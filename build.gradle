@@ -32,7 +32,6 @@ apply(plugin: "java");
 apply(plugin: "maven");
 apply(plugin: "signing");
 apply(plugin: "osgi");
-apply(plugin: "fatjar");
 apply(plugin: "idea");
 apply(plugin: "eclipse");
 
