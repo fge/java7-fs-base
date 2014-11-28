@@ -7,8 +7,9 @@
  *   later version;
  * - the Apache Software License (ASL) version 2.0.
  *
- * The text of both licenses is available under the src/resources/ directory of
- * this project (under the names LGPL-3.0.txt and ASL-2.0.txt respectively).
+ * The text of this file and of both licenses is available at the root of this
+ * project or, if you have the jar distribution, in directory META-INF/, under
+ * the names LGPL-3.0.txt and ASL-2.0.txt respectively.
  *
  * Direct link to the sources:
  *
@@ -16,17 +17,20 @@
  * - ASL 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
  */
 
-/*
- * This has to be here... It will not be taken into account in common.gradle!
- *
- * Looks like a serious bug... See also:
- *
- * http://forums.gradle.org/gradle/topics/buildscript_in_subprojects_ignored
- *
- * We also use Spring's propdeps plugin to have a _real_ provided scope. See:
- *
- * https://github.com/spring-projects/gradle-plugins/tree/master/propdeps-plugin
- */
+buildscript {
+    repositories {
+        maven {
+            url "http://repo.springsource.org/plugins-release";
+            mavenCentral();
+        }
+    }
+    dependencies {
+        classpath(group: "org.springframework.build.gradle",
+            name: "propdeps-plugin", version: "0.0.7");
+        classpath(group: "info.solidsoft.gradle.pitest",
+            name: "gradle-pitest-plugin", version: "1.1.1");
+    }
+};
 
 apply(plugin: "java");
 apply(plugin: "maven");
@@ -34,8 +38,35 @@ apply(plugin: "signing");
 apply(plugin: "osgi");
 apply(plugin: "idea");
 apply(plugin: "eclipse");
+apply(plugin: "propdeps");
+apply(plugin: "propdeps-maven");
+apply(plugin: "propdeps-idea");
+apply(plugin: "propdeps-eclipse");
+apply(plugin: "info.solidsoft.pitest");
 
-apply(from: "project.gradle");
+group = "com.github.fge";
+version = "0.1-SNAPSHOT";
+description = "Helper classes for FileSystem implementations";
+sourceCompatibility = "1.7";
+targetCompatibility = "1.7"; // defaults to sourceCompatibility
+
+/*
+ * List of dependencies
+ */
+dependencies {
+    provided(group: "com.google.code.findbugs", name: "jsr305",
+        version: "3.0.0");
+    testCompile(group: "org.testng", name: "testng", version: "6.8.8") {
+        exclude(group: "junit", module: "junit");
+        exclude(group: "org.beanshell", module: "bsh");
+        exclude(group: "org.yaml", module: "snakeyaml");
+    };
+    testCompile(group: "org.mockito", name: "mockito-core", version: "1.10.13");
+    testCompile(group: "org.assertj", name: "assertj-core", version: "1.7.0");
+}
+
+javadoc.options.links("http://docs.oracle.com/javase/7/docs/api/");
+javadoc.options.links("http://jsr-305.googlecode.com/svn/trunk/javadoc/");
 
 /*
  * Repositories to use
@@ -47,14 +78,15 @@ repositories {
 /*
  * Necessary! Otherwise TestNG will not be used...
  *
- * Also, we don't want gradle's default HTML report: it does not support
- * parameterized tests which I use a _lot_.
  */
 test {
     useTestNG() {
         useDefaultListeners = true;
     };
-    reports.html.enabled = false;
+}
+
+pitest {
+    pitestVersion = "1.1.2"; // see https://github.com/hcoles/pitest/issues/150
 }
 
 /*
@@ -63,15 +95,6 @@ test {
 task sourcesJar(type: Jar, dependsOn: classes) {
     classifier = "sources";
     from sourceSets.main.allSource;
-}
-
-/*
- * Javadoc: we need to tell where the overview.html is, it will not pick it up
- * automatically...
- */
-
-javadoc {
-    options.overview = "src/main/java/overview.html";
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
@@ -86,7 +109,7 @@ artifacts {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = "1.11";
+    gradleVersion = "2.2";
     distributionUrl = "http://services.gradle.org/distributions/gradle-${gradleVersion}-all.zip";
 }
 
@@ -153,9 +176,9 @@ uploadArchives {
     uploadArchives.repositories.mavenDeployer
 ]*.pom*.whenConfigured { pom ->
     pom.project {
-        name "${name}";
+        name "${project.name}";
         packaging "jar";
-        description "${description}";
+        description "${project.description}";
         url "${projectURL}";
 
         scm {
