@@ -38,11 +38,14 @@ import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Objects;
 
 @ParametersAreNonnullByDefault
 public final class GenericPath
     implements Path
 {
+    private static final String[] NO_NAMES = new String[0];
+
     private final FileSystem fs;
 
     private final PathNamesFactory factory;
@@ -77,7 +80,7 @@ public final class GenericPath
     @Override
     public boolean isAbsolute()
     {
-        return pathNames.absolute;
+        return factory.isAbsolute(pathNames);
     }
 
     /**
@@ -90,9 +93,7 @@ public final class GenericPath
     @Override
     public Path getRoot()
     {
-        if (!pathNames.absolute)
-            return null;
-        final PathNames newNames = factory.getRoot(pathNames);
+        final PathNames newNames = pathNames.rootPathName();
         return newNames == null ? null : new GenericPath(fs, factory, newNames);
     }
 
@@ -220,9 +221,8 @@ public final class GenericPath
                 e);
         }
 
-        // The result is never a prefixed path
-        // TODO: rework; untrue for Windows paths?
-        final PathNames newNames = new PathNames(false, names);
+        // The result never has a root
+        final PathNames newNames = new PathNames(null, names);
         return new GenericPath(fs, factory, newNames);
     }
 
@@ -251,9 +251,8 @@ public final class GenericPath
         if (!fs.equals(other.getFileSystem()))
             return false;
 
-        // TODO: Windows...
         final PathNames otherNames = ((GenericPath) other).pathNames;
-        if (pathNames.absolute ^ otherNames.absolute)
+        if (!Objects.equals(pathNames.root, otherNames.root))
             return false;
         final int len = otherNames.names.length;
         if (len > pathNames.names.length)
@@ -262,15 +261,6 @@ public final class GenericPath
             if (!pathNames.names[i].equals(otherNames.names[i]))
                 return false;
         return true;
-    }
-
-    public static void main(final String... args)
-    {
-        final Path path1 = Paths.get("/a/b");
-        for (final Path path: path1)
-            System.out.println(path);
-
-        System.out.println(path1.getRoot());
     }
 
     /**
@@ -290,7 +280,9 @@ public final class GenericPath
     @Override
     public boolean startsWith(final String other)
     {
-        return false;
+        final Path otherPath
+            = new GenericPath(fs, factory, factory.toPathNames(other));
+        return startsWith(otherPath);
     }
 
     /**
@@ -316,7 +308,28 @@ public final class GenericPath
     @Override
     public boolean endsWith(final Path other)
     {
-        return false;
+        if (!fs.equals(other.getFileSystem()))
+            return false;
+
+        final PathNames otherPathNames = ((GenericPath) other).pathNames;
+
+        //noinspection VariableNotUsedInsideIf
+        if (otherPathNames.root != null)
+            return false;
+
+        final String[] names = pathNames.names;
+        final int length = names.length;
+        final String[] otherNames = otherPathNames.names;
+        final int otherLength = otherNames.length;
+
+        if (length < otherLength)
+            return false;
+
+        for (int i = 0; i < otherLength; i++)
+            if (!names[length - i].equals(otherNames[otherLength - i]))
+                return false;
+
+        return true;
     }
 
     /**
@@ -339,7 +352,9 @@ public final class GenericPath
     @Override
     public boolean endsWith(final String other)
     {
-        return false;
+        final GenericPath otherPath
+            = new GenericPath(fs, factory, factory.toPathNames(other));
+        return endsWith(otherPath);
     }
 
     /**

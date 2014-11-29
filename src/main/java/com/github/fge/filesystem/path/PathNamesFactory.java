@@ -29,17 +29,18 @@ public abstract class PathNamesFactory
 {
     protected static final String[] NO_NAMES = new String[0];
 
-    private final String absolutePrefix;
+    private final String rootSeparator;
     private final String separator;
 
-    protected PathNamesFactory(final String absolutePrefix,
+    protected PathNamesFactory(final String rootSeparator,
         final String separator)
     {
-        this.absolutePrefix = absolutePrefix;
+        this.rootSeparator = rootSeparator;
         this.separator = separator;
     }
 
-    protected abstract boolean isAbsolutePath(final String path);
+    @Nullable
+    protected abstract String extractRoot(final String path);
 
     protected abstract String namesOnly(final String path);
 
@@ -51,8 +52,7 @@ public abstract class PathNamesFactory
 
     protected abstract boolean isParent(final String name);
 
-    @Nullable
-    protected abstract PathNames getRoot(final PathNames pathNames);
+    protected abstract boolean isAbsolute(final PathNames pathNames);
 
     @Nullable
     protected abstract PathNames getParent(final PathNames pathNames);
@@ -60,7 +60,7 @@ public abstract class PathNamesFactory
     @Nonnull
     protected final PathNames toPathNames(final String path)
     {
-        final boolean absolute = isAbsolutePath(path);
+        final String root = extractRoot(path);
         final String namesOnly = namesOnly(path);
         final String[] names = rawNames(namesOnly);
         for (final String name: names)
@@ -68,7 +68,7 @@ public abstract class PathNamesFactory
                 throw new InvalidPathException(path,
                     "invalid path element: " + name);
 
-        return new PathNames(absolute, names);
+        return new PathNames(root, names);
     }
 
     @Nonnull
@@ -88,7 +88,7 @@ public abstract class PathNamesFactory
                 newNames[index++] = name;
         }
 
-        return new PathNames(pathNames.absolute,
+        return new PathNames(pathNames.root,
             index == 0 ? NO_NAMES : Arrays.copyOf(newNames, index));
     }
 
@@ -96,14 +96,17 @@ public abstract class PathNamesFactory
     protected final String toString(final PathNames pathNames)
     {
         final StringBuilder sb = new StringBuilder();
-        if (pathNames.absolute)
-            sb.append(absolutePrefix);
+        final boolean hasRoot = pathNames.root != null;
+        if (hasRoot)
+            sb.append(pathNames.root);
 
         final String[] names = pathNames.names;
         final int len = names.length;
         if (len == 0)
             return sb.toString();
 
+        if (hasRoot)
+            sb.append(rootSeparator);
         sb.append(names[0]);
 
         for (int i = 1; i < len; i++)
