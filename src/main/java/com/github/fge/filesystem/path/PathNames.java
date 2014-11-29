@@ -22,14 +22,17 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Arrays;
+import java.util.Objects;
 
 @ParametersAreNonnullByDefault
 final class PathNames
 {
     static final String[] NO_NAMES = new String[0];
+    static final PathNames EMPTY = new PathNames(null, NO_NAMES);
 
     final String root;
     final String[] names;
+
 
     @Nonnull
     static PathNames singleton(final String name)
@@ -64,5 +67,25 @@ final class PathNames
     {
         final int length = names.length;
         return length == 0 ? null : singleton(names[length - 1]);
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return 31 * Objects.hashCode(root) + Arrays.hashCode(names);
+    }
+
+    @Override
+    public boolean equals(@Nullable final Object obj)
+    {
+        if (obj == null)
+            return false;
+        if (this == obj)
+            return true;
+        if (getClass() != obj.getClass())
+            return false;
+        final PathNames other = (PathNames) obj;
+        return Objects.equals(root, other.root)
+            && Arrays.equals(names, other.names);
     }
 }

@@ -18,6 +18,8 @@
 
 package com.github.fge.filesystem.path;
 
+import com.github.fge.filesystem.exceptions.FileSystemMismatchException;
+
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.File;
 import java.io.IOError;
@@ -31,7 +33,6 @@ import java.nio.file.LinkOption;
 import java.nio.file.NotDirectoryException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.ProviderMismatchException;
 import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
@@ -384,7 +385,9 @@ public final class GenericPath
     @Override
     public Path normalize()
     {
-        return null;
+        final PathNames normalized = factory.normalize(pathNames);
+        return pathNames.equals(normalized) ? this
+            : new GenericPath(fs, factory, normalized);
     }
 
     /**
@@ -409,7 +412,21 @@ public final class GenericPath
     @Override
     public Path resolve(final Path other)
     {
-        return null;
+        checkProvider(other);
+        final GenericPath otherPath = (GenericPath) other;
+
+        final PathNames newNames
+            = factory.resolve(pathNames, otherPath.pathNames);
+
+        /*
+         * See PathNamesFactory's .resolve()
+         */
+        if (newNames == pathNames)
+            return this;
+        if (newNames == otherPath.pathNames)
+            return other;
+
+        return new GenericPath(fs, factory, newNames);
     }
 
     /**
@@ -430,7 +447,8 @@ public final class GenericPath
     @Override
     public Path resolve(final String other)
     {
-        return null;
+        final PathNames otherNames = factory.toPathNames(other);
+        return resolve(new GenericPath(fs, factory, otherNames));
     }
 
     /**
@@ -453,6 +471,18 @@ public final class GenericPath
     @Override
     public Path resolveSibling(final Path other)
     {
+        checkProvider(other);
+        if (other.isAbsolute())
+            return other;
+
+        final PathNames parentNames = pathNames.parent();
+        if (parentNames == null)
+            return other;
+
+        final PathNames otherNames = ((GenericPath) other).pathNames;
+        if (PathNames.EMPTY.equals(otherNames))
+            return new GenericPath(fs, factory, parentNames);
+
         return null;
     }
 
@@ -808,7 +838,7 @@ public final class GenericPath
 
     private void checkProvider(final Path other)
     {
-        if (!fs.provider().equals(other.getFileSystem().provider()))
-            throw new ProviderMismatchException();
+        if (!fs.equals(other.getFileSystem()))
+            throw new FileSystemMismatchException();
     }
 }

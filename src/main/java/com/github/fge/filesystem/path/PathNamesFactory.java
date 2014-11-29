@@ -92,6 +92,44 @@ public abstract class PathNamesFactory
             index == 0 ? NO_NAMES : Arrays.copyOf(newNames, index));
     }
 
+    /*
+     * NOTE: throws OperationNotSupportedException if second is not absolute but
+     * has a root
+     */
+    @Nonnull
+    protected final PathNames resolve(final PathNames first,
+        final PathNames second)
+    {
+        if (isAbsolute(second))
+            return second;
+
+        //noinspection VariableNotUsedInsideIf
+        if (second.root != null)
+            throw new UnsupportedOperationException();
+
+        final String[] firstNames = first.names;
+        final String[] secondNames = second.names;
+        final int firstLen = firstNames.length;
+        final int secondLen = secondNames.length;
+
+        if (secondLen == 0)
+            return first;
+
+        final String[] newNames
+            = Arrays.copyOf(firstNames, firstLen + secondLen);
+        System.arraycopy(secondNames, 0, newNames, firstLen, secondLen);
+
+        return new PathNames(first.root, newNames);
+    }
+
+    @Nonnull
+    protected final PathNames resolveSibling(final PathNames first,
+        final PathNames second)
+    {
+        final PathNames firstParent = first.parent();
+        return firstParent == null ? second : resolve(firstParent, second);
+    }
+
     @Nonnull
     protected final String toString(final PathNames pathNames)
     {
