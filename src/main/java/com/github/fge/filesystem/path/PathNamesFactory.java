@@ -40,20 +40,9 @@ public abstract class PathNamesFactory
 
     protected abstract boolean isAbsolutePath(final String path);
 
-    /**
-     * Extract raw names from a given path
-     *
-     * <p>This method will strip any prefix and suffix from the path, then
-     * extract the name elements. No check on individual elements are
-     * performed.</p>
-     *
-     * @param path the path
-     * @return an array with the raw name elements
-     *
-     * @see #toNames(String)
-     * @see #isValidName(String)
-     */
-    protected abstract String[] rawNames(final String path);
+    protected abstract String namesOnly(final String path);
+
+    protected abstract String[] rawNames(final String namesOnly);
 
     protected abstract boolean isValidName(final String name);
 
@@ -61,25 +50,39 @@ public abstract class PathNamesFactory
 
     protected abstract boolean isParent(final String name);
 
-    /**
-     * Extract names from, and check the validity of, a given path
-     *
-     * @param path the path
-     * @return an array with this path's name elements
-     * @throws InvalidPathException at least one name element is invalid
-     *
-     * @see #rawNames(String)
-     * @see #isValidName(String)
-     */
     @Nonnull
-    protected final String[] toNames(final String path)
+    protected final PathNames toPathNames(final String path)
     {
-        final String[] ret = rawNames(path);
-        for (final String name: ret)
+        final boolean absolute = isAbsolutePath(path);
+        final String namesOnly = namesOnly(path);
+        final String[] names = rawNames(namesOnly);
+        for (final String name: names)
             if (!isValidName(name))
                 throw new InvalidPathException(path,
                     "invalid path element: " + name);
-        return ret;
+
+        return new PathNames(absolute, names);
+    }
+
+    @Nonnull
+    protected final PathNames normalize(final PathNames pathNames)
+    {
+        final String[] names = pathNames.names;
+        final String[] newNames = new String[names.length];
+
+        int index = 0;
+        for (final String name: names) {
+            if (isParent(name)) {
+                if (index > 0)
+                    index--;
+                continue;
+            }
+            if (!isSelf(name))
+                newNames[index++] = name;
+        }
+
+        return new PathNames(pathNames.absolute,
+            index == 0 ? NO_NAMES : Arrays.copyOf(newNames, index));
     }
 
     @Nonnull
@@ -100,24 +103,5 @@ public abstract class PathNamesFactory
             sb.append(separator).append(names[i]);
 
         return sb.toString();
-    }
-
-    @Nonnull
-    protected final String[] normalizeNames(final String[] names)
-    {
-        final String[] ret = new String[names.length];
-
-        int index = 0;
-        for (final String name: names) {
-            if (isParent(name)) {
-                if (index > 0)
-                    index--;
-                continue;
-            }
-            if (!isSelf(name))
-                ret[index++] = name;
-        }
-
-        return index == 0 ? NO_NAMES : Arrays.copyOf(ret, index);
     }
 }
