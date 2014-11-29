@@ -24,14 +24,14 @@ import java.nio.file.InvalidPathException;
 import java.util.Arrays;
 
 @ParametersAreNonnullByDefault
-public abstract class AbstractPathFactory<P extends AbstractPath>
+public abstract class PathNamesFactory
 {
     protected static final String[] NO_NAMES = new String[0];
 
     private final String absolutePrefix;
     private final String separator;
 
-    protected AbstractPathFactory(final String absolutePrefix,
+    protected PathNamesFactory(final String absolutePrefix,
         final String separator)
     {
         this.absolutePrefix = absolutePrefix;
@@ -83,13 +83,13 @@ public abstract class AbstractPathFactory<P extends AbstractPath>
     }
 
     @Nonnull
-    protected final String toString(final P path)
+    protected final String toString(final PathNames pathNames)
     {
         final StringBuilder sb = new StringBuilder();
-        if (path.absolute)
+        if (pathNames.absolute)
             sb.append(absolutePrefix);
 
-        final String[] names = path.names;
+        final String[] names = pathNames.names;
         final int len = names.length;
         if (len == 0)
             return sb.toString();

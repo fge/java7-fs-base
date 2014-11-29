@@ -29,18 +29,15 @@ public abstract class AbstractPath
 {
     protected final FileSystem fs;
 
-    protected final AbstractPathFactory<?> factory;
-    protected final boolean absolute;
-    protected final String[] names;
+    protected final PathNamesFactory factory;
+    protected final PathNames pathNames;
 
-    protected AbstractPath(final FileSystem fs,
-        final AbstractPathFactory<?> factory, final boolean absolute,
-        final String[] names)
+    protected AbstractPath(final FileSystem fs, final PathNamesFactory factory,
+        final PathNames pathNames)
     {
         this.fs = fs;
         this.factory = factory;
-        this.absolute = absolute;
-        this.names = names;
+        this.pathNames = pathNames;
     }
 
     @Override
