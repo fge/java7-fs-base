@@ -18,22 +18,40 @@
 
 package com.github.fge.filesystem.path;
 
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.nio.file.FileSystem;
 import java.nio.file.Path;
+import java.nio.file.ProviderMismatchException;
 
+@ParametersAreNonnullByDefault
 public abstract class AbstractPath
     implements Path
 {
     protected final FileSystem fs;
 
-    protected AbstractPath(final FileSystem fs)
+    protected final AbstractPathFactory<?> factory;
+    protected final boolean absolute;
+    protected final String[] names;
+
+    protected AbstractPath(final FileSystem fs,
+        final AbstractPathFactory<?> factory, final boolean absolute,
+        final String[] names)
     {
         this.fs = fs;
+        this.factory = factory;
+        this.absolute = absolute;
+        this.names = names;
     }
 
     @Override
     public final FileSystem getFileSystem()
     {
         return fs;
+    }
+
+    private void checkProvider(final Path other)
+    {
+        if (!fs.provider().equals(other.getFileSystem().provider()))
+            throw new ProviderMismatchException();
     }
 }
