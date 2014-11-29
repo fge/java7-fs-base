@@ -18,15 +18,30 @@
 
 package com.github.fge.filesystem.path;
 
+import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
+
+@ParametersAreNonnullByDefault
 final class PathNames
 {
-
     final boolean absolute;
     final String[] names;
+
+    static PathNames singleton(final String name)
+    {
+        return new PathNames(false, new String[] { name });
+    }
 
     PathNames(final boolean absolute, final String[] names)
     {
         this.absolute = absolute;
         this.names = names;
+    }
+
+    @Nullable
+    PathNames lastName()
+    {
+        final int length = names.length;
+        return length == 0 ? null : singleton(names[length - 1]);
     }
 }

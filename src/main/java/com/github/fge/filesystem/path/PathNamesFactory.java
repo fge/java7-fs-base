@@ -19,6 +19,7 @@
 package com.github.fge.filesystem.path;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.nio.file.InvalidPathException;
 import java.util.Arrays;
@@ -49,6 +50,12 @@ public abstract class PathNamesFactory
     protected abstract boolean isSelf(final String name);
 
     protected abstract boolean isParent(final String name);
+
+    @Nullable
+    protected abstract PathNames getRoot(final PathNames pathNames);
+
+    @Nullable
+    protected abstract PathNames getParent(final PathNames pathNames);
 
     @Nonnull
     protected final PathNames toPathNames(final String path)

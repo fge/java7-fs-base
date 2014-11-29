@@ -36,6 +36,7 @@ import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
+import java.util.Arrays;
 import java.util.Iterator;
 
 @ParametersAreNonnullByDefault
@@ -63,7 +64,7 @@ public final class GenericPath
     @Override
     public FileSystem getFileSystem()
     {
-        return null;
+        return fs;
     }
 
     /**
@@ -76,7 +77,7 @@ public final class GenericPath
     @Override
     public boolean isAbsolute()
     {
-        return false;
+        return pathNames.absolute;
     }
 
     /**
@@ -89,7 +90,10 @@ public final class GenericPath
     @Override
     public Path getRoot()
     {
-        return null;
+        if (!pathNames.absolute)
+            return null;
+        final PathNames newNames = factory.getRoot(pathNames);
+        return newNames == null ? null : new GenericPath(fs, factory, newNames);
     }
 
     /**
@@ -103,7 +107,8 @@ public final class GenericPath
     @Override
     public Path getFileName()
     {
-        return null;
+        final PathNames names = pathNames.lastName();
+        return names == null ? null : new GenericPath(fs, factory, names);
     }
 
     /**
@@ -131,7 +136,8 @@ public final class GenericPath
     @Override
     public Path getParent()
     {
-        return null;
+        final PathNames newNames = factory.getParent(pathNames);
+        return newNames == null ? null : new GenericPath(fs, factory, newNames);
     }
 
     /**
@@ -143,7 +149,7 @@ public final class GenericPath
     @Override
     public int getNameCount()
     {
-        return 0;
+        return pathNames.names.length;
     }
 
     /**
@@ -166,7 +172,16 @@ public final class GenericPath
     @Override
     public Path getName(final int index)
     {
-        return null;
+        final String name;
+
+        //noinspection ProhibitedExceptionCaught
+        try {
+            name = pathNames.names[index];
+        } catch (ArrayIndexOutOfBoundsException e) {
+            throw new IllegalArgumentException("illegal index " + index, e);
+        }
+
+        return new GenericPath(fs, factory, PathNames.singleton(name));
     }
 
     /**
@@ -195,7 +210,20 @@ public final class GenericPath
     @Override
     public Path subpath(final int beginIndex, final int endIndex)
     {
-        return null;
+        final String[] names;
+
+        //noinspection ProhibitedExceptionCaught
+        try {
+            names = Arrays.copyOfRange(pathNames.names, beginIndex, endIndex);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            throw new IllegalArgumentException("invalid begin and/or end index",
+                e);
+        }
+
+        // The result is never a prefixed path
+        // TODO: rework; untrue for Windows paths?
+        final PathNames newNames = new PathNames(false, names);
+        return new GenericPath(fs, factory, newNames);
     }
 
     /**
@@ -220,7 +248,29 @@ public final class GenericPath
     @Override
     public boolean startsWith(final Path other)
     {
-        return false;
+        if (!fs.equals(other.getFileSystem()))
+            return false;
+
+        // TODO: Windows...
+        final PathNames otherNames = ((GenericPath) other).pathNames;
+        if (pathNames.absolute ^ otherNames.absolute)
+            return false;
+        final int len = otherNames.names.length;
+        if (len > pathNames.names.length)
+            return false;
+        for (int i = 0; i < len; i++)
+            if (!pathNames.names[i].equals(otherNames.names[i]))
+                return false;
+        return true;
+    }
+
+    public static void main(final String... args)
+    {
+        final Path path1 = Paths.get("/a/b");
+        for (final Path path: path1)
+            System.out.println(path);
+
+        System.out.println(path1.getRoot());
     }
 
     /**
