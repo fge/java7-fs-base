@@ -469,18 +469,18 @@ public final class GenericPath
     public Path resolveSibling(final Path other)
     {
         checkProvider(other);
-        if (other.isAbsolute())
+        final GenericPath otherPath = (GenericPath) other;
+
+        final PathElements newNames
+            = factory.resolveSibling(elements, otherPath.elements);
+
+        /*
+         * See PathElementsFactory's .resolve()
+         */
+        if (newNames == otherPath.elements)
             return other;
 
-        final PathElements parent = elements.parent();
-        if (parent == null)
-            return other;
-
-        final PathElements otherNames = ((GenericPath) other).elements;
-        if (PathElements.EMPTY.equals(otherNames))
-            return new GenericPath(fs, factory, parent);
-
-        return null;
+        return new GenericPath(fs, factory, newNames);
     }
 
     /**

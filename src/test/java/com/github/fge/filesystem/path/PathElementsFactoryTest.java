@@ -180,6 +180,49 @@ public final class PathElementsFactoryTest
         soft.assertAll();
     }
 
+    @Test
+    public void resolveSiblingWorks()
+    {
+        PathElements first, second, resolved;
+
+        final SoftAssertions soft = new SoftAssertions();
+
+        first = new PathElements(null, stringArray("foo"));
+        second = new PathElements(null, new String[0]);
+        resolved = factory.resolveSibling(first, second);
+
+        soft.assertThat(resolved)
+            .as("if first has no parent, second is returned even if empty")
+            .isSameAs(second);
+
+        second = new PathElements(null, stringArray("bar"));
+        resolved = factory.resolveSibling(first, second);
+
+        soft.assertThat(resolved)
+            .as("if first has no parent, second is returned")
+            .isSameAs(second);
+
+        first = new PathElements("/", stringArray("foo", "bar"));
+        second = new PathElements("/", stringArray("bar"));
+        resolved = factory.resolveSibling(first, second);
+
+        soft.assertThat(resolved)
+            .as("if second is absolute, it is returned")
+            .isSameAs(second);
+
+        second = new PathElements(null, stringArray("baz"));
+        resolved = factory.resolveSibling(first, second);
+
+        soft.assertThat(resolved.root)
+            .as("resolved path has same root as first")
+            .isSameAs(first.root);
+        soft.assertThat(resolved.names)
+            .as("resolved path has expected names")
+            .containsOnly("foo", "baz");
+
+        soft.assertAll();
+    }
+
     private static String[] stringArray(final String first,
         final String... other)
     {

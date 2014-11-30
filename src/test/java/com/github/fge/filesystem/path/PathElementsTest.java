@@ -104,6 +104,36 @@ public final class PathElementsTest
         soft.assertAll();
     }
 
+    @Test
+    public void singleNamePathElementParentIsCorrect()
+    {
+        PathElements elements, parent;
+
+        final SoftAssertions soft = new SoftAssertions();
+
+        elements = new PathElements(null, stringArray("foo"));
+        parent = elements.parent();
+
+        soft.assertThat(parent)
+            .as("path element with single name and no root has null parent")
+            .isNull();
+
+        elements = new PathElements("/", stringArray("foo"));
+        parent = elements.parent();
+
+        soft.assertThat(parent)
+            .as("path element with single name and a root has a parent")
+            .isNotNull();
+
+        //noinspection ConstantConditions
+        soft.assertThat(parent.root).as("parent preserves root")
+            .isSameAs(elements.root);
+        soft.assertThat(parent.names).as("parent has no names")
+            .isEmpty();
+
+        soft.assertAll();
+    }
+
     @SuppressWarnings("ConstantConditions")
     @Test
     public void pathNameParentHasRelevantNamesAndPreservesRoot()

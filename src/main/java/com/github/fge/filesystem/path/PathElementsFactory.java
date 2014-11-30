@@ -256,12 +256,47 @@ public abstract class PathElementsFactory
         return new PathElements(first.root, newNames);
     }
 
+    /**
+     * Resolve a {@link PathElements} against the sibling of another
+     *
+     * <p>This method performs the same as {@link Path#resolveSibling(Path) the
+     * equivalent operation of {@code Path}}, with the first argument being
+     * the path to resolve against and the second being the path to resolve.</p>
+     *
+     * <p>The rules are the same as the equivalent {@code Path} method:</p>
+     *
+     * <ul>
+     *     <li>if the second argument is absolute, it is returned;</li>
+     *     <li>if the first argument has no parent, the second is returned;</li>
+     *     <li>if the second argument is an empty path, the first argument's
+     *     {@link PathElements#parent() parent} is returned, or the {@link
+     *     PathElements#EMPTY empty path} if parent is null.</li>
+     * </ul>
+     *
+     * @param first path to resolve against
+     * @param second resolved path
+     * @return the result path
+     */
     @Nonnull
     protected final PathElements resolveSibling(final PathElements first,
         final PathElements second)
     {
+        if (isAbsolute(second))
+            return second;
+
+        //noinspection VariableNotUsedInsideIf
+        if (second.root != null)
+            throw new UnsupportedOperationException();
+
         final PathElements firstParent = first.parent();
-        return firstParent == null ? second : resolve(firstParent, second);
+
+        /*
+         * Note: agrees with native paths
+         */
+        if (firstParent == null)
+            return second;
+
+        return resolve(firstParent, second);
     }
 
     @Nonnull

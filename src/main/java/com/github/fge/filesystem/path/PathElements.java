@@ -111,8 +111,12 @@ final class PathElements
     /**
      * Return the parent PathElements of this instance
      *
-     * <p>If this instance has no name elements, {@code null} is returned;
-     * otherwise a new instance is returned with all name elements except for
+     * <p>If this instance has no name elements, {@code null} is returned.</p>
+     *
+     * <p>If this instance has only one name element and no root, {@code null}
+     * is returned.</p>
+     *
+     * <p>Otherwise a new instance is returned with all name elements except for
      * the last one.</p>
      *
      * <p>The root component is preserved.</p>
@@ -126,6 +130,8 @@ final class PathElements
     {
         final int length = names.length;
         if (length == 0)
+            return null;
+        if (length == 1 && root == null)
             return null;
         final String[] newNames = length  == 1 ? NO_NAMES
             : Arrays.copyOf(names, length - 1);
