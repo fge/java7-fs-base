@@ -45,8 +45,6 @@ import java.util.Objects;
 public final class GenericPath
     implements Path
 {
-    private static final String[] NO_NAMES = new String[0];
-
     private final FileSystem fs;
 
     private final PathNamesFactory factory;
