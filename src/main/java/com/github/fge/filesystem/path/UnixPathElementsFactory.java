@@ -22,14 +22,14 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.regex.Pattern;
 
 @ParametersAreNonnullByDefault
-public final class UnixPathNamesFactory
-    extends PathNamesFactory
+public final class UnixPathElementsFactory
+    extends PathElementsFactory
 {
     private static final Pattern ROOT_PATTERN = Pattern.compile("^/+");
     private static final Pattern TAIL_PATTERN = Pattern.compile("/+$");
     private static final Pattern SPLIT_PATTERN = Pattern.compile("/+");
 
-    public UnixPathNamesFactory()
+    public UnixPathElementsFactory()
     {
         super("", "/");
     }
@@ -79,8 +79,8 @@ public final class UnixPathNamesFactory
     }
 
     @Override
-    protected boolean isAbsolute(final PathNames pathNames)
+    protected boolean isAbsolute(final PathElements pathElements)
     {
-        return pathNames.root != null;
+        return pathElements.root != null;
     }
 }

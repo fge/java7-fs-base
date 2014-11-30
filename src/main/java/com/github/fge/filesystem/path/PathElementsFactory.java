@@ -25,9 +25,9 @@ import java.nio.file.Path;
 import java.util.Arrays;
 
 /**
- * Abstract factory for {@link PathNames} instances
+ * Abstract factory for {@link PathElements} instances
  *
- * <p>This class is in charge of all the heavy {@link PathNames} operations:
+ * <p>This class is in charge of all the heavy {@link PathElements} operations:
  * creating them from input strings, but also resolving, relativizing and
  * normalizing them.</p>
  *
@@ -40,7 +40,7 @@ import java.util.Arrays;
  * <p>This package provides an implementation for Unix paths.</p>
  */
 @ParametersAreNonnullByDefault
-public abstract class PathNamesFactory
+public abstract class PathElementsFactory
 {
     protected static final String[] NO_NAMES = new String[0];
 
@@ -54,7 +54,7 @@ public abstract class PathNamesFactory
      * if any, and the first name element, if any
      * @param separator the separator to insert between two name elements
      */
-    protected PathNamesFactory(final String rootSeparator,
+    protected PathElementsFactory(final String rootSeparator,
         final String separator)
     {
         this.rootSeparator = rootSeparator;
@@ -103,7 +103,7 @@ public abstract class PathNamesFactory
      * @param name the name to check
      * @return true if the name represents the current directory
      *
-     * @see #normalize(PathNames)
+     * @see #normalize(PathElements)
      */
     protected abstract boolean isSelf(final String name);
 
@@ -113,32 +113,32 @@ public abstract class PathNamesFactory
      * @param name the name to check
      * @return true if the name represents the parent directory
      *
-     * @see #normalize(PathNames)
+     * @see #normalize(PathElements)
      */
     protected abstract boolean isParent(final String name);
 
     /**
-     * Check whether a {@link PathNames} instance represents an absolute path
+     * Check whether a {@link PathElements} instance represents an absolute path
      *
-     * @param pathNames the instance to check
+     * @param pathElements the instance to check
      * @return true if the instance is an absolute path
      *
      * @see Path#isAbsolute()
      */
-    protected abstract boolean isAbsolute(final PathNames pathNames);
+    protected abstract boolean isAbsolute(final PathElements pathElements);
 
     /**
-     * Convert an input string into a {@link PathNames} instance
+     * Convert an input string into a {@link PathElements} instance
      *
      * @param path the string to convert
-     * @return a new {@link PathNames} instance
+     * @return a new {@link PathElements} instance
      * @throws InvalidPathException one name element is wrong
      *
      * @see #rootAndNames(String)
      * @see #isValidName(String)
      */
     @Nonnull
-    protected final PathNames toPathNames(final String path)
+    protected final PathElements toPathElements(final String path)
     {
         final String[] rootAndNames = rootAndNames(path);
         final String root = rootAndNames[0];
@@ -151,13 +151,13 @@ public abstract class PathNamesFactory
                 throw new InvalidPathException(path,
                     "invalid path element: " + name);
 
-        return new PathNames(root, names);
+        return new PathElements(root, names);
     }
 
     /**
-     * Normalize a {@link PathNames} instance
+     * Normalize a {@link PathElements} instance
      *
-     * @param pathNames the instance to normalize
+     * @param elements the instance to normalize
      * @return a new, normalized instance
      *
      * @see #isSelf(String)
@@ -165,9 +165,9 @@ public abstract class PathNamesFactory
      * @see Path#normalize()
      */
     @Nonnull
-    protected final PathNames normalize(final PathNames pathNames)
+    protected final PathElements normalize(final PathElements elements)
     {
-        final String[] names = pathNames.names;
+        final String[] names = elements.names;
         final int length = names.length;
         final String[] newNames = new String[length];
 
@@ -200,19 +200,19 @@ public abstract class PathNamesFactory
                 newNames[dstIndex++] = name;
         }
 
-        return new PathNames(pathNames.root,
+        return new PathElements(elements.root,
             dstIndex == 0 ? NO_NAMES : Arrays.copyOf(newNames, dstIndex));
     }
 
     /**
-     * Resolve a {@link PathNames} instance against another
+     * Resolve a {@link PathElements} instance against another
      *
      * <p>This method mimicks the {@link Path#resolve(Path) equivalent operation
      * from {@code Path}}, with the first argument being the path to be
      * resolved against and the second one being the argument of the method:</p>
      *
      * <ul>
-     *     <li>if the second argument is {@link #isAbsolute(PathNames)
+     *     <li>if the second argument is {@link #isAbsolute(PathElements)
      *     absolute}, it is returned;</li>
      *     <li>if the second argument has no name components, the first
      *     argument is returned;</li>
@@ -231,8 +231,8 @@ public abstract class PathNamesFactory
      * @see Path#resolve(Path)
      */
     @Nonnull
-    protected final PathNames resolve(final PathNames first,
-        final PathNames second)
+    protected final PathElements resolve(final PathElements first,
+        final PathElements second)
     {
         if (isAbsolute(second))
             return second;
@@ -253,26 +253,26 @@ public abstract class PathNamesFactory
             = Arrays.copyOf(firstNames, firstLen + secondLen);
         System.arraycopy(secondNames, 0, newNames, firstLen, secondLen);
 
-        return new PathNames(first.root, newNames);
+        return new PathElements(first.root, newNames);
     }
 
     @Nonnull
-    protected final PathNames resolveSibling(final PathNames first,
-        final PathNames second)
+    protected final PathElements resolveSibling(final PathElements first,
+        final PathElements second)
     {
-        final PathNames firstParent = first.parent();
+        final PathElements firstParent = first.parent();
         return firstParent == null ? second : resolve(firstParent, second);
     }
 
     @Nonnull
-    protected final String toString(final PathNames pathNames)
+    protected final String toString(final PathElements elements)
     {
         final StringBuilder sb = new StringBuilder();
-        final boolean hasRoot = pathNames.root != null;
+        final boolean hasRoot = elements.root != null;
         if (hasRoot)
-            sb.append(pathNames.root);
+            sb.append(elements.root);
 
-        final String[] names = pathNames.names;
+        final String[] names = elements.names;
         final int len = names.length;
         if (len == 0)
             return sb.toString();

@@ -28,9 +28,9 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public final class PathNamesFactoryTest
+public final class PathElementsFactoryTest
 {
-    private final PathNamesFactory factory = new UnixPathNamesFactory();
+    private final PathElementsFactory factory = new UnixPathElementsFactory();
 
     @DataProvider
     public Iterator<Object[]> rootAndNamesData()
@@ -82,6 +82,7 @@ public final class PathNamesFactoryTest
         return list.iterator();
     }
 
+    @SuppressWarnings("MethodCanBeVariableArityMethod")
     @Test(dataProvider = "splitNamesData")
     public void splitNamesWorks(final String input, final String[] names)
     {
@@ -122,12 +123,13 @@ public final class PathNamesFactoryTest
         return list.iterator();
     }
 
+    @SuppressWarnings("MethodCanBeVariableArityMethod")
     @Test(dataProvider = "normalizeData")
     public void normalizingWorks(final String root, final String[] orig,
         final String[] expectedNames)
     {
-        final PathNames pathNames = new PathNames(root, orig);
-        final PathNames normalized = factory.normalize(pathNames);
+        final PathElements elements = new PathElements(root, orig);
+        final PathElements normalized = factory.normalize(elements);
 
         final SoftAssertions soft = new SoftAssertions();
 
@@ -142,34 +144,34 @@ public final class PathNamesFactoryTest
     @Test
     public void resolveWorks()
     {
-        PathNames first, second, resolved;
+        PathElements first, second, resolved;
 
         final SoftAssertions soft = new SoftAssertions();
 
-        first = new PathNames(null, stringArray("foo"));
-        second = new PathNames("/", stringArray("bar"));
+        first = new PathElements(null, stringArray("foo"));
+        second = new PathElements("/", stringArray("bar"));
 
         soft.assertThat(factory.resolve(first, second))
             .as("second itself is returned if absolute")
             .isSameAs(second);
 
-        second = PathNames.EMPTY;
+        second = PathElements.EMPTY;
 
         soft.assertThat(factory.resolve(first, second))
             .as("first is returned if second has no root nor name components")
             .isSameAs(first);
 
-        first = new PathNames(null, stringArray("a", "b"));
-        second = new PathNames(null, stringArray("c", "d"));
-        resolved = new PathNames(null, stringArray("a", "b", "c", "d"));
+        first = new PathElements(null, stringArray("a", "b"));
+        second = new PathElements(null, stringArray("c", "d"));
+        resolved = new PathElements(null, stringArray("a", "b", "c", "d"));
 
         soft.assertThat(factory.resolve(first, second))
             .as("normal resolution works correctly")
             .isEqualTo(resolved);
 
-        first = new PathNames("/", stringArray("a", "."));
-        second = new PathNames(null, stringArray("..", "d"));
-        resolved = new PathNames("/", stringArray("a", ".", "..", "d"));
+        first = new PathElements("/", stringArray("a", "."));
+        second = new PathElements(null, stringArray("..", "d"));
+        resolved = new PathElements("/", stringArray("a", ".", "..", "d"));
 
         soft.assertThat(factory.resolve(first, second))
             .as("resolution does not normalize")

@@ -30,20 +30,20 @@ import java.util.Objects;
  *
  * <p>The two elements of a path are its root component, if any, and its
  * name elements, if any. Note that the validity of name elements is not
- * checked here: this is the role of a {@link PathNamesFactory} to do so.</p>
+ * checked here: this is the role of a {@link PathElementsFactory} to do so.</p>
  *
  * <p>Also note that theoretically, if a path has a {@link Path#getRoot() root
  * component}, it <em>does not mean</em> that it is {@link Path#isAbsolute()
  * absolute}.</p>
  *
  * <p>You will not generate instances of this class directly; this is up to
- * a {@link PathNamesFactory} to do so.</p>
+ * a {@link PathElementsFactory} to do so.</p>
  *
  * @see GenericPath
- * @see PathNamesFactory
+ * @see PathElementsFactory
  */
 @ParametersAreNonnullByDefault
-final class PathNames
+final class PathElements
 {
     /**
      * An empty string array for instances with no elements
@@ -53,7 +53,7 @@ final class PathNames
     /**
      * An empty instance (no root, no names)
      */
-    static final PathNames EMPTY = new PathNames(null, NO_NAMES);
+    static final PathElements EMPTY = new PathElements(null, NO_NAMES);
 
     /**
      * The root component of this path
@@ -67,15 +67,15 @@ final class PathNames
 
 
     /**
-     * A {@link PathNames} consisting of a single name, with no root
+     * A {@link PathElements} consisting of a single name, with no root
      *
      * @param name the name
      * @return a single-name, no root instance
      */
     @Nonnull
-    static PathNames singleton(final String name)
+    static PathElements singleton(final String name)
     {
-        return new PathNames(null, new String[] { name });
+        return new PathElements(null, new String[] { name });
     }
 
     /**
@@ -88,7 +88,7 @@ final class PathNames
      * @param names the name elements
      */
     @SuppressWarnings("MethodCanBeVariableArityMethod")
-    PathNames(@Nullable final String root, final String[] names)
+    PathElements(@Nullable final String root, final String[] names)
     {
         this.root = root;
         //noinspection AssignmentToCollectionOrArrayFieldFromParameter
@@ -96,20 +96,20 @@ final class PathNames
     }
 
     /**
-     * Return the root PathNames of this instance (null if root is null)
+     * Return the root PathElements of this instance (null if root is null)
      *
      * @return see description
      *
      * @see Path#getRoot()
      */
     @Nullable
-    PathNames rootPathName()
+    PathElements rootPathElement()
     {
-        return root == null ? null : new PathNames(root, NO_NAMES);
+        return root == null ? null : new PathElements(root, NO_NAMES);
     }
 
     /**
-     * Return the parent PathNames of this instance
+     * Return the parent PathElements of this instance
      *
      * <p>If this instance has no name elements, {@code null} is returned;
      * otherwise a new instance is returned with all name elements except for
@@ -122,27 +122,27 @@ final class PathNames
      * @see Path#getParent()
      */
     @Nullable
-    PathNames parent()
+    PathElements parent()
     {
         final int length = names.length;
         if (length == 0)
             return null;
         final String[] newNames = length  == 1 ? NO_NAMES
             : Arrays.copyOf(names, length - 1);
-        return new PathNames(root, newNames);
+        return new PathElements(root, newNames);
     }
 
     /**
-     * Return a PathNames with only the last name element
+     * Return a PathElements with only the last name element
      *
-     * <p>If this PathNames has no names, {@code null} is returned.</p>
+     * <p>If this PathElements has no names, {@code null} is returned.</p>
      *
      * @return see description
      *
      * @see Path#getFileName()
      */
     @Nullable
-    PathNames lastName()
+    PathElements lastName()
     {
         final int length = names.length;
         return length == 0 ? null : singleton(names[length - 1]);
@@ -163,7 +163,7 @@ final class PathNames
             return true;
         if (getClass() != obj.getClass())
             return false;
-        final PathNames other = (PathNames) obj;
+        final PathElements other = (PathElements) obj;
         return Objects.equals(root, other.root)
             && Arrays.equals(names, other.names);
     }

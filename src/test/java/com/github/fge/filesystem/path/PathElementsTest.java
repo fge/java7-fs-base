@@ -28,17 +28,16 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public final class PathNamesTest
+public final class PathElementsTest
 {
     private static final String[] NO_NAMES = new String[0];
 
     @Test
     public void singletonHasNoRoot()
     {
-        final PathNames pathNames = PathNames.singleton("foo");
-        assertThat(pathNames.root)
-            .overridingErrorMessage("singleton PathNames should have null root")
-            .isNull();
+        final PathElements elements = PathElements.singleton("foo");
+        assertThat(elements.root).overridingErrorMessage(
+            "singleton PathElements should have null root").isNull();
     }
 
     @DataProvider
@@ -56,11 +55,12 @@ public final class PathNamesTest
 
     @SuppressWarnings("MethodCanBeVariableArityMethod")
     @Test(dataProvider = "variousNameArrays")
-    public void pathNamesWithNoRootReturnsNullRootPath(final String[] names)
+    public void pathElementsWithNoRootReturnsNullRootPath(final String[] names)
     {
-        final PathNames pathNames = new PathNames(null, names);
-        assertThat(pathNames.rootPathName()).overridingErrorMessage(
-            "root path name of a path name with null root should be null"
+        final PathElements elements = new PathElements(null, names);
+
+        assertThat(elements.rootPathElement()).overridingErrorMessage(
+            "root path of a PathElements with null root should be null"
         ).isNull();
     }
 
@@ -68,36 +68,39 @@ public final class PathNamesTest
         "MethodCanBeVariableArityMethod", "ConstantConditions"
     })
     @Test(dataProvider = "variousNameArrays")
-    public void pathNamesWithRootRetunsRootOnlyRootPath(final String[] names)
+    public void pathElementsWithRootRetunsRootOnlyRootPath(final String[] names)
     {
         final String root = "foo";
-        final PathNames pathNames = new PathNames(root, names);
-        final PathNames rootPath = pathNames.rootPathName();
+        final PathElements elements = new PathElements(root, names);
+        final PathElements rootElements = elements.rootPathElement();
 
         final SoftAssertions soft = new SoftAssertions();
-        soft.assertThat(rootPath.root)
-            .overridingErrorMessage(".rootPathName() should keep the root")
+
+        soft.assertThat(rootElements.root)
+            .overridingErrorMessage(".rootPathElement() should keep the root")
             .isSameAs(root);
-        soft.assertThat(rootPath.names)
-            .overridingErrorMessage(".rootPathName() should have no names")
+        soft.assertThat(rootElements.names)
+            .overridingErrorMessage(".rootPathElement() should have no names")
             .isEmpty();
+
         soft.assertAll();
     }
 
     @Test
-    public void pathNameWithNoNamesHasNullParent()
+    public void pathElementsWithNoNamesHasNullParent()
     {
-        final PathNames pathNames1 = new PathNames(null, NO_NAMES);
-        final PathNames pathNames2 = new PathNames("foo", NO_NAMES);
+        final PathElements elements1 = new PathElements(null, NO_NAMES);
+        final PathElements elements2 = new PathElements("foo", NO_NAMES);
 
         final SoftAssertions soft = new SoftAssertions();
 
-        soft.assertThat(pathNames1.parent()).overridingErrorMessage(
-            "a PathNames with no names must have a null parent"
+        soft.assertThat(elements1.parent()).overridingErrorMessage(
+            "a PathElements with no names must have a null parent"
         ).isNull();
-        soft.assertThat(pathNames2.parent()).overridingErrorMessage(
-            "a PathNames with no names must have a null parent"
+        soft.assertThat(elements2.parent()).overridingErrorMessage(
+            "a PathElements with no names must have a null parent"
         ).isNull();
+
         soft.assertAll();
     }
 
@@ -108,23 +111,23 @@ public final class PathNamesTest
         final String[] before = stringArray("foo", "bar", "baz");
         final String[] after = stringArray("foo", "bar");
 
-        final PathNames pathNamesWithRoot = new PathNames("root", before);
-        final PathNames pathNamesWithoutRoot = new PathNames(null, before);
+        final PathElements elementsWithRoot = new PathElements("root", before);
+        final PathElements elementsWithoutRoot = new PathElements(null, before);
 
         final SoftAssertions soft = new SoftAssertions();
 
-        PathNames actual, expected;
+        PathElements actual, expected;
 
-        actual = pathNamesWithRoot.parent();
-        expected = new PathNames("root", after);
+        actual = elementsWithRoot.parent();
+        expected = new PathElements("root", after);
 
         soft.assertThat(actual.root).as("parent() preserves root")
             .isEqualTo(expected.root);
         soft.assertThat(actual.names).as("parent() has correct names")
             .isEqualTo(expected.names);
 
-        actual = pathNamesWithoutRoot.parent();
-        expected = new PathNames(null, after);
+        actual = elementsWithoutRoot.parent();
+        expected = new PathElements(null, after);
 
         soft.assertThat(actual.root).as("parent() preserves root")
             .isNull();
@@ -137,15 +140,16 @@ public final class PathNamesTest
     @Test
     public void pathNameWithNoNamesHasNoLastName()
     {
-        final PathNames pathNames1 = new PathNames(null, NO_NAMES);
-        final PathNames pathNames2 = new PathNames("foo", NO_NAMES);
+        final PathElements elements1 = new PathElements(null, NO_NAMES);
+        final PathElements elements2 = new PathElements("foo", NO_NAMES);
 
         final SoftAssertions soft = new SoftAssertions();
 
-        soft.assertThat(pathNames1.lastName()).overridingErrorMessage(
-            "a PathNames with no names must not have a last name").isNull();
-        soft.assertThat(pathNames2.parent()).overridingErrorMessage(
-            "a PathNames with no names must not have a last name"
+        soft.assertThat(elements1.lastName()).overridingErrorMessage(
+            "a PathElements with no names must not have a last name"
+        ).isNull();
+        soft.assertThat(elements2.parent()).overridingErrorMessage(
+            "a PathElements with no names must not have a last name"
         ).isNull();
 
         soft.assertAll();
@@ -160,11 +164,11 @@ public final class PathNamesTest
 
         final SoftAssertions soft = new SoftAssertions();
 
-        PathNames pathNames, actual;
+        PathElements elements, actual;
         String[] expectedNames;
 
-        pathNames = new PathNames("root", names1);
-        actual = pathNames.lastName();
+        elements = new PathElements("root", names1);
+        actual = elements.lastName();
         expectedNames = stringArray("baz");
 
         soft.assertThat(actual.root).as("lastName() always has null root")
@@ -172,8 +176,8 @@ public final class PathNamesTest
         soft.assertThat(actual.names).as("lastName() has correct name elements")
             .isEqualTo(expectedNames);
 
-        pathNames = new PathNames(null, names2);
-        actual = pathNames.lastName();
+        elements = new PathElements(null, names2);
+        actual = elements.lastName();
         expectedNames = stringArray("bar");
 
         soft.assertThat(actual.root).as("lastName() always has null root")
@@ -187,11 +191,11 @@ public final class PathNamesTest
     @Test
     public void equalsHashCodeWorks()
     {
-        final PathNames p1 = PathNames.EMPTY;
+        final PathElements p1 = PathElements.EMPTY;
         final String[] names = stringArray("foo");
-        final PathNames p2 = new PathNames(null, names);
-        final PathNames p3 = new PathNames(null, names);
-        final PathNames p4 = new PathNames("/", names);
+        final PathElements p2 = new PathElements(null, names);
+        final PathElements p3 = new PathElements(null, names);
+        final PathElements p4 = new PathElements("/", names);
         final Object o = new Object();
 
         final SoftAssertions soft = new SoftAssertions();
