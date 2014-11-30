@@ -16,12 +16,9 @@
  * - ASL 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
  */
 
-package com.github.fge.filesystem.exceptions;
+package com.github.fge.filesystem.path;
 
-import java.nio.file.ProviderMismatchException;
-
-@SuppressWarnings("UncheckedExceptionClass")
-public final class FileSystemMismatchException
-    extends ProviderMismatchException
+public final class PathNamesFactoryTest
 {
+
 }

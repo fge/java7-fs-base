@@ -19,7 +19,6 @@
 package com.github.fge.filesystem.path;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.nio.file.InvalidPathException;
 import java.util.Arrays;
@@ -39,12 +38,9 @@ public abstract class PathNamesFactory
         this.separator = separator;
     }
 
-    @Nullable
-    protected abstract String extractRoot(final String path);
+    protected abstract String[] rootAndNames(final String path);
 
-    protected abstract String namesOnly(final String path);
-
-    protected abstract String[] rawNames(final String namesOnly);
+    protected abstract String[] splitNames(final String namesOnly);
 
     protected abstract boolean isValidName(final String name);
 
@@ -57,9 +53,12 @@ public abstract class PathNamesFactory
     @Nonnull
     protected final PathNames toPathNames(final String path)
     {
-        final String root = extractRoot(path);
-        final String namesOnly = namesOnly(path);
-        final String[] names = rawNames(namesOnly);
+        final String[] rootAndNames = rootAndNames(path);
+        final String root = rootAndNames[0];
+        final String namesOnly = rootAndNames[1];
+
+        final String[] names = splitNames(namesOnly);
+
         for (final String name: names)
             if (!isValidName(name))
                 throw new InvalidPathException(path,

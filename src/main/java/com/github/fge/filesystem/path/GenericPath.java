@@ -18,8 +18,6 @@
 
 package com.github.fge.filesystem.path;
 
-import com.github.fge.filesystem.exceptions.FileSystemMismatchException;
-
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.File;
 import java.io.IOError;
@@ -33,6 +31,7 @@ import java.nio.file.LinkOption;
 import java.nio.file.NotDirectoryException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.ProviderMismatchException;
 import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
@@ -836,7 +835,7 @@ public final class GenericPath
 
     private void checkProvider(final Path other)
     {
-        if (!fs.equals(other.getFileSystem()))
-            throw new FileSystemMismatchException();
+        if (!fs.provider().equals(other.getFileSystem().provider()))
+            throw new ProviderMismatchException();
     }
 }
