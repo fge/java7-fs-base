@@ -21,8 +21,24 @@ package com.github.fge.filesystem.path;
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
 import java.util.Arrays;
 
+/**
+ * Abstract factory for {@link PathNames} instances
+ *
+ * <p>This class is in charge of all the heavy {@link PathNames} operations:
+ * creating them from input strings, but also resolving, relativizing and
+ * normalizing them.</p>
+ *
+ * <p>Implementations have to override the necessary methods to extract the root
+ * components and name elements from a string, but also telling whether a name
+ * element is valid at all, or represents the current or parent directory (in
+ * typical filesystems, those would be testing that the name is either of {@code
+ * "."} or {@code ".."}).</p>
+ *
+ * <p>This package provides an implementation for Unix paths.</p>
+ */
 @ParametersAreNonnullByDefault
 public abstract class PathNamesFactory
 {
@@ -31,6 +47,13 @@ public abstract class PathNamesFactory
     private final String rootSeparator;
     private final String separator;
 
+    /**
+     * Constructor
+     *
+     * @param rootSeparator the separator to insert between the root component,
+     * if any, and the first name element, if any
+     * @param separator the separator to insert between two name elements
+     */
     protected PathNamesFactory(final String rootSeparator,
         final String separator)
     {
@@ -38,18 +61,82 @@ public abstract class PathNamesFactory
         this.separator = separator;
     }
 
+    /**
+     * Split an input path into the root component and all name elements
+     *
+     * <p>This method returns a two-element string array, where the first
+     * element is the root component and the second element is all name
+     * elements.</p>
+     *
+     * <p>This method also removes all trailing characters from the name
+     * elements, if any. If the path has no root, the first element of the
+     * returned array must be {@code null}.</p>
+     *
+     * @param path the path
+     * @return see description
+     */
     protected abstract String[] rootAndNames(final String path);
 
+    /**
+     * Split a names-only input into the individual name components
+     *
+     * <p>The input is guaranteed to be well-formed (no root component, no
+     * trailing characters). The name components must be in their order of
+     * appearance in the input.</p>
+     *
+     * @param namesOnly the input string
+     * @return an array of the different name components
+     */
     protected abstract String[] splitNames(final String namesOnly);
 
+    /**
+     * Check whether a name element is valid for that factory
+     *
+     * @param name the name to check
+     * @return true if the name is valid
+     */
     protected abstract boolean isValidName(final String name);
 
+    /**
+     * Check whether a name element represents the current directory
+     *
+     * @param name the name to check
+     * @return true if the name represents the current directory
+     *
+     * @see #normalize(PathNames)
+     */
     protected abstract boolean isSelf(final String name);
 
+    /**
+     * Check whether a name element represents the parent directory
+     *
+     * @param name the name to check
+     * @return true if the name represents the parent directory
+     *
+     * @see #normalize(PathNames)
+     */
     protected abstract boolean isParent(final String name);
 
+    /**
+     * Check whether a {@link PathNames} instance represents an absolute path
+     *
+     * @param pathNames the instance to check
+     * @return true if the instance is an absolute path
+     *
+     * @see Path#isAbsolute()
+     */
     protected abstract boolean isAbsolute(final PathNames pathNames);
 
+    /**
+     * Convert an input string into a {@link PathNames} instance
+     *
+     * @param path the string to convert
+     * @return a new {@link PathNames} instance
+     * @throws InvalidPathException one name element is wrong
+     *
+     * @see #rootAndNames(String)
+     * @see #isValidName(String)
+     */
     @Nonnull
     protected final PathNames toPathNames(final String path)
     {
@@ -67,25 +154,54 @@ public abstract class PathNamesFactory
         return new PathNames(root, names);
     }
 
+    /**
+     * Normalize a {@link PathNames} instance
+     *
+     * @param pathNames the instance to normalize
+     * @return a new, normalized instance
+     *
+     * @see #isSelf(String)
+     * @see #isParent(String)
+     * @see Path#normalize()
+     */
     @Nonnull
     protected final PathNames normalize(final PathNames pathNames)
     {
         final String[] names = pathNames.names;
-        final String[] newNames = new String[names.length];
+        final int length = names.length;
+        final String[] newNames = new String[length];
 
-        int index = 0;
+        int dstIndex = 0;
+        boolean seenRegularName = false;
+
         for (final String name: names) {
-            if (isParent(name)) {
-                if (index > 0)
-                    index--;
+            /*
+             * Just skip self names
+             */
+            if (isSelf(name))
+                continue;
+            /*
+             * Copy over regular names, and say that we have seen such a token
+             */
+            if (!isParent(name)) {
+                newNames[dstIndex++] = name;
+                seenRegularName = true;
                 continue;
             }
-            if (!isSelf(name))
-                newNames[index++] = name;
+            /*
+             * Parent token... If we have seen a regular token already _and_
+             * the destination array contains at least one element, decrease
+             * the destination index; otherwise copy it into the destination
+             * array.
+             */
+            if (seenRegularName && dstIndex > 0)
+                dstIndex--;
+            else
+                newNames[dstIndex++] = name;
         }
 
         return new PathNames(pathNames.root,
-            index == 0 ? NO_NAMES : Arrays.copyOf(newNames, index));
+            dstIndex == 0 ? NO_NAMES : Arrays.copyOf(newNames, dstIndex));
     }
 
     /*
