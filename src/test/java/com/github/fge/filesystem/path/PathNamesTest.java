@@ -64,7 +64,9 @@ public final class PathNamesTest
         ).isNull();
     }
 
-    @SuppressWarnings("MethodCanBeVariableArityMethod")
+    @SuppressWarnings({
+        "MethodCanBeVariableArityMethod", "ConstantConditions"
+    })
     @Test(dataProvider = "variousNameArrays")
     public void pathNamesWithRootRetunsRootOnlyRootPath(final String[] names)
     {
@@ -99,6 +101,39 @@ public final class PathNamesTest
         soft.assertAll();
     }
 
+    @SuppressWarnings("ConstantConditions")
+    @Test
+    public void pathNameParentHasRelevantNamesAndPreservesRoot()
+    {
+        final String[] before = stringArray("foo", "bar", "baz");
+        final String[] after = stringArray("foo", "bar");
+
+        final PathNames pathNamesWithRoot = new PathNames("root", before);
+        final PathNames pathNamesWithoutRoot = new PathNames(null, before);
+
+        final SoftAssertions soft = new SoftAssertions();
+
+        PathNames actual, expected;
+
+        actual = pathNamesWithRoot.parent();
+        expected = new PathNames("root", after);
+
+        soft.assertThat(actual.root).as("parent() preserves root")
+            .isEqualTo(expected.root);
+        soft.assertThat(actual.names).as("parent() has correct names")
+            .isEqualTo(expected.names);
+
+        actual = pathNamesWithoutRoot.parent();
+        expected = new PathNames(null, after);
+
+        soft.assertThat(actual.root).as("parent() preserves root")
+            .isNull();
+        soft.assertThat(actual.names).as("parent() has correct names")
+            .isEqualTo(expected.names);
+
+        soft.assertAll();
+    }
+
     @Test
     public void pathNameWithNoNamesHasNoLastName()
     {
@@ -112,6 +147,40 @@ public final class PathNamesTest
         soft.assertThat(pathNames2.parent()).overridingErrorMessage(
             "a PathNames with no names must not have a last name"
         ).isNull();
+
+        soft.assertAll();
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Test
+    public void pathNameLastNameWorksAndHasNoRoot()
+    {
+        final String[] names1 = stringArray("foo", "bar", "baz");
+        final String[] names2 = stringArray("foo", "bar");
+
+        final SoftAssertions soft = new SoftAssertions();
+
+        PathNames pathNames, actual;
+        String[] expectedNames;
+
+        pathNames = new PathNames("root", names1);
+        actual = pathNames.lastName();
+        expectedNames = stringArray("baz");
+
+        soft.assertThat(actual.root).as("lastName() always has null root")
+            .isNull();
+        soft.assertThat(actual.names).as("lastName() has correct name elements")
+            .isEqualTo(expectedNames);
+
+        pathNames = new PathNames(null, names2);
+        actual = pathNames.lastName();
+        expectedNames = stringArray("bar");
+
+        soft.assertThat(actual.root).as("lastName() always has null root")
+            .isNull();
+        soft.assertThat(actual.names).as("lastName() has correct name elements")
+            .isEqualTo(expectedNames);
+
         soft.assertAll();
     }
 
@@ -127,18 +196,19 @@ public final class PathNamesTest
 
         final SoftAssertions soft = new SoftAssertions();
 
-        soft.assertThat(p1).isEqualTo(p1);
+        //noinspection EqualsWithItself
+        soft.assertThat(p1.equals(p1)).isTrue();
         soft.assertThat(p1.hashCode()).isEqualTo(p1.hashCode());
 
-        soft.assertThat(p1).isNotEqualTo(o);
-        soft.assertThat(p1).isNotEqualTo(null);
+        soft.assertThat(p1.equals(o)).isFalse();
+        //noinspection ObjectEqualsNull
+        soft.assertThat(p1.equals(null)).isFalse();
 
         soft.assertThat(p2.equals(p3)).isTrue();
         soft.assertThat(p3.equals(p2)).isTrue();
         soft.assertThat(p3.hashCode()).isEqualTo(p2.hashCode());
 
         soft.assertThat(p4.equals(p3)).isFalse();
-        soft.assertThat(p3.hashCode()).isNotEqualTo(p4.hashCode());
 
         soft.assertAll();
     }

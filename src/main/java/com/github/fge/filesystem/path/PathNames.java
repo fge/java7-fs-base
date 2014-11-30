@@ -21,36 +21,106 @@ package com.github.fge.filesystem.path;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Objects;
 
+/**
+ * A generic representation of a {@link Path}'s elements
+ *
+ * <p>The two elements of a path are its root component, if any, and its
+ * name elements, if any. Note that the validity of name elements is not
+ * checked here: this is the role of a {@link PathNamesFactory} to do so.</p>
+ *
+ * <p>Also note that theoretically, if a path has a {@link Path#getRoot() root
+ * component}, it <em>does not mean</em> that it is {@link Path#isAbsolute()
+ * absolute}.</p>
+ *
+ * <p>You will not generate instances of this class directly; this is up to
+ * a {@link PathNamesFactory} to do so.</p>
+ *
+ * @see GenericPath
+ * @see PathNamesFactory
+ */
 @ParametersAreNonnullByDefault
 final class PathNames
 {
+    /**
+     * An empty string array for instances with no elements
+     */
     static final String[] NO_NAMES = new String[0];
+
+    /**
+     * An empty instance (no root, no names)
+     */
     static final PathNames EMPTY = new PathNames(null, NO_NAMES);
 
+    /**
+     * The root component of this path
+     */
     final String root;
+
+    /**
+     * The name components of this path
+     */
     final String[] names;
 
 
+    /**
+     * A {@link PathNames} consisting of a single name, with no root
+     *
+     * @param name the name
+     * @return a single-name, no root instance
+     */
     @Nonnull
     static PathNames singleton(final String name)
     {
         return new PathNames(null, new String[] { name });
     }
 
+    /**
+     * Constructor
+     *
+     * <p>Note that the names array is <em>not</em> copied; it is up to the
+     * caller to ensure the safety of using this array.</p>
+     *
+     * @param root the root component (may be null)
+     * @param names the name elements
+     */
+    @SuppressWarnings("MethodCanBeVariableArityMethod")
     PathNames(@Nullable final String root, final String[] names)
     {
         this.root = root;
+        //noinspection AssignmentToCollectionOrArrayFieldFromParameter
         this.names = names;
     }
 
+    /**
+     * Return the root PathNames of this instance (null if root is null)
+     *
+     * @return see description
+     *
+     * @see Path#getRoot()
+     */
+    @Nullable
     PathNames rootPathName()
     {
         return root == null ? null : new PathNames(root, NO_NAMES);
     }
 
+    /**
+     * Return the parent PathNames of this instance
+     *
+     * <p>If this instance has no name elements, {@code null} is returned;
+     * otherwise a new instance is returned with all name elements except for
+     * the last one.</p>
+     *
+     * <p>The root component is preserved.</p>
+     *
+     * @return see description
+     *
+     * @see Path#getParent()
+     */
     @Nullable
     PathNames parent()
     {
@@ -62,6 +132,15 @@ final class PathNames
         return new PathNames(root, newNames);
     }
 
+    /**
+     * Return a PathNames with only the last name element
+     *
+     * <p>If this PathNames has no names, {@code null} is returned.</p>
+     *
+     * @return see description
+     *
+     * @see Path#getFileName()
+     */
     @Nullable
     PathNames lastName()
     {
