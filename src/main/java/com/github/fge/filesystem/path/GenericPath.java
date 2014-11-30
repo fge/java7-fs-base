@@ -136,7 +136,7 @@ public final class GenericPath
     @Override
     public Path getParent()
     {
-        final PathNames newNames = factory.getParent(pathNames);
+        final PathNames newNames = pathNames.parent();
         return newNames == null ? null : new GenericPath(fs, factory, newNames);
     }
 

@@ -54,9 +54,6 @@ public abstract class PathNamesFactory
 
     protected abstract boolean isAbsolute(final PathNames pathNames);
 
-    @Nullable
-    protected abstract PathNames getParent(final PathNames pathNames);
-
     @Nonnull
     protected final PathNames toPathNames(final String path)
     {
