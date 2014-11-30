@@ -139,6 +139,45 @@ public final class PathNamesFactoryTest
         soft.assertAll();
     }
 
+    @Test
+    public void resolveWorks()
+    {
+        PathNames first, second, resolved;
+
+        final SoftAssertions soft = new SoftAssertions();
+
+        first = new PathNames(null, stringArray("foo"));
+        second = new PathNames("/", stringArray("bar"));
+
+        soft.assertThat(factory.resolve(first, second))
+            .as("second itself is returned if absolute")
+            .isSameAs(second);
+
+        second = PathNames.EMPTY;
+
+        soft.assertThat(factory.resolve(first, second))
+            .as("first is returned if second has no root nor name components")
+            .isSameAs(first);
+
+        first = new PathNames(null, stringArray("a", "b"));
+        second = new PathNames(null, stringArray("c", "d"));
+        resolved = new PathNames(null, stringArray("a", "b", "c", "d"));
+
+        soft.assertThat(factory.resolve(first, second))
+            .as("normal resolution works correctly")
+            .isEqualTo(resolved);
+
+        first = new PathNames("/", stringArray("a", "."));
+        second = new PathNames(null, stringArray("..", "d"));
+        resolved = new PathNames("/", stringArray("a", ".", "..", "d"));
+
+        soft.assertThat(factory.resolve(first, second))
+            .as("resolution does not normalize")
+            .isEqualTo(resolved);
+
+        soft.assertAll();
+    }
+
     private static String[] stringArray(final String first,
         final String... other)
     {

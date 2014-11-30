@@ -204,9 +204,31 @@ public abstract class PathNamesFactory
             dstIndex == 0 ? NO_NAMES : Arrays.copyOf(newNames, dstIndex));
     }
 
-    /*
-     * NOTE: throws OperationNotSupportedException if second is not absolute but
-     * has a root
+    /**
+     * Resolve a {@link PathNames} instance against another
+     *
+     * <p>This method mimicks the {@link Path#resolve(Path) equivalent operation
+     * from {@code Path}}, with the first argument being the path to be
+     * resolved against and the second one being the argument of the method:</p>
+     *
+     * <ul>
+     *     <li>if the second argument is {@link #isAbsolute(PathNames)
+     *     absolute}, it is returned;</li>
+     *     <li>if the second argument has no name components, the first
+     *     argument is returned;</li>
+     *     <li>otherwise, resolution is performed by just appending the name
+     *     components of the first argument to the second argument; no
+     *     normalization is performed.</li>
+     * </ul>
+     *
+     * <p>NOTE: this method throws an {@link UnsupportedOperationException} if
+     * the second argument is not absolute but has a root component.</p>
+     *
+     * @param first the path to resolve against
+     * @param second the path to resolve with
+     * @return the resolved path; see description
+     *
+     * @see Path#resolve(Path)
      */
     @Nonnull
     protected final PathNames resolve(final PathNames first,
