@@ -434,6 +434,7 @@ public final class GenericPath
      *
      * @see #relativize
      */
+    @SuppressWarnings("ObjectEquality")
     @Override
     public Path resolve(final Path other)
     {
@@ -472,8 +473,8 @@ public final class GenericPath
     @Override
     public Path resolve(final String other)
     {
-        final PathElements otherNames = factory.toPathElements(other);
-        return resolve(new GenericPath(fs, factory, otherNames));
+        final PathElements otherElements = factory.toPathElements(other);
+        return resolve(new GenericPath(fs, factory, otherElements));
     }
 
     /**
@@ -505,6 +506,7 @@ public final class GenericPath
         /*
          * See PathElementsFactory's .resolve()
          */
+        //noinspection ObjectEquality
         if (newNames == otherPath.elements)
             return other;
 
@@ -526,7 +528,8 @@ public final class GenericPath
     @Override
     public Path resolveSibling(final String other)
     {
-        return null;
+        final PathElements otherElements = factory.toPathElements(other);
+        return resolveSibling(new GenericPath(fs, factory, otherElements));
     }
 
     /**

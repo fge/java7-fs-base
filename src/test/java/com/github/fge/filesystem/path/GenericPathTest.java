@@ -25,7 +25,6 @@ import java.nio.file.FileSystem;
 import java.nio.file.Path;
 
 import static com.github.fge.filesystem.path.PathAssert.assertPath;
-import static com.github.fge.filesystem.path.PathElementsAssert.assertElements;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -65,41 +64,38 @@ public final class GenericPathTest
     }
 
     @Test
-    public void getRootDelegatesToPathElements()
+    public void getRootWihtoutRootReturnsNull()
     {
-        final PathElements withRoot = new PathElements("/", NO_NAMES);
-        final PathElements withoutRoot = new PathElements(null, NO_NAMES);
-
-        Path path;
-
-        path = new GenericPath(fs, factory, withRoot);
-
-        assertPath(path.getRoot()).isNotNull();
-
-        path = new GenericPath(fs, factory, withoutRoot);
+        final Path path = new GenericPath(fs, factory, PathElements.EMPTY);
 
         assertPath(path.getRoot()).isNull();
     }
 
     @Test
-    public void getFileNameDelegatesToPathElements()
+    public void getRootWithRootDoesNotReturnNull()
     {
-        PathElements elements;
-        Path path;
+        final PathElements elements = new PathElements("/", NO_NAMES);
+        final Path path = new GenericPath(fs, factory, elements);
 
-        elements = PathElements.EMPTY;
-        path = new GenericPath(fs, factory, elements);
+        assertPath(path.getRoot()).isNotNull();
+    }
+
+    @Test
+    public void getFileNameWithNoNamesReturnsNull()
+    {
+        final Path path = new GenericPath(fs, factory, PathElements.EMPTY);
 
         assertPath(path.getFileName()).isNull();
+    }
 
-        elements = new PathElements("/", new String[] { "foo", "bar" });
-        path = new GenericPath(fs, factory, elements);
+    @Test
+    public void getFileNameWithNameElementsDoesNotReturnNull()
+    {
+        final PathElements elements
+            = new PathElements(null, new String[] { "foo", "bar" });
 
-        final Path filename = path.getFileName();
+        final Path path = new GenericPath(fs, factory, elements);
 
-        assertPath(filename).isNotNull().isExactlyInstanceOf(GenericPath.class);
-
-        assertElements(((GenericPath) filename).elements)
-            .hasSameContentsAs(PathElements.singleton("bar"));
+        assertPath(path.getFileName()).isNotNull();
     }
 }
