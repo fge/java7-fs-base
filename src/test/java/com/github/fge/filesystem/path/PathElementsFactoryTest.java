@@ -262,6 +262,18 @@ public final class PathElementsFactoryTest
             stringArray("a", "b", "c", "d", "e"),
             stringArray("c", "d", "e")
         });
+        list.add(new Object[] {
+            "whatever",
+            stringArray("a", "b", "c", "d", "e"),
+            stringArray("a", "b", "f"),
+            stringArray("..", "..", "..", "f")
+        });
+        list.add(new Object[] {
+            "whatever",
+            stringArray("a", "b", "f"),
+            stringArray("a", "b", "c", "d", "e"),
+            stringArray("..", "c", "d", "e")
+        });
 
         return list.iterator();
     }
