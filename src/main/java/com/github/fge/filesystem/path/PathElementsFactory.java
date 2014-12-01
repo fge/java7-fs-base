@@ -23,6 +23,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * Abstract factory for {@link PathElements} instances
@@ -297,6 +298,66 @@ public abstract class PathElementsFactory
             return second;
 
         return resolve(firstParent, second);
+    }
+
+    @Nonnull
+    protected final PathElements relativize(final PathElements first,
+        final PathElements second)
+    {
+        /*
+         * FIXME: javadoc says that if both have a root component then it is
+         * implementation dependent; we throw IAE unconditionally here. As
+         * Objects.equals() accounts for null, we are OK.
+         */
+        if (!Objects.equals(first.root, second.root))
+            throw new IllegalArgumentException();
+
+        final String[] firstNames = first.names;
+        final String[] secondNames = second.names;
+
+        final int firstLen = firstNames.length;
+        final int secondLen = secondNames.length;
+
+        /*
+         * The resulting names array will have at most the added length of both
+         * name arrays.
+         */
+        final String[] newNames = new String[firstLen + secondLen];
+
+        int insertionIndex = 0;
+
+        final int minLen = Math.min(firstLen, secondLen);
+
+        int restartIndex;
+        String name;
+
+        /*
+         * Start by skipping the common elements at the beginning
+         */
+        for (restartIndex = 0; restartIndex < minLen; restartIndex++) {
+            name = firstNames[restartIndex];
+            if (!name.equals(secondNames[restartIndex]))
+                break;
+        }
+
+        /*
+         * OK, no more common elements. This means we need to insert parent
+         * tokens into the result array while there are still elements in the
+         * first array.
+         */
+        // TODO: unhardcode parent!!
+        for (int len = restartIndex; len < firstLen; len++)
+            newNames[insertionIndex++] = "..";
+
+        /*
+         * Finally we need to insert all remaining tokens of the second array.
+         */
+        for (int len = restartIndex; len < secondLen; len++)
+            newNames[insertionIndex++] = secondNames[len];
+
+        return insertionIndex == 0
+            ? PathElements.EMPTY
+            : new PathElements(null, Arrays.copyOf(newNames, insertionIndex));
     }
 
     /**

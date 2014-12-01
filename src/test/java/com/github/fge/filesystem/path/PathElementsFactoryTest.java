@@ -28,6 +28,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.testng.Assert.assertTrue;
 
 public final class PathElementsFactoryTest
 {
@@ -211,6 +213,72 @@ public final class PathElementsFactoryTest
 
         soft.assertThat(resolved).hasSameRootAs(first)
             .hasNames("foo", "baz");
+
+        soft.assertAll();
+    }
+
+    @Test
+    public void relativizingWithDifferentRootsThrowsIAE()
+    {
+        final PathElements elements1
+            = new PathElements("/", PathElements.NO_NAMES);
+        final PathElements elements2 = PathElements.EMPTY;
+
+        try {
+            factory.relativize(elements1, elements2);
+            fail("No exception thrown!");
+        } catch (IllegalArgumentException ignored) {
+            assertTrue(true);
+        }
+
+        try {
+            factory.relativize(elements2, elements1);
+            fail("No exception thrown!");
+        } catch (IllegalArgumentException ignored) {
+            assertTrue(true);
+        }
+    }
+
+    @DataProvider
+    public Iterator<Object[]> relativizeData()
+    {
+        final List<Object[]> list = new ArrayList<>();
+
+        list.add(new Object[] {
+            "/",
+            stringArray("a", "b"),
+            stringArray("a", "b"),
+            PathElements.NO_NAMES
+        });
+        list.add(new Object[] {
+            null,
+            stringArray("a", "b"),
+            stringArray("a", "c"),
+            stringArray("..", "c")
+        });
+        list.add(new Object[] {
+            "whatever",
+            stringArray("a", "b"),
+            stringArray("a", "b", "c", "d", "e"),
+            stringArray("c", "d", "e")
+        });
+
+        return list.iterator();
+    }
+
+    @SuppressWarnings("MethodCanBeVariableArityMethod")
+    @Test(dataProvider = "relativizeData")
+    public void relativizeGivesExpectedResults(final String root,
+        final String[] firstNames, final String[] secondNames,
+        final String[] expectedNames)
+    {
+        final PathElements first = new PathElements(root, firstNames);
+        final PathElements second = new PathElements(root, secondNames);
+        final PathElements relativized = factory.relativize(first, second);
+
+        final CustomSoftAssertions soft = CustomSoftAssertions.create();
+
+        soft.assertThat(relativized).hasNullRoot().hasNames(expectedNames);
 
         soft.assertAll();
     }
