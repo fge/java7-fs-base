@@ -60,7 +60,8 @@ public final class GenericPath
     private final FileSystem fs;
 
     private final PathElementsFactory factory;
-    private final PathElements elements;
+    // visible for testing
+    final PathElements elements;
 
     /**
      * Constructor
@@ -94,6 +95,8 @@ public final class GenericPath
      * with other path information in order to locate a file.
      *
      * @return {@code true} if, and only if, this path is absolute
+     *
+     * @see PathElementsFactory#isAbsolute(PathElements)
      */
     @Override
     public boolean isAbsolute()
@@ -107,6 +110,8 @@ public final class GenericPath
      *
      * @return a path representing the root component of this path,
      * or {@code null}
+     *
+     * @see PathElements#rootPathElement()
      */
     @Override
     public Path getRoot()
@@ -123,6 +128,8 @@ public final class GenericPath
      *
      * @return a path representing the name of the file or directory, or
      * {@code null} if this path has zero elements
+     *
+     * @see PathElements#lastName()
      */
     @Override
     public Path getFileName()
