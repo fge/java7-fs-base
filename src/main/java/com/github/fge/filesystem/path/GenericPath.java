@@ -572,7 +572,15 @@ public final class GenericPath
     @Override
     public Path relativize(final Path other)
     {
-        return null;
+        checkProvider(other);
+
+        final GenericPath otherPath = (GenericPath) other;
+        final PathElements otherElements = otherPath.elements;
+
+        final PathElements relativized
+            = factory.relativize(elements, otherElements);
+
+        return new GenericPath(fs, factory, relativized);
     }
 
     /**
