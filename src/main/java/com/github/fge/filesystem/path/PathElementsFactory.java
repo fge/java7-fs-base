@@ -324,27 +324,39 @@ public abstract class PathElementsFactory
         final int firstLen = firstNames.length;
         final int secondLen = secondNames.length;
 
-        /*
-         * The resulting names array will have at most the added length of both
-         * name arrays.
-         */
-        final String[] newNames = new String[firstLen + secondLen];
-
-        int insertionIndex = 0;
-
         final int minLen = Math.min(firstLen, secondLen);
 
         int restartIndex;
-        String name;
 
         /*
          * Start by skipping the common elements at the beginning
          */
-        for (restartIndex = 0; restartIndex < minLen; restartIndex++) {
-            name = firstNames[restartIndex];
-            if (!name.equals(secondNames[restartIndex]))
+        for (restartIndex = 0; restartIndex < minLen; restartIndex++)
+            if (!firstNames[restartIndex].equals(secondNames[restartIndex]))
                 break;
-        }
+
+
+        /*
+         * The resulting names array will always have a length of the sum of
+         * both arrays, minus twice the number of common elements.
+         */
+        final int newNamesLength = firstLen + secondLen - 2 * restartIndex;
+
+        /*
+         * We can immediately bail out if the new length is 0: this means that
+         * both name arrays are exhausted, which in turns means that the paths
+         * are the same. In this case, as per the docs, return an empty path.
+         */
+
+        if (newNamesLength == 0)
+            return PathElements.EMPTY;
+
+        final String[] newNames = new String[newNamesLength];
+
+        /*
+         * Where to insert in the new names array
+         */
+        int insertionIndex = 0;
 
         /*
          * OK, no more common elements. This means we need to insert parent
@@ -353,7 +365,7 @@ public abstract class PathElementsFactory
          */
         // TODO: unhardcode parent!!
         for (int len = restartIndex; len < firstLen; len++)
-            newNames[insertionIndex++] = "..";
+            newNames[insertionIndex++] = parentToken;
 
         /*
          * Finally we need to insert all remaining tokens of the second array.
@@ -361,9 +373,7 @@ public abstract class PathElementsFactory
         for (int len = restartIndex; len < secondLen; len++)
             newNames[insertionIndex++] = secondNames[len];
 
-        return insertionIndex == 0
-            ? PathElements.EMPTY
-            : new PathElements(null, Arrays.copyOf(newNames, insertionIndex));
+        return new PathElements(null, newNames);
     }
 
     /**
