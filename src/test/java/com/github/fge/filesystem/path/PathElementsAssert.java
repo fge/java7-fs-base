@@ -21,8 +21,9 @@ package com.github.fge.filesystem.path;
 import org.assertj.core.api.ObjectAssert;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.Arrays;
+import java.util.Objects;
 
-import static org.assertj.core.api.Assertions.assertThat;
 
 @ParametersAreNonnullByDefault
 // cannot be final, see CustomSoftAssertions
@@ -44,23 +45,34 @@ public class PathElementsAssert
      * root checks
      */
 
+    @SuppressWarnings("VariableNotUsedInsideIf")
     public final PathElementsAssert hasNullRoot()
     {
-        assertThat(actual.root).as("root component should be null").isNull();
+        if (actual.root != null)
+            failWithMessage("root component is not null\n (is: <%s>)",
+                actual.root);
         return this;
     }
 
     public final PathElementsAssert hasRoot(final String expected)
     {
-        assertThat(actual.root).as("root component is correct")
-            .isEqualTo(expected);
+        if (!Objects.equals(actual.root, expected))
+            failWithMessage(
+                "root component is not what is expected\n"
+                + "expected: <%s>\nactual: <%s>\n",
+                expected, actual.root
+            );
         return this;
     }
 
     public final PathElementsAssert hasSameRootAs(final PathElements other)
     {
-        assertThat(actual.root).as("root component should be same as other")
-            .isSameAs(other.root);
+        if (!Objects.equals(actual.root, other.root))
+            failWithMessage(
+                "root component is not the same as other\n"
+                + "expected: <%s>\nactual  : <%s>\n",
+                other.root, actual.root
+            );
         return this;
     }
 
@@ -70,22 +82,28 @@ public class PathElementsAssert
 
     public final PathElementsAssert hasNoNames()
     {
-        assertThat(actual.names).as("should not have any name elements")
-            .isEmpty();
+        if (actual.names.length != 0)
+            failWithMessage("names array (%s) is not empty",
+                Arrays.toString(actual.names));
         return this;
     }
 
     public final PathElementsAssert hasNames(final String... expected)
     {
-        assertThat(actual.names).as("names should match")
-            .containsExactly(expected);
+        if (!Arrays.equals(actual.names, expected))
+            failWithMessage("names array is not what is expected\n"
+                + "expected: <%s>\nactual  : <%s>\n",
+                Arrays.toString(expected), Arrays.toString(actual.names));
         return this;
     }
 
     public final PathElementsAssert hasSameNamesAs(final PathElements other)
     {
-        assertThat(actual.names).as("names should be same as other")
-            .containsExactly(other.names);
+        if (!Arrays.equals(actual.names, other.names))
+            failWithMessage(
+                "names differ from provided elements instance\n"
+                + "expected: <%s>\nactual  : <%s>\n",
+                Arrays.toString(other.names), Arrays.toString(actual.names));
         return this;
     }
 
