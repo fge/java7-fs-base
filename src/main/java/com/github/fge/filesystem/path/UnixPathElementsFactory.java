@@ -47,13 +47,13 @@ public final class UnixPathElementsFactory
     }
 
     @Override
-    protected String[] splitNames(final String namesOnly)
+    protected String[] splitNames(final String names)
     {
-        if (namesOnly.isEmpty())
+        if (names.isEmpty())
             return NO_NAMES;
-        if (namesOnly.indexOf('/') == -1)
-            return new String[] { namesOnly };
-        return SPLIT_PATTERN.split(namesOnly);
+        if (names.indexOf('/') == -1)
+            return new String[] { names };
+        return SPLIT_PATTERN.split(names);
     }
 
     @Override

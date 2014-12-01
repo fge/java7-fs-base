@@ -55,6 +55,8 @@ public abstract class PathElementsFactory
      * @param rootSeparator the separator to insert between the root component,
      * if any, and the first name element, if any
      * @param separator the separator to insert between two name elements
+     * @param parentToken a canonical path token to represent the parent of the
+     * current path
      */
     protected PathElementsFactory(final String rootSeparator,
         final String separator, final String parentToken)
@@ -68,12 +70,11 @@ public abstract class PathElementsFactory
      * Split an input path into the root component and all name elements
      *
      * <p>This method returns a two-element string array, where the first
-     * element is the root component and the second element is all name
-     * elements.</p>
+     * element is the root component and the second element is a string with
+     * all name elements and any trailing characters (if any) removed.</p>
      *
-     * <p>This method also removes all trailing characters from the name
-     * elements, if any. If the path has no root, the first element of the
-     * returned array must be {@code null}.</p>
+     * <p>If the path has no {@link Path#getRoot() root}, the first element of
+     * the returned array must be {@code null}.</p>
      *
      * @param path the path
      * @return see description
@@ -81,19 +82,19 @@ public abstract class PathElementsFactory
     protected abstract String[] rootAndNames(final String path);
 
     /**
-     * Split a names-only input into the individual name components
+     * Split a names-only input into individual name elements
      *
-     * <p>The input is guaranteed to be well-formed (no root component, no
-     * trailing characters). The name components must be in their order of
-     * appearance in the input.</p>
+     * <p>The input is guaranteed to be well-formed (no root component, no root
+     * separator and no trailing characters). The name elements must be in
+     * their order of appearance in the input.</p>
      *
-     * @param namesOnly the input string
-     * @return an array of the different name components
+     * @param names the input string
+     * @return an array of the name elements, in their order of appearance
      */
-    protected abstract String[] splitNames(final String namesOnly);
+    protected abstract String[] splitNames(final String names);
 
     /**
-     * Check whether a name element is valid for that factory
+     * Check whether a name element is valid
      *
      * @param name the name to check
      * @return true if the name is valid
@@ -125,7 +126,7 @@ public abstract class PathElementsFactory
     protected abstract boolean isParent(final String name);
 
     /**
-     * Check whether a {@link PathElements} instance represents an absolute path
+     * Check whether a {@link PathElements} represents an absolute path
      *
      * @param pathElements the instance to check
      * @return true if the instance is an absolute path
@@ -135,11 +136,11 @@ public abstract class PathElementsFactory
     protected abstract boolean isAbsolute(final PathElements pathElements);
 
     /**
-     * Convert an input string into a {@link PathElements} instance
+     * Convert an input string into a {@link PathElements}
      *
      * @param path the string to convert
      * @return a new {@link PathElements} instance
-     * @throws InvalidPathException one name element is wrong
+     * @throws InvalidPathException one name element is invalid
      *
      * @see #rootAndNames(String)
      * @see #isValidName(String)
@@ -162,7 +163,7 @@ public abstract class PathElementsFactory
     }
 
     /**
-     * Normalize a {@link PathElements} instance
+     * Normalize a {@link PathElements}
      *
      * @param elements the instance to normalize
      * @return a new, normalized instance
@@ -212,11 +213,11 @@ public abstract class PathElementsFactory
     }
 
     /**
-     * Resolve a {@link PathElements} instance against another
+     * Resolve a {@link PathElements} against another
      *
-     * <p>This method mimicks the {@link Path#resolve(Path) equivalent operation
-     * from {@code Path}}, with the first argument being the path to be
-     * resolved against and the second one being the argument of the method:</p>
+     * <p>This method replicates the contract of {@link Path#resolve(Path)}. In
+     * this method, the {@code first} argument is the instance performing the
+     * resolution and the {@code second} argument is the method's argument.</p>
      *
      * <ul>
      *     <li>if the second argument is {@link #isAbsolute(PathElements)
@@ -224,16 +225,22 @@ public abstract class PathElementsFactory
      *     <li>if the second argument has no name components, the first
      *     argument is returned;</li>
      *     <li>otherwise, resolution is performed by just appending the name
-     *     components of the first argument to the second argument; no
-     *     normalization is performed.</li>
+     *     components of the first argument to the second argument.</li>
      * </ul>
      *
-     * <p>NOTE: this method throws an {@link UnsupportedOperationException} if
-     * the second argument is not absolute but has a root component.</p>
+     * <p>NOTES:</p>
      *
-     * @param first the path to resolve against
-     * @param second the path to resolve with
-     * @return the resolved path; see description
+     * <ul>
+     *     <li>as per the original method, <strong>no normalization of any
+     *     argument is performed</strong>;</li>
+     *     <li>if the second argument is deemed to be absolute but it does not
+     *     have a root component, this method throws an {@link
+     *     UnsupportedOperationException}.</li>
+     * </ul>
+     *
+     * @param first the path performing the operation
+     * @param second the path on which the operation is performed
+     * @return the resulting path
      *
      * @see Path#resolve(Path)
      */
@@ -264,11 +271,12 @@ public abstract class PathElementsFactory
     }
 
     /**
-     * Resolve a {@link PathElements} against the sibling of another
+     * Resolve a {@link PathElements}'s parent against another
      *
-     * <p>This method performs the same as {@link Path#resolveSibling(Path) the
-     * equivalent operation of {@code Path}}, with the first argument being
-     * the path to resolve against and the second being the path to resolve.</p>
+     * <p>This method replicates the contract of {@link
+     * Path#resolveSibling(Path)}. In this method, the {@code first} argument is
+     * the instance performing the resolution and the {@code second} argument is
+     * the method's argument.</p>
      *
      * <p>The rules are the same as the equivalent {@code Path} method:</p>
      *
@@ -280,9 +288,9 @@ public abstract class PathElementsFactory
      *     PathElements#EMPTY empty path} if parent is null.</li>
      * </ul>
      *
-     * @param first path to resolve against
-     * @param second resolved path
-     * @return the result path
+     * @param first the path performing the operation
+     * @param second the path on which the operation is performed
+     * @return the resulting path
      */
     @Nonnull
     protected final PathElements resolveSibling(final PathElements first,
@@ -306,6 +314,23 @@ public abstract class PathElementsFactory
         return resolve(firstParent, second);
     }
 
+    /**
+     * Relativize a path against another
+     *
+     * <p>This mirrors the behaviour of {@link Path#relativize(Path)}; in
+     * this method, {@code first} is the path performing the operation and
+     * {@code second} is the method's argument.</p>
+     *
+     * <p>NOTE: in the event that both path elements have root components
+     * and they are not equal, an {@link IllegalArgumentException} is thrown
+     * unconditionally.</p>
+     *
+     * @param first the path performing the operation
+     * @param second the path on which the operation is performed
+     * @return the resulting path
+     *
+     * @see Path#relativize(Path)
+     */
     @Nonnull
     protected final PathElements relativize(final PathElements first,
         final PathElements second)
