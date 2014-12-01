@@ -43,7 +43,7 @@ import java.util.Objects;
  * @see PathElementsFactory
  */
 @ParametersAreNonnullByDefault
-final class PathElements
+public final class PathElements
 {
     /**
      * An empty string array for instances with no elements

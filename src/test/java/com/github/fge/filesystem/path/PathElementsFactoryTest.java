@@ -18,6 +18,7 @@
 
 package com.github.fge.filesystem.path;
 
+import com.github.fge.filesystem.CustomSoftAssertions;
 import org.assertj.core.api.SoftAssertions;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -131,12 +132,9 @@ public final class PathElementsFactoryTest
         final PathElements elements = new PathElements(root, orig);
         final PathElements normalized = factory.normalize(elements);
 
-        final SoftAssertions soft = new SoftAssertions();
+        final CustomSoftAssertions soft = CustomSoftAssertions.create();
 
-        soft.assertThat(normalized.root).as("normalize() does not change root")
-            .isEqualTo(root);
-        soft.assertThat(normalized.names).as("name normalization works")
-            .isEqualTo(expectedNames);
+        soft.assertThat(normalized).hasRoot(root).hasNames(expectedNames);
 
         soft.assertAll();
     }
@@ -146,7 +144,7 @@ public final class PathElementsFactoryTest
     {
         PathElements first, second, resolved;
 
-        final SoftAssertions soft = new SoftAssertions();
+        final CustomSoftAssertions soft = CustomSoftAssertions.create();
 
         first = new PathElements(null, stringArray("foo"));
         second = new PathElements("/", stringArray("bar"));
@@ -166,16 +164,14 @@ public final class PathElementsFactoryTest
         resolved = new PathElements(null, stringArray("a", "b", "c", "d"));
 
         soft.assertThat(factory.resolve(first, second))
-            .as("normal resolution works correctly")
-            .isEqualTo(resolved);
+            .hasSameContentsAs(resolved);
 
         first = new PathElements("/", stringArray("a", "."));
         second = new PathElements(null, stringArray("..", "d"));
         resolved = new PathElements("/", stringArray("a", ".", "..", "d"));
 
         soft.assertThat(factory.resolve(first, second))
-            .as("resolution does not normalize")
-            .isEqualTo(resolved);
+            .hasSameContentsAs(resolved);
 
         soft.assertAll();
     }
@@ -185,7 +181,7 @@ public final class PathElementsFactoryTest
     {
         PathElements first, second, resolved;
 
-        final SoftAssertions soft = new SoftAssertions();
+        final CustomSoftAssertions soft = CustomSoftAssertions.create();
 
         first = new PathElements(null, stringArray("foo"));
         second = new PathElements(null, new String[0]);
@@ -213,12 +209,8 @@ public final class PathElementsFactoryTest
         second = new PathElements(null, stringArray("baz"));
         resolved = factory.resolveSibling(first, second);
 
-        soft.assertThat(resolved.root)
-            .as("resolved path has same root as first")
-            .isSameAs(first.root);
-        soft.assertThat(resolved.names)
-            .as("resolved path has expected names")
-            .containsOnly("foo", "baz");
+        soft.assertThat(resolved).hasSameRootAs(first)
+            .hasNames("foo", "baz");
 
         soft.assertAll();
     }
