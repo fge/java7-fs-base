@@ -183,7 +183,7 @@ public final class GenericPathTest
          * Now with the non absolute version
          */
         p = new GenericPath(fsForP, elementsFactory,
-            new PathElements("/", new String[] { "p1", "p2" }));
+            new PathElements(null, new String[] { "p1", "p2" }));
         rr = (GenericPath) p.relativize(p.resolve(q));
 
         soft.assertThat(rr.getFileSystem())
