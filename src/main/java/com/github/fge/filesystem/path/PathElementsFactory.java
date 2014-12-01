@@ -299,21 +299,33 @@ public abstract class PathElementsFactory
         return resolve(firstParent, second);
     }
 
+    /**
+     * Return a string representation of a {@link PathElements} instance
+     *
+     * <p>{@link PathElements} does not define {@code .toString()}, as the
+     * string representation of a path is highly system dependent.</p>
+     *
+     * @param elements the instance
+     * @return a string representation
+     */
     @Nonnull
     protected final String toString(final PathElements elements)
     {
         final StringBuilder sb = new StringBuilder();
+
         final boolean hasRoot = elements.root != null;
+        final String[] names = elements.names;
+        final int len = names.length;
+
         if (hasRoot)
             sb.append(elements.root);
 
-        final String[] names = elements.names;
-        final int len = names.length;
         if (len == 0)
             return sb.toString();
 
         if (hasRoot)
             sb.append(rootSeparator);
+
         sb.append(names[0]);
 
         for (int i = 1; i < len; i++)

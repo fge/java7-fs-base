@@ -215,6 +215,30 @@ public final class PathElementsFactoryTest
         soft.assertAll();
     }
 
+    @DataProvider
+    public Iterator<Object[]> toStringData()
+    {
+        final List<Object[]> list = new ArrayList<>();
+
+        list.add(new Object[] { null, PathElements.NO_NAMES, "" });
+        list.add(new Object[] { "/", PathElements.NO_NAMES, "/" });
+        list.add(new Object[] { null, stringArray("foo"), "foo" });
+        list.add(new Object[] { "/", stringArray("foo"), "/foo" });
+        list.add(new Object[] { null, stringArray("foo", "bar"), "foo/bar" });
+        list.add(new Object[] { "/", stringArray("foo", "bar"), "/foo/bar" });
+
+        return list.iterator();
+    }
+
+    @Test(dataProvider = "toStringData")
+    public void toStringWorks(final String root, final String[] names,
+        final String expected)
+    {
+        final PathElements elements = new PathElements(root, names);
+
+        assertThat(factory.toString(elements)).isEqualTo(expected);
+    }
+
     private static String[] stringArray(final String first,
         final String... other)
     {
