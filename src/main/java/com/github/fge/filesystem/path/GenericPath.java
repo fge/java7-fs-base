@@ -40,6 +40,19 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Objects;
 
+/**
+ * A generic {@link Path} implementation
+ *
+ * <p>Most of the heavy lifting of path manipulation (resolution, parent etc)
+ * is delegated to the {@link PathElementsFactory} provided as an argument to
+ * the constructor, which is why this class can be made {@code final}.</p>
+ *
+ * <p>You won't want to create instances of this class directly; use {@link
+ * FileSystem#getPath(String, String...)} instead.</p>
+ *
+ * @see PathElementsFactory
+ * @see PathElements
+ */
 @ParametersAreNonnullByDefault
 public final class GenericPath
     implements Path
@@ -49,12 +62,19 @@ public final class GenericPath
     private final PathElementsFactory factory;
     private final PathElements elements;
 
+    /**
+     * Constructor
+     *
+     * @param fs the file system this path is issued from
+     * @param factory the path elements factory
+     * @param elements the path elements
+     */
     public GenericPath(final FileSystem fs, final PathElementsFactory factory,
         final PathElements elements)
     {
-        this.fs = fs;
-        this.factory = factory;
-        this.elements = elements;
+        this.fs = Objects.requireNonNull(fs);
+        this.factory = Objects.requireNonNull(factory);
+        this.elements = Objects.requireNonNull(elements);
     }
 
     /**
@@ -91,8 +111,9 @@ public final class GenericPath
     @Override
     public Path getRoot()
     {
-        final PathElements newNames = elements.rootPathElement();
-        return newNames == null ? null : new GenericPath(fs, factory, newNames);
+        final PathElements newElements = elements.rootPathElement();
+        return newElements == null ? null
+            : new GenericPath(fs, factory, newElements);
     }
 
     /**
