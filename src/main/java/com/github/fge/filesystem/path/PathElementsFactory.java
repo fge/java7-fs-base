@@ -47,6 +47,7 @@ public abstract class PathElementsFactory
 
     private final String rootSeparator;
     private final String separator;
+    protected final String parentToken;
 
     /**
      * Constructor
@@ -56,10 +57,11 @@ public abstract class PathElementsFactory
      * @param separator the separator to insert between two name elements
      */
     protected PathElementsFactory(final String rootSeparator,
-        final String separator)
+        final String separator, final String parentToken)
     {
         this.rootSeparator = rootSeparator;
         this.separator = separator;
+        this.parentToken = parentToken;
     }
 
     /**
@@ -106,6 +108,8 @@ public abstract class PathElementsFactory
      *
      * @see #normalize(PathElements)
      */
+    // TODO: is it necessary? Can we have filesystems with more than one
+    // possible self token?
     protected abstract boolean isSelf(final String name);
 
     /**
@@ -116,6 +120,8 @@ public abstract class PathElementsFactory
      *
      * @see #normalize(PathElements)
      */
+    // TODO: is it necessary? Can we have filesystems with more than one
+    // possible parent token?
     protected abstract boolean isParent(final String name);
 
     /**

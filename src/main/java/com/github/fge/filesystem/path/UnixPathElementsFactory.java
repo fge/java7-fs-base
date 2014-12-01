@@ -31,7 +31,7 @@ public final class UnixPathElementsFactory
 
     public UnixPathElementsFactory()
     {
-        super("", "/");
+        super("", "/", "..");
     }
 
     @Override
@@ -75,7 +75,7 @@ public final class UnixPathElementsFactory
     @Override
     protected boolean isParent(final String name)
     {
-        return "..".equals(name);
+        return parentToken.equals(name);
     }
 
     @Override
