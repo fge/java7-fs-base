@@ -30,7 +30,8 @@ import java.util.Objects;
  *
  * <p>This class is in charge of all the heavy {@link PathElements} operations:
  * creating them from input strings, but also resolving, relativizing and
- * normalizing them.</p>
+ * normalizing them. An instance of (an implementation of) this class is passed
+ * to all {@link GenericPath} instances.</p>
  *
  * <p>Implementations have to override the necessary methods to extract the root
  * components and name elements from a string, but also telling whether a name
@@ -39,6 +40,12 @@ import java.util.Objects;
  * "."} or {@code ".."}).</p>
  *
  * <p>This package provides an implementation for Unix paths.</p>
+ *
+ * <p><strong>Important note:</strong> this class adheres as closely as possible
+ * to the {@link Path} contract with regards to resolution and relativization;
+ * this means that for both of these operations, <strong>normalization
+ * is not performed</strong>. You will therefore have to ensure that paths you
+ * submit to these methods are normalized.</p>
  */
 @ParametersAreNonnullByDefault
 public abstract class PathElementsFactory
