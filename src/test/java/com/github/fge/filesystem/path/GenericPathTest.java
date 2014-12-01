@@ -18,11 +18,13 @@
 
 package com.github.fge.filesystem.path;
 
+import com.github.fge.filesystem.CustomSoftAssertions;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.nio.file.FileSystem;
 import java.nio.file.Path;
+import java.nio.file.spi.FileSystemProvider;
 
 import static com.github.fge.filesystem.path.PathAssert.assertPath;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -97,5 +99,98 @@ public final class GenericPathTest
         final Path path = new GenericPath(fs, factory, elements);
 
         assertPath(path.getFileName()).isNotNull();
+    }
+
+    /*
+     * This test this part of the Path's .relativize() method:
+     *
+     * <p> For any two {@link #normalize normalized} paths <i>p</i> and
+     * <i>q</i>, where <i>q</i> does not have a root component,
+     * <blockquote>
+     * <i>p</i><tt>.relativize(</tt><i>p</i><tt>.resolve(</tt><i>q</i><tt>))
+     * .equals(</tt><i>q</i><tt>)</tt>
+     * </blockquote>
+     *
+     * Unfortunately, that turns out NOT TO BE TRUE! Whether p is absolute or
+     * relative, it is indeed the case that the path elements (root, names) are
+     * the same but the filesystem DIFFERS.
+     *
+     * An as Path's .equals() requires that the two filesystems be equal in
+     * order for two Paths to be equals, this contract can not be obeyed; or I
+     * am doing something VERY wrong.
+     */
+    @Test(enabled = false)
+    public void relativizeResolveRoundRobinWorks()
+    {
+        /*
+         * In order to set up the environment we define a mock
+         * FileSystemProvider which both our mock filesystems will return when
+         * .provider() is called.
+         *
+         * We also suppose that the same PathElementsFactory is used; while this
+         * code is not written yet, there should be only one such factory per
+         * FileSystemProvider anyway (which is fed into all generated FileSystem
+         * instances -- at least that's the plan).
+         *
+         * Note that this test method assumes that .equals() and .hashCode() are
+         * not implemented on GenericPath. As such we check that the FileSystem
+         * is the same (this is required by Path's equals()) and that the path
+         * elements are the same (this is this package's requirements).
+         */
+        final FileSystemProvider fsProvider = mock(FileSystemProvider.class);
+        final PathElementsFactory elementsFactory
+            = new UnixPathElementsFactory();
+        final FileSystem fsForP = mock(FileSystem.class);
+        final FileSystem fsForQ = mock(FileSystem.class);
+
+        when(fsForP.provider()).thenReturn(fsProvider);
+        when(fsForQ.provider()).thenReturn(fsProvider);
+
+        /*
+         * The path to be operated. As the contract says, it has no root
+         * component.
+         */
+        final GenericPath q = new GenericPath(fsForQ, elementsFactory,
+            new PathElements(null, new String[] { "q1", "q2" }));
+
+        /*
+         * The path against which both resolution and relativization are
+         * performed. We take two versions of it: a non absolute one and an
+         * absolute one.
+         *
+         * Note that since we use a UnixPathElementsFactory, we equate an
+         * absolute path (or not) to a path which has a root component (or not).
+         */
+        GenericPath p;
+        // "rr" as in "resolved, relativized"
+        GenericPath rr;
+
+        final CustomSoftAssertions soft = CustomSoftAssertions.create();
+
+        /*
+         * Try with the absolute version first...
+         */
+        p = new GenericPath(fsForP, elementsFactory,
+            new PathElements("/", new String[] { "p1", "p2" }));
+        rr = (GenericPath) p.relativize(p.resolve(q));
+
+        soft.assertThat(rr.getFileSystem())
+            .as("rr and q filesystems should be the same (p absolute)")
+            .isSameAs(q.getFileSystem());
+        soft.assertThat(rr.elements).hasSameContentsAs(q.elements);
+
+        /*
+         * Now with the non absolute version
+         */
+        p = new GenericPath(fsForP, elementsFactory,
+            new PathElements("/", new String[] { "p1", "p2" }));
+        rr = (GenericPath) p.relativize(p.resolve(q));
+
+        soft.assertThat(rr.getFileSystem())
+            .as("rr and q filesystems should be the same (p not absolute)")
+            .isSameAs(q.getFileSystem());
+        soft.assertThat(rr.elements).hasSameContentsAs(q.elements);
+
+        soft.assertAll();
     }
 }
