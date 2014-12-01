@@ -326,24 +326,25 @@ public abstract class PathElementsFactory
 
         final int minLen = Math.min(firstLen, secondLen);
 
-        int restartIndex;
-
         /*
-         * Start by skipping the common elements at the beginning
+         * Start by skipping the common elements at the beginning of both name
+         * elements. We save the index since we will have to use it later.
          */
-        for (restartIndex = 0; restartIndex < minLen; restartIndex++)
-            if (!firstNames[restartIndex].equals(secondNames[restartIndex]))
+        int srcIndex;
+
+        for (srcIndex = 0; srcIndex < minLen; srcIndex++)
+            if (!firstNames[srcIndex].equals(secondNames[srcIndex]))
                 break;
 
-
         /*
-         * The resulting names array will always have a length of the sum of
-         * both arrays, minus twice the number of common elements.
+         * The resulting name elements array will always have the length of
+         * both the original name arrays minus twice the number of common
+         * elements.
          */
-        final int newNamesLength = firstLen + secondLen - 2 * restartIndex;
+        final int newNamesLength = firstLen + secondLen - 2 * srcIndex;
 
         /*
-         * We can immediately bail out if the new length is 0: this means that
+         * We can immediately return if the new length is 0: this means that
          * both name arrays are exhausted, which in turns means that the paths
          * are the same. In this case, as per the docs, return an empty path.
          */
@@ -356,22 +357,21 @@ public abstract class PathElementsFactory
         /*
          * Where to insert in the new names array
          */
-        int insertionIndex = 0;
+        int dstIndex = 0;
 
         /*
-         * OK, no more common elements. This means we need to insert parent
-         * tokens into the result array while there are still elements in the
-         * first array.
+         * Since all common elements to both name elements have been exhausted,
+         * the first step after that is to insert parent tokens into the result
+         * array while there are still elements in the first array.
          */
-        // TODO: unhardcode parent!!
-        for (int len = restartIndex; len < firstLen; len++)
-            newNames[insertionIndex++] = parentToken;
+        for (int len = srcIndex; len < firstLen; len++)
+            newNames[dstIndex++] = parentToken;
 
         /*
          * Finally we need to insert all remaining tokens of the second array.
          */
-        for (int len = restartIndex; len < secondLen; len++)
-            newNames[insertionIndex++] = secondNames[len];
+        for (int len = srcIndex; len < secondLen; len++)
+            newNames[dstIndex++] = secondNames[len];
 
         return new PathElements(null, newNames);
     }
