@@ -23,6 +23,8 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 
 /**
@@ -44,6 +46,7 @@ import java.util.Objects;
  */
 @ParametersAreNonnullByDefault
 public final class PathElements
+    implements Iterable<PathElements>
 {
     /**
      * An empty string array for instances with no elements
@@ -152,6 +155,44 @@ public final class PathElements
     {
         final int length = names.length;
         return length == 0 ? null : singleton(names[length - 1]);
+    }
+
+    /**
+     * Returns an iterator over a set of elements of type T.
+     *
+     * @return an Iterator.
+     */
+    @SuppressWarnings({
+        "AnonymousInnerClassWithTooManyMethods",
+        "OverlyComplexAnonymousInnerClass"
+    })
+    @Override
+    public Iterator<PathElements> iterator()
+    {
+        return new Iterator<PathElements>()
+        {
+            int index = 0;
+
+            @Override
+            public boolean hasNext()
+            {
+                return index < names.length;
+            }
+
+            @Override
+            public PathElements next()
+            {
+                if (!hasNext())
+                    throw new NoSuchElementException();
+                return singleton(names[index++]);
+            }
+
+            @Override
+            public void remove()
+            {
+                throw new UnsupportedOperationException();
+            }
+        };
     }
 
     @Override
