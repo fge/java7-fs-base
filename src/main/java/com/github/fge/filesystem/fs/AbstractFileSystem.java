@@ -100,6 +100,10 @@ public abstract class AbstractFileSystem
     @Override
     public final Path getPath(final String first, final String... more)
     {
+        if (more.length == 0)
+            return new GenericPath(this, factory,
+                factory.toPathElements(first));
+
         final StringBuilder sb = new StringBuilder(first);
 
         for (final String s: more)

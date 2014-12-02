@@ -28,16 +28,19 @@ public abstract class AbstractFileStore
 {
     private final String name;
     private final String type;
+    private final boolean readOnly;
 
-    protected AbstractFileStore(final String name, final String type)
+    protected AbstractFileStore(final String name, final String type,
+        final boolean readOnly)
     {
+        this.readOnly = readOnly;
         this.name = Objects.requireNonNull(name);
         this.type = Objects.requireNonNull(type);
     }
 
-    protected AbstractFileStore(final String name)
+    protected AbstractFileStore(final String name, final boolean readOnly)
     {
-        this(name, name);
+        this(name, name, readOnly);
     }
 
     /**
@@ -67,5 +70,19 @@ public abstract class AbstractFileStore
     public final String type()
     {
         return type;
+    }
+
+    /**
+     * Tells whether this file store is read-only. A file store is read-only if
+     * it does not support write operations or other changes to files. Any
+     * attempt to create a file, open an existing file for writing etc. causes
+     * an {@code IOException} to be thrown.
+     *
+     * @return {@code true} if, and only if, this file store is read-only
+     */
+    @Override
+    public final boolean isReadOnly()
+    {
+        return readOnly;
     }
 }

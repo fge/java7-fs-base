@@ -44,4 +44,5 @@ public abstract class AbstractFileSystemProvider
     {
         return scheme;
     }
+
 }
