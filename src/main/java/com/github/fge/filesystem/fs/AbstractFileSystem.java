@@ -142,6 +142,7 @@ public abstract class AbstractFileSystem
     public void close()
         throws IOException
     {
+        // TODO: complete!
         open = false;
     }
 
