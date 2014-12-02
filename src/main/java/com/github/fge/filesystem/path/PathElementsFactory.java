@@ -73,6 +73,11 @@ public abstract class PathElementsFactory
         this.parentToken = parentToken;
     }
 
+    public final String getSeparator()
+    {
+        return separator;
+    }
+
     /**
      * Split an input path into the root component and all name elements
      *
@@ -153,7 +158,7 @@ public abstract class PathElementsFactory
      * @see #isValidName(String)
      */
     @Nonnull
-    protected final PathElements toPathElements(final String path)
+    public final PathElements toPathElements(final String path)
     {
         final String[] rootAndNames = rootAndNames(path);
         final String root = rootAndNames[0];
