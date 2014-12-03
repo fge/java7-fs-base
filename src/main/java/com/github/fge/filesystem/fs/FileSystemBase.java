@@ -34,6 +34,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.WatchService;
+import java.nio.file.attribute.UserPrincipalLookupService;
 import java.nio.file.spi.FileSystemProvider;
 import java.util.Collections;
 
@@ -273,5 +274,48 @@ public abstract class FileSystemBase
 
         final PathElements elements = factory.toPathElements(sb.toString());
         return new GenericPath(this, factory, elements);
+    }
+
+    /**
+     * Returns the {@code UserPrincipalLookupService} for this file system
+     * <i>(optional operation)</i>. The resulting lookup service may be used to
+     * lookup user or group names.
+     * <p> <b>Usage Example:</b>
+     * Suppose we want to make "joe" the owner of a file:
+     * <pre>
+     *     UserPrincipalLookupService lookupService = FileSystems.getDefault
+     *     ().getUserPrincipalLookupService();
+     *     Files.setOwner(path, lookupService.lookupPrincipalByName("joe"));
+     * </pre>
+     *
+     * @return The {@code UserPrincipalLookupService} for this file system
+     *
+     * @throws UnsupportedOperationException If this {@code FileSystem} does
+     * not does have a lookup service
+     */
+    @Override
+    public final UserPrincipalLookupService getUserPrincipalLookupService()
+    {
+        return driver.getUserPrincipalLookupService();
+    }
+
+    /**
+     * Constructs a new {@link WatchService} <i>(optional operation)</i>.
+     * <p> This method constructs a new watch service that may be used to watch
+     * registered objects for changes and events.
+     *
+     * @return a new watch service
+     *
+     * @throws UnsupportedOperationException If this {@code FileSystem} does
+     * not support watching file system
+     * objects for changes and events. This exception is not thrown
+     * by {@code FileSystems} created by the default provider.
+     * @throws IOException If an I/O error occurs
+     */
+    @Override
+    public final WatchService newWatchService()
+        throws IOException
+    {
+        return driver.newWatchService();
     }
 }

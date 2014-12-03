@@ -24,6 +24,8 @@ import com.github.fge.filesystem.path.PathElementsFactory;
 import javax.annotation.Nonnull;
 import java.io.Closeable;
 import java.nio.file.FileStore;
+import java.nio.file.WatchService;
+import java.nio.file.attribute.UserPrincipalLookupService;
 
 public interface FileSystemDriver
     extends Closeable
@@ -37,4 +39,9 @@ public interface FileSystemDriver
     @Nonnull
     FileStore getFileStore();
 
+    @Nonnull
+    UserPrincipalLookupService getUserPrincipalLookupService();
+
+    @Nonnull
+    WatchService newWatchService();
 }

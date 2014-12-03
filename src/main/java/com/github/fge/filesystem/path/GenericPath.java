@@ -65,6 +65,7 @@ public final class GenericPath
     private final PathElementsFactory factory;
     // visible for testing
     final PathElements elements;
+    private final String asString;
 
     /**
      * Constructor
@@ -79,6 +80,7 @@ public final class GenericPath
         this.fs = Objects.requireNonNull(fs);
         this.factory = Objects.requireNonNull(factory);
         this.elements = Objects.requireNonNull(elements);
+        asString = factory.toString(elements);
     }
 
     /**
@@ -730,7 +732,7 @@ public final class GenericPath
     @Override
     public File toFile()
     {
-        return new File(toString());
+        return new File(asString);
     }
 
     /**
@@ -849,6 +851,7 @@ public final class GenericPath
      *
      * @return an iterator over the name elements of this path.
      */
+    @SuppressWarnings("AnonymousInnerClassWithTooManyMethods")
     @Override
     public Iterator<Path> iterator()
     {
@@ -901,7 +904,7 @@ public final class GenericPath
             // Meh. Required by the contract.
             throw new ClassCastException();
         }
-        return toString().compareTo(other.toString());
+        return asString.compareTo(other.toString());
     }
 
     private void checkProvider(final Path other)
@@ -1042,6 +1045,6 @@ public final class GenericPath
     @Nonnull
     public String toString()
     {
-        return factory.toString(elements);
+        return asString;
     }
 }
