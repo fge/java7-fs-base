@@ -23,14 +23,14 @@ import java.nio.file.FileStore;
 import java.util.Objects;
 
 @ParametersAreNonnullByDefault
-public abstract class AbstractFileStore
+public abstract class FileStoreBase
     extends FileStore
 {
     private final String name;
     private final String type;
     private final boolean readOnly;
 
-    protected AbstractFileStore(final String name, final String type,
+    protected FileStoreBase(final String name, final String type,
         final boolean readOnly)
     {
         this.readOnly = readOnly;
@@ -38,7 +38,7 @@ public abstract class AbstractFileStore
         this.type = Objects.requireNonNull(type);
     }
 
-    protected AbstractFileStore(final String name, final boolean readOnly)
+    protected FileStoreBase(final String name, final boolean readOnly)
     {
         this(name, name, readOnly);
     }
