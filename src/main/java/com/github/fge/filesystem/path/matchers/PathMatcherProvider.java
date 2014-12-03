@@ -72,10 +72,11 @@ public class PathMatcherProvider
 
         try {
             handle = LOOKUP.findConstructor(matcherClass, CONSTRUCTOR_TYPE);
-            type = handle.type().changeReturnType(PathMatcher.class);
-            handleMap.put(name, handle.asType(type));
         } catch (NoSuchMethodException | IllegalAccessException e) {
             throw new RuntimeException("cannot find constructor", e);
         }
+
+        type = handle.type().changeReturnType(PathMatcher.class);
+        handleMap.put(name, handle.asType(type));
     }
 }
