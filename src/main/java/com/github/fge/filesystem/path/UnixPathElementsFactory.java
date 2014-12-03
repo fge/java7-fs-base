@@ -29,6 +29,9 @@ public final class UnixPathElementsFactory
     private static final Pattern TAIL_PATTERN = Pattern.compile("/+$");
     private static final Pattern SPLIT_PATTERN = Pattern.compile("/+");
 
+    private static final PathElements ROOT
+        = new PathElements("/", PathElements.NO_NAMES);
+
     public UnixPathElementsFactory()
     {
         super("", "/", "..");
@@ -82,5 +85,11 @@ public final class UnixPathElementsFactory
     protected boolean isAbsolute(final PathElements pathElements)
     {
         return pathElements.root != null;
+    }
+
+    @Override
+    protected PathElements getRootPathElements()
+    {
+        return ROOT;
     }
 }

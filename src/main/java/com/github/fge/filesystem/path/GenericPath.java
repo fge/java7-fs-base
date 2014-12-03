@@ -665,7 +665,10 @@ public final class GenericPath
     @Override
     public Path toAbsolutePath()
     {
-        return null;
+        if (isAbsolute())
+            return this;
+        final PathElements root = factory.getRootPathElements();
+        return new GenericPath(fs, factory, factory.resolve(root, elements));
     }
 
     /**
@@ -707,11 +710,13 @@ public final class GenericPath
      * checkPropertyAccess} method is invoked to check access to the
      * system property {@code user.dir}
      */
+    @SuppressWarnings("OverloadedVarargsMethod")
     @Override
     public Path toRealPath(final LinkOption... options)
         throws IOException
     {
-        return null;
+        // TODO: symlinks
+        return toAbsolutePath();
     }
 
     /**
@@ -784,14 +789,14 @@ public final class GenericPath
      * installed, the {@link SecurityManager#checkRead(String) checkRead}
      * method is invoked to check read access to the file.
      */
+    @SuppressWarnings("OverloadedVarargsMethod")
     @Override
     public WatchKey register(final WatchService watcher,
         final WatchEvent.Kind<?>[] events,
         final WatchEvent.Modifier... modifiers)
         throws IOException
     {
-        // TODO
-        return null;
+        throw new UnsupportedOperationException("TODO");
     }
 
     /**
@@ -832,13 +837,13 @@ public final class GenericPath
      * installed, the {@link SecurityManager#checkRead(String) checkRead}
      * method is invoked to check read access to the file.
      */
+    @SuppressWarnings("OverloadedVarargsMethod")
     @Override
     public WatchKey register(final WatchService watcher,
         final WatchEvent.Kind<?>... events)
         throws IOException
     {
-        // TODO
-        return null;
+        throw new UnsupportedOperationException("TODO");
     }
 
     /**
