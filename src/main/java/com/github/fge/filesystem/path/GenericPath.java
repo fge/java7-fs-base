@@ -907,12 +907,6 @@ public final class GenericPath
         return asString.compareTo(other.toString());
     }
 
-    private void checkProvider(final Path other)
-    {
-        if (!fs.provider().equals(other.getFileSystem().provider()))
-            throw new ProviderMismatchException();
-    }
-
     /**
      * Returns a hash code value for the object. This method is
      * supported for the benefit of hash tables such as those provided by
@@ -1047,4 +1041,11 @@ public final class GenericPath
     {
         return asString;
     }
+
+    private void checkProvider(final Path other)
+    {
+        if (!fs.provider().equals(other.getFileSystem().provider()))
+            throw new ProviderMismatchException();
+    }
+
 }
