@@ -946,10 +946,7 @@ public final class GenericPath
     @Override
     public int hashCode()
     {
-        int ret = fs.hashCode();
-        ret = 31 * ret + factory.hashCode();
-        ret = 31 * ret + elements.hashCode();
-        return ret;
+        return Objects.hash(fs, factory, elements);
     }
 
     /**
@@ -1047,5 +1044,4 @@ public final class GenericPath
         if (!fs.provider().equals(other.getFileSystem().provider()))
             throw new ProviderMismatchException();
     }
-
 }
