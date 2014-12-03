@@ -20,6 +20,7 @@ package com.github.fge.filesystem.driver;
 
 import com.github.fge.filesystem.path.PathElements;
 import com.github.fge.filesystem.path.PathElementsFactory;
+import com.github.fge.filesystem.path.matchers.PathMatcherProvider;
 
 import javax.annotation.Nonnull;
 import java.io.Closeable;
@@ -38,6 +39,9 @@ public interface FileSystemDriver
 
     @Nonnull
     FileStore getFileStore();
+
+    @Nonnull
+    PathMatcherProvider getPathMatcherProvider();
 
     @Nonnull
     UserPrincipalLookupService getUserPrincipalLookupService();

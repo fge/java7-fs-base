@@ -23,12 +23,12 @@ import java.nio.file.spi.FileSystemProvider;
 import java.util.Objects;
 
 @ParametersAreNonnullByDefault
-public abstract class AbstractFileSystemProvider
+public abstract class FileSystemProviderBase
     extends FileSystemProvider
 {
     private final String scheme;
 
-    protected AbstractFileSystemProvider(final String scheme)
+    protected FileSystemProviderBase(final String scheme)
     {
         // TODO: validity of the scheme is not checked
         this.scheme = Objects.requireNonNull(scheme);
