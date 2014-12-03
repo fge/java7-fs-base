@@ -19,9 +19,20 @@
 package com.github.fge.filesystem.filestore;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.io.IOException;
 import java.nio.file.FileStore;
+import java.nio.file.attribute.FileStoreAttributeView;
 import java.util.Objects;
 
+/**
+ * Base implementation of a {@link FileStore}
+ *
+ * <p>Limitations:</p>
+ *
+ * <ul>
+ *     <li>no support for {@link FileStoreAttributeView}s</li>
+ * </ul>
+ */
 @ParametersAreNonnullByDefault
 public abstract class FileStoreBase
     extends FileStore
@@ -84,5 +95,59 @@ public abstract class FileStoreBase
     public final boolean isReadOnly()
     {
         return readOnly;
+    }
+
+    /**
+     * Returns a {@code FileStoreAttributeView} of the given type.
+     * <p> This method is intended to be used where the file store attribute
+     * view defines type-safe methods to read or update the file store
+     * attributes.
+     * The {@code type} parameter is the type of the attribute view required and
+     * the method returns an instance of that type if supported.
+     *
+     * @param type the {@code Class} object corresponding to the attribute view
+     * @return a file store attribute view of the specified type or
+     * {@code null} if the attribute view is not available
+     */
+    @Override
+    public final <V extends FileStoreAttributeView> V getFileStoreAttributeView(
+        final Class<V> type)
+    {
+        return null;
+    }
+
+    /**
+     * Reads the value of a file store attribute.
+     * <p> The {@code attribute} parameter identifies the attribute to be read
+     * and takes the form:
+     * <blockquote>
+     * <i>view-name</i><b>:</b><i>attribute-name</i>
+     * </blockquote>
+     * where the character {@code ':'} stands for itself.
+     * <p> <i>view-name</i> is the {@link FileStoreAttributeView#name name} of
+     * a {@link FileStore AttributeView} that identifies a set of file
+     * attributes.
+     * <i>attribute-name</i> is the name of the attribute.
+     * <p> <b>Usage Example:</b>
+     * Suppose we want to know if ZFS compression is enabled (assuming the "zfs"
+     * view is supported):
+     * <pre>
+     *    boolean compression = (Boolean)fs.getAttribute("zfs:compression");
+     * </pre>
+     *
+     * @param attribute the attribute to read
+     * @return the attribute value; {@code null} may be a valid valid for some
+     * attributes
+     *
+     * @throws UnsupportedOperationException if the attribute view is not
+     * available or it does not support
+     * reading the attribute
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    public final Object getAttribute(final String attribute)
+        throws IOException
+    {
+        throw new UnsupportedOperationException();
     }
 }
