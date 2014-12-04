@@ -56,6 +56,8 @@ public class PathMatcherProvider
 
         try {
             return (PathMatcher) handle.invokeExact(arg);
+        } catch (Error error) {
+            throw error;
         } catch (Throwable throwable) {
             throw new RuntimeException("Unhandled exception", throwable);
         }
