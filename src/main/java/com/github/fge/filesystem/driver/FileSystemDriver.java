@@ -28,6 +28,7 @@ import java.net.URI;
 import java.nio.file.FileStore;
 import java.nio.file.WatchService;
 import java.nio.file.attribute.UserPrincipalLookupService;
+import java.util.Set;
 
 public interface FileSystemDriver
     extends Closeable
@@ -43,6 +44,9 @@ public interface FileSystemDriver
 
     @Nonnull
     FileStore getFileStore();
+
+    @Nonnull
+    Set<String> getSupportedFileAttributeViews();
 
     @Nonnull
     PathMatcherProvider getPathMatcherProvider();

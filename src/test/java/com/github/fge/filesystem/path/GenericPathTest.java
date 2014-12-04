@@ -19,12 +19,18 @@
 package com.github.fge.filesystem.path;
 
 import com.github.fge.filesystem.CustomSoftAssertions;
+import com.github.fge.filesystem.driver.FileSystemDriver;
 import com.github.fge.filesystem.fs.FileSystemBase;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.spi.FileSystemProvider;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import static com.github.fge.filesystem.path.PathAssert.assertPath;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,13 +42,18 @@ public final class GenericPathTest
     private static final String[] NO_NAMES = new String[0];
 
     private FileSystemBase fs;
+    private FileSystemProvider provider;
+    private FileSystemDriver driver;
     private PathElementsFactory factory;
 
     @BeforeMethod
     public void initMocks()
     {
-        fs = mock(FileSystemBase.class);
+        provider = mock(FileSystemProvider.class);
+        driver = mock(FileSystemDriver.class);
         factory = mock(PathElementsFactory.class);
+        when(driver.getPathElementsFactory()).thenReturn(factory);
+        fs = new FileSystemBase(driver, provider);
     }
 
     @Test
@@ -192,5 +203,31 @@ public final class GenericPathTest
         soft.assertThat(rr.elements).hasSameContentsAs(q.elements);
 
         soft.assertAll();
+    }
+
+    @DataProvider
+    public Iterator<Object[]> toUriPathData()
+    {
+        final List<Object[]> list = new ArrayList<>();
+
+        list.add(new Object[] { "foo://bar", "/", "foo://bar" });
+        list.add(new Object[] { "foo://bar/x", "/", "foo://bar/x" });
+        list.add(new Object[] { "foo://bar/x", "/../a", "foo://bar/x/a" });
+        list.add(new Object[] { "foo://bar", "/a v", "foo://bar/a%20v" });
+
+        return list.iterator();
+    }
+
+    @Test(dataProvider = "toUriPathData")
+    public void toUriPathReturnsCorrectURI(final String uri, final String path,
+        final String expected)
+    {
+        final PathElementsFactory unixFactory = new UnixPathElementsFactory();
+        when(driver.getUri()).thenReturn(URI.create(uri));
+        final PathElements elements = unixFactory.toPathElements(path);
+        final Path p = new GenericPath(fs, unixFactory, elements);
+
+        assertThat(p.toUri().toString()).as("generated URI is correct")
+            .isEqualTo(expected);
     }
 }

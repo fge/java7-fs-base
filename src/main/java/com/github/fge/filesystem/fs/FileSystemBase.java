@@ -38,10 +38,13 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.WatchService;
+import java.nio.file.attribute.BasicFileAttributeView;
+import java.nio.file.attribute.FileAttributeView;
 import java.nio.file.attribute.UserPrincipalLookupService;
 import java.nio.file.spi.FileSystemProvider;
 import java.util.Collections;
 import java.util.Objects;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -55,17 +58,17 @@ import java.util.regex.PatternSyntaxException;
  *     one {@link FileSystem#getFileStores() file store}.</li>
  * </ul>
  */
-public abstract class FileSystemBase
+public final class FileSystemBase
     extends FileSystem
 {
     private volatile boolean open = true;
 
-    protected final FileSystemDriver driver;
-    protected final FileSystemProvider provider;
-    protected final PathElementsFactory factory;
-    protected final String separator;
+    private final FileSystemDriver driver;
+    private final FileSystemProvider provider;
+    private final PathElementsFactory factory;
+    private final String separator;
 
-    protected FileSystemBase(final FileSystemDriver driver,
+    public FileSystemBase(final FileSystemDriver driver,
         final FileSystemProvider provider)
     {
         this.driver = driver;
@@ -75,7 +78,7 @@ public abstract class FileSystemBase
     }
 
     @Nonnull
-    public final URI getUri()
+    public URI getUri()
     {
         return driver.getUri();
     }
@@ -86,7 +89,7 @@ public abstract class FileSystemBase
      * @return The provider that created this file system.
      */
     @Override
-    public final FileSystemProvider provider()
+    public FileSystemProvider provider()
     {
         return provider;
     }
@@ -109,7 +112,7 @@ public abstract class FileSystemBase
      * default file system
      */
     @Override
-    public final void close()
+    public void close()
         throws IOException
     {
         open = false;
@@ -123,7 +126,7 @@ public abstract class FileSystemBase
      * @return {@code true} if, and only if, this file system is open
      */
     @Override
-    public final boolean isOpen()
+    public boolean isOpen()
     {
         return open;
     }
@@ -136,7 +139,7 @@ public abstract class FileSystemBase
      * read-only access
      */
     @Override
-    public final boolean isReadOnly()
+    public boolean isReadOnly()
     {
         return driver.getFileStore().isReadOnly();
     }
@@ -155,7 +158,7 @@ public abstract class FileSystemBase
      * @return The name separator
      */
     @Override
-    public final String getSeparator()
+    public String getSeparator()
     {
         return separator;
     }
@@ -181,7 +184,7 @@ public abstract class FileSystemBase
      * @return An object to iterate over the root directories
      */
     @Override
-    public final Iterable<Path> getRootDirectories()
+    public Iterable<Path> getRootDirectories()
     {
         return Collections.<Path>singletonList(
             new GenericPath(this, factory, driver.getRoot())
@@ -220,9 +223,28 @@ public abstract class FileSystemBase
      * @return An object to iterate over the backing file stores
      */
     @Override
-    public final Iterable<FileStore> getFileStores()
+    public Iterable<FileStore> getFileStores()
     {
         return Collections.singletonList(driver.getFileStore());
+    }
+
+    /**
+     * Returns the set of the {@link FileAttributeView#name names} of the file
+     * attribute views supported by this {@code FileSystem}.
+     * <p> The {@link BasicFileAttributeView} is required to be supported and
+     * therefore the set contains at least one element, "basic".
+     * <p> The {@link FileStore#supportsFileAttributeView(String)
+     * supportsFileAttributeView(String)} method may be used to test if an
+     * underlying {@link FileStore} supports the file attributes identified by a
+     * file attribute view.
+     *
+     * @return An unmodifiable set of the names of the supported file attribute
+     * views
+     */
+    @Override
+    public Set<String> supportedFileAttributeViews()
+    {
+        return driver.getSupportedFileAttributeViews();
     }
 
     /**
@@ -272,7 +294,7 @@ public abstract class FileSystemBase
      */
     @SuppressWarnings("OverloadedVarargsMethod")
     @Override
-    public final Path getPath(final String first, final String... more)
+    public Path getPath(final String first, final String... more)
     {
         if (more.length == 0)
             return new GenericPath(this, factory,
@@ -407,7 +429,7 @@ public abstract class FileSystemBase
      * @see Files#newDirectoryStream(Path, String)
      */
     @Override
-    public final PathMatcher getPathMatcher(final String syntaxAndPattern)
+    public PathMatcher getPathMatcher(final String syntaxAndPattern)
     {
         final int index = Objects.requireNonNull(syntaxAndPattern).indexOf(':');
 
@@ -442,7 +464,7 @@ public abstract class FileSystemBase
      * not does have a lookup service
      */
     @Override
-    public final UserPrincipalLookupService getUserPrincipalLookupService()
+    public UserPrincipalLookupService getUserPrincipalLookupService()
     {
         return driver.getUserPrincipalLookupService();
     }
@@ -461,7 +483,7 @@ public abstract class FileSystemBase
      * @throws IOException If an I/O error occurs
      */
     @Override
-    public final WatchService newWatchService()
+    public WatchService newWatchService()
         throws IOException
     {
         return driver.newWatchService();

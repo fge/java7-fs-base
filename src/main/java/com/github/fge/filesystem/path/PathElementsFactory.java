@@ -55,6 +55,7 @@ public abstract class PathElementsFactory
     protected static final String[] NO_NAMES = new String[0];
 
     private static final Pattern SLASHES = Pattern.compile("/+");
+    private static final Pattern TRAILING_SLASHES = Pattern.compile("/+$");
 
     private final String rootSeparator;
     private final String separator;
@@ -454,6 +455,26 @@ public abstract class PathElementsFactory
         return sb.toString();
     }
 
+    /**
+     * Make a valid, raw URI path from a path's elements and a path prefix
+     *
+     * <p>The validity of the path prefix is NOT checked, it is supposed to be
+     * valid. Note that it must be "raw", that is not URI-encoded.</p>
+     *
+     * <p>The elements must represent an absolute path according to that
+     * factory.</p>
+     *
+     * <p>This method will perform normalization on the path elements before
+     * returning the result. If any parent tokens are found at the head of the
+     * name elements, they are removed. Name tokens are then appended and joined
+     * with a slash ({@code /}) character, as required by RFC 3986.</p>
+     *
+     * <p>Trailing slashes, if any, are removed.</p>
+     *
+     * @param prefix the URI path prefix (may be null)
+     * @param elements the path elements
+     * @return a raw (unencoded) path suitable for use in a URI
+     */
     @Nonnull
     protected final String toUriPath(@Nullable final String prefix,
         final PathElements elements)
@@ -467,19 +488,19 @@ public abstract class PathElementsFactory
 
         final PathElements normalized = normalize(elements);
         final String[] names = normalized.names;
-        final int namesLen = names.length;
-
-        int startIndex = 0;
-
-        while (isParent(names[startIndex]))
-            startIndex++;
 
         if (normalized.root != null)
             sb.append('/').append(normalized.root);
 
-        while (startIndex < namesLen)
-            sb.append('/').append(names[startIndex++]);
+        /*
+         * Since the path elements are normalized, the only parents we can see
+         * are at the beginning.
+         */
+        for (final String name: names)
+            if (!isParent(name))
+                sb.append('/').append(name);
 
-        return SLASHES.matcher(sb).replaceAll("/");
+        return TRAILING_SLASHES.matcher(SLASHES.matcher(sb).replaceAll("/"))
+            .replaceAll("");
     }
 }

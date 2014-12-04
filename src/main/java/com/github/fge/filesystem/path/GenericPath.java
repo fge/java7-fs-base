@@ -650,10 +650,10 @@ public final class GenericPath
         final String path = base.getPath();
         final String query = base.getQuery();
         final String fragment = base.getFragment();
-        final String s = toAbsolutePath().toString();
-        final String realPath = path == null ? s : path + s;
+        final String uriPath = factory.toUriPath(path, elements);
         try {
-            return new URI(scheme, authority, realPath, query, fragment);
+            return new URI(scheme, authority, uriPath, query, fragment)
+                .normalize();
         } catch (URISyntaxException e) {
             throw new RuntimeException("How did I get there??", e);
         }
