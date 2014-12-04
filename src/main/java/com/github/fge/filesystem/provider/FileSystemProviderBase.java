@@ -26,7 +26,7 @@ import java.util.Objects;
 public abstract class FileSystemProviderBase
     extends FileSystemProvider
 {
-    private final String scheme;
+    protected final String scheme;
 
     protected FileSystemProviderBase(final String scheme)
     {
@@ -44,5 +44,6 @@ public abstract class FileSystemProviderBase
     {
         return scheme;
     }
+
 
 }

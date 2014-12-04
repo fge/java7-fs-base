@@ -23,8 +23,10 @@ import com.github.fge.filesystem.path.GenericPath;
 import com.github.fge.filesystem.path.PathElements;
 import com.github.fge.filesystem.path.PathElementsFactory;
 
+import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.channels.Channel;
 import java.nio.file.ClosedFileSystemException;
 import java.nio.file.DirectoryStream;
@@ -72,6 +74,11 @@ public abstract class FileSystemBase
         separator = factory.getSeparator();
     }
 
+    @Nonnull
+    public final URI getUri()
+    {
+        return driver.getUri();
+    }
 
     /**
      * Returns the provider that created this file system.

@@ -18,6 +18,8 @@
 
 package com.github.fge.filesystem.path;
 
+import com.github.fge.filesystem.fs.FileSystemBase;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -25,6 +27,7 @@ import java.io.File;
 import java.io.IOError;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.ClosedWatchServiceException;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
@@ -60,7 +63,7 @@ import java.util.Objects;
 public final class GenericPath
     implements Path
 {
-    private final FileSystem fs;
+    private final FileSystemBase fs;
 
     private final PathElementsFactory factory;
     // visible for testing
@@ -74,8 +77,8 @@ public final class GenericPath
      * @param factory the path elements factory
      * @param elements the path elements
      */
-    public GenericPath(final FileSystem fs, final PathElementsFactory factory,
-        final PathElements elements)
+    public GenericPath(final FileSystemBase fs,
+        final PathElementsFactory factory, final PathElements elements)
     {
         this.fs = Objects.requireNonNull(fs);
         this.factory = Objects.requireNonNull(factory);
@@ -640,7 +643,20 @@ public final class GenericPath
     @Override
     public URI toUri()
     {
-        return null;
+        // URI is normalized, so this works...
+        final URI base = fs.getUri();
+        final String scheme = base.getScheme();
+        final String authority = base.getAuthority();
+        final String path = base.getPath();
+        final String query = base.getQuery();
+        final String fragment = base.getFragment();
+        final String s = toAbsolutePath().toString();
+        final String realPath = path == null ? s : path + s;
+        try {
+            return new URI(scheme, authority, realPath, query, fragment);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException("How did I get there??", e);
+        }
     }
 
     /**
@@ -737,7 +753,7 @@ public final class GenericPath
     @Override
     public File toFile()
     {
-        return new File(asString);
+        throw new UnsupportedOperationException();
     }
 
     /**

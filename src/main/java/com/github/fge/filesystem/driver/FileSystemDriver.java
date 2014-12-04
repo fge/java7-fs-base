@@ -24,6 +24,7 @@ import com.github.fge.filesystem.path.matchers.PathMatcherProvider;
 
 import javax.annotation.Nonnull;
 import java.io.Closeable;
+import java.net.URI;
 import java.nio.file.FileStore;
 import java.nio.file.WatchService;
 import java.nio.file.attribute.UserPrincipalLookupService;
@@ -31,6 +32,9 @@ import java.nio.file.attribute.UserPrincipalLookupService;
 public interface FileSystemDriver
     extends Closeable
 {
+    @Nonnull
+    URI getUri();
+
     @Nonnull
     PathElementsFactory getPathElementsFactory();
 

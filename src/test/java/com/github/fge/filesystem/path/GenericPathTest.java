@@ -19,10 +19,10 @@
 package com.github.fge.filesystem.path;
 
 import com.github.fge.filesystem.CustomSoftAssertions;
+import com.github.fge.filesystem.fs.FileSystemBase;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.nio.file.FileSystem;
 import java.nio.file.Path;
 import java.nio.file.spi.FileSystemProvider;
 
@@ -35,13 +35,13 @@ public final class GenericPathTest
 {
     private static final String[] NO_NAMES = new String[0];
 
-    private FileSystem fs;
+    private FileSystemBase fs;
     private PathElementsFactory factory;
 
     @BeforeMethod
     public void initMocks()
     {
-        fs = mock(FileSystem.class);
+        fs = mock(FileSystemBase.class);
         factory = mock(PathElementsFactory.class);
     }
 
@@ -140,8 +140,8 @@ public final class GenericPathTest
         final FileSystemProvider fsProvider = mock(FileSystemProvider.class);
         final PathElementsFactory elementsFactory
             = new UnixPathElementsFactory();
-        final FileSystem fsForP = mock(FileSystem.class);
-        final FileSystem fsForQ = mock(FileSystem.class);
+        final FileSystemBase fsForP = mock(FileSystemBase.class);
+        final FileSystemBase fsForQ = mock(FileSystemBase.class);
 
         when(fsForP.provider()).thenReturn(fsProvider);
         when(fsForQ.provider()).thenReturn(fsProvider);
