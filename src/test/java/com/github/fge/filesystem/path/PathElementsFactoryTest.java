@@ -29,6 +29,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
 import static org.testng.Assert.assertTrue;
 
 public final class PathElementsFactoryTest
@@ -293,6 +294,46 @@ public final class PathElementsFactoryTest
         soft.assertThat(relativized).hasNullRoot().hasNames(expectedNames);
 
         soft.assertAll();
+    }
+
+    @Test
+    public void toUriPathRefusesNonAbsolutePath()
+    {
+        final PathElements elements = new PathElements(null, stringArray("a"));
+
+        try {
+            factory.toUriPath(null, elements);
+            failBecauseExceptionWasNotThrown(IllegalArgumentException.class);
+        } catch (IllegalArgumentException e) {
+            assertThat(e).isExactlyInstanceOf(IllegalArgumentException.class)
+                .hasMessage("elements not absolute");
+        }
+    }
+
+    @DataProvider
+    public Iterator<Object[]> toUriPathData()
+    {
+        final List<Object[]> list = new ArrayList<>();
+
+        list.add(new Object[] { null, stringArray("a", "b"), "/a/b" });
+        list.add(new Object[] { "/", stringArray("a", "b"), "/a/b"});
+        list.add(new Object[] { "/foo", stringArray("a", "b"), "/foo/a/b"});
+        list.add(new Object[] { "/foo/", stringArray("a", "b"), "/foo/a/b"});
+        list.add(new Object[] { null, stringArray("..", "..", "a"), "/a"});
+        list.add(new Object[] { null, stringArray("a", ".", "b"), "/a/b"});
+
+        return list.iterator();
+    }
+
+    @Test(dataProvider = "toUriPathData")
+    public void toUriPathGivesCorrectResult(final String prefix,
+        final String[] names, final String expected)
+    {
+        final PathElements elements = new PathElements("/", names);
+        final String actual = factory.toUriPath(prefix, elements);
+
+        assertThat(actual).as("URI path is correctly generated")
+            .isEqualTo(expected);
     }
 
     @DataProvider

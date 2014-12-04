@@ -19,11 +19,13 @@
 package com.github.fge.filesystem.path;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 /**
  * Abstract factory for {@link PathElements} instances
@@ -51,6 +53,8 @@ import java.util.Objects;
 public abstract class PathElementsFactory
 {
     protected static final String[] NO_NAMES = new String[0];
+
+    private static final Pattern SLASHES = Pattern.compile("/+");
 
     private final String rootSeparator;
     private final String separator;
@@ -448,5 +452,34 @@ public abstract class PathElementsFactory
             sb.append(separator).append(names[i]);
 
         return sb.toString();
+    }
+
+    @Nonnull
+    protected final String toUriPath(@Nullable final String prefix,
+        final PathElements elements)
+    {
+        if (!isAbsolute(elements))
+            throw new IllegalArgumentException("elements not absolute");
+
+        final StringBuilder sb = new StringBuilder();
+        if (prefix != null)
+            sb.append(prefix);
+
+        final PathElements normalized = normalize(elements);
+        final String[] names = normalized.names;
+        final int namesLen = names.length;
+
+        int startIndex = 0;
+
+        while (isParent(names[startIndex]))
+            startIndex++;
+
+        if (normalized.root != null)
+            sb.append('/').append(normalized.root);
+
+        while (startIndex < namesLen)
+            sb.append('/').append(names[startIndex++]);
+
+        return SLASHES.matcher(sb).replaceAll("/");
     }
 }
