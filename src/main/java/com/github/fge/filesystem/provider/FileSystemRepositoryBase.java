@@ -21,6 +21,7 @@ package com.github.fge.filesystem.provider;
 import com.github.fge.filesystem.driver.FileSystemDriver;
 import com.github.fge.filesystem.fs.FileSystemBase;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
@@ -28,6 +29,7 @@ import java.net.URI;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystemAlreadyExistsException;
 import java.nio.file.FileSystemNotFoundException;
+import java.nio.file.Path;
 import java.nio.file.spi.FileSystemProvider;
 import java.util.HashMap;
 import java.util.Map;
@@ -46,12 +48,14 @@ public abstract class FileSystemRepositoryBase
         this.scheme = scheme;
     }
 
+    @Nonnull
     @Override
     public final String getScheme()
     {
         return scheme;
     }
 
+    @Nonnull
     @Override
     public final FileSystem createFileSystem(final FileSystemProvider provider,
         final URI uri, final Map<String, ?> env)
@@ -72,6 +76,7 @@ public abstract class FileSystemRepositoryBase
         }
     }
 
+    @Nonnull
     @Override
     public final FileSystem getFileSystem(final URI uri)
     {
@@ -89,6 +94,37 @@ public abstract class FileSystemRepositoryBase
         return fs;
     }
 
+    // Note: fs never created automatically
+    @Nonnull
+    @Override
+    public final Path getPath(final URI uri)
+    {
+        checkURI(uri);
+
+        URI tmp;
+        FileSystemBase fs;
+        String path;
+
+        synchronized (filesystems) {
+            for (final Map.Entry<URI, FileSystemBase> entry:
+                filesystems.entrySet()) {
+                tmp = uri.relativize(entry.getKey());
+                if (tmp.isAbsolute())
+                    continue;
+                fs = entry.getValue();
+                // TODO: can happen...
+                if (!fs.isOpen())
+                    continue;
+                path = tmp.getPath();
+                if (path == null)
+                    path = "";
+                return entry.getValue().getPath(path);
+            }
+        }
+
+        throw new FileSystemNotFoundException();
+    }
+
     // Called ONLY after the driver and fs have been successfully closed
     // uri is guaranteed to exist
     @Override
@@ -100,7 +136,7 @@ public abstract class FileSystemRepositoryBase
         }
     }
 
-    private static void checkURI(@Nullable final URI uri)
+    private  void checkURI(@Nullable final URI uri)
     {
         Objects.requireNonNull(uri);
         if (!uri.isAbsolute())
@@ -108,5 +144,7 @@ public abstract class FileSystemRepositoryBase
         if (uri.isOpaque())
             throw new IllegalArgumentException("uri is not hierarchical "
                 + "(.isOpaque() returns true)");
+        if (!scheme.equals(uri.getScheme()))
+            throw new IllegalArgumentException("bad scheme");
     }
 }

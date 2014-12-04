@@ -21,26 +21,34 @@ package com.github.fge.filesystem.provider;
 import com.github.fge.filesystem.driver.FileSystemDriver;
 
 import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.FileSystem;
+import java.nio.file.Path;
 import java.nio.file.spi.FileSystemProvider;
 import java.util.Map;
 
+@ParametersAreNonnullByDefault
 public interface FileSystemRepository
 {
     @Nonnull
     FileSystemDriver createDriver(URI uri, Map<String, ?> env)
         throws IOException;
 
+    @Nonnull
     String getScheme();
 
+    @Nonnull
     FileSystem createFileSystem(FileSystemProvider provider, URI uri,
         Map<String, ?> env)
             throws IOException;
 
+    @Nonnull
     FileSystem getFileSystem(URI uri);
 
+    @Nonnull
+    Path getPath(URI uri);
     // Called ONLY after the driver and fs have been successfully closed
     // uri is guaranteed to exist
     void unregister(URI uri);

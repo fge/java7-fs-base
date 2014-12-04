@@ -18,20 +18,39 @@
 
 package com.github.fge.filesystem.provider;
 
-import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.channels.SeekableByteChannel;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.FileStore;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystemAlreadyExistsException;
 import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.OpenOption;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.FileAttribute;
 import java.nio.file.spi.FileSystemProvider;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
+/**
+ * Base {@link FileSystemProvider} implementation
+ *
+ * <p>Notes:</p>
+ *
+ * <ul>
+ *     <li>{@link #getPath(URI)}: filesystems are never created automatically;
+ *     </li>
+ *     <li>{@link #newByteChannel(Path, Set, FileAttribute[])}: throws {@link
+ *     UnsupportedOperationException};</li>
+ * </ul>
+ */
 @ParametersAreNonnullByDefault
 public abstract class FileSystemProviderBase
     extends FileSystemProvider
@@ -41,12 +60,6 @@ public abstract class FileSystemProviderBase
     protected FileSystemProviderBase(final FileSystemRepository repository)
     {
         this.repository = Objects.requireNonNull(repository);
-    }
-
-    @Nonnull
-    public final FileSystemRepository getRepository()
-    {
-        return repository;
     }
 
     /**
@@ -144,5 +157,102 @@ public abstract class FileSystemProviderBase
     public final FileSystem getFileSystem(final URI uri)
     {
         return repository.getFileSystem(uri);
+    }
+
+    /**
+     * Return a {@code Path} object by converting the given {@link URI}. The
+     * resulting {@code Path} is associated with a {@link FileSystem} that
+     * already exists or is constructed automatically.
+     * <p> The exact form of the URI is file system provider dependent. In the
+     * case of the default provider, the URI scheme is {@code "file"} and the
+     * given URI has a non-empty path component, and undefined query, and
+     * fragment components. The resulting {@code Path} is associated with the
+     * default {@link FileSystems#getDefault default} {@code FileSystem}.
+     * <p> If a security manager is installed then a provider implementation
+     * may require to check a permission. In the case of the {@link
+     * FileSystems#getDefault default} file system, no permission check is
+     * required.
+     *
+     * @param uri The URI to convert
+     * @throws IllegalArgumentException If the URI scheme does not identify
+     * this provider or other
+     * preconditions on the uri parameter do not hold
+     * @throws FileSystemNotFoundException The file system, identified by the
+     * URI, does not exist and
+     * cannot be created automatically
+     * @throws SecurityException If a security manager is installed and it
+     * denies an unspecified
+     * permission.
+     */
+    @Override
+    public final Path getPath(final URI uri)
+    {
+        return repository.getPath(uri);
+    }
+
+    /**
+     * Opens or creates a file, returning a seekable byte channel to access the
+     * file. This method works in exactly the manner specified by the {@link
+     * Files#newByteChannel(Path, Set, FileAttribute[])} method.
+     *
+     * @param path the path to the file to open or create
+     * @param options options specifying how the file is opened
+     * @param attrs an optional list of file attributes to set atomically when
+     * creating the file
+     * @return a new seekable byte channel
+     *
+     * @throws IllegalArgumentException if the set contains an invalid
+     * combination of options
+     * @throws UnsupportedOperationException if an unsupported open option is
+     * specified or the array contains
+     * attributes that cannot be set atomically when creating the file
+     * @throws FileAlreadyExistsException if a file of that name already
+     * exists and the {@link
+     * StandardOpenOption#CREATE_NEW CREATE_NEW} option is specified
+     * <i>(optional specific exception)</i>
+     * @throws IOException if an I/O error occurs
+     * @throws SecurityException In the case of the default provider, and a
+     * security manager is
+     * installed, the {@link SecurityManager#checkRead(String) checkRead}
+     * method is invoked to check read access to the path if the file is
+     * opened for reading. The {@link SecurityManager#checkWrite(String)
+     * checkWrite} method is invoked to check write access to the path
+     * if the file is opened for writing. The {@link
+     * SecurityManager#checkDelete(String) checkDelete} method is
+     * invoked to check delete access if the file is opened with the
+     * {@code DELETE_ON_CLOSE} option.
+     */
+    @SuppressWarnings("OverloadedVarargsMethod")
+    @Override
+    public final SeekableByteChannel newByteChannel(final Path path,
+        final Set<? extends OpenOption> options,
+        final FileAttribute<?>... attrs)
+        throws IOException
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Returns the {@link FileStore} representing the file store where a file
+     * is located. This method works in exactly the manner specified by the
+     * {@link Files#getFileStore} method.
+     *
+     * @param path the path to the file
+     * @return the file store where the file is stored
+     *
+     * @throws IOException if an I/O error occurs
+     * @throws SecurityException In the case of the default provider, and a
+     * security manager is
+     * installed, the {@link SecurityManager#checkRead(String) checkRead}
+     * method is invoked to check read access to the file, and in
+     * addition it checks {@link RuntimePermission}<tt>
+     * ("getFileStoreAttributes")</tt>
+     */
+    @Override
+    public final FileStore getFileStore(final Path path)
+        throws IOException
+    {
+        // See FileSystemBase: only one file store per filesystem
+        return path.getFileSystem().getFileStores().iterator().next();
     }
 }
