@@ -21,6 +21,7 @@ package com.github.fge.filesystem.path;
 import com.github.fge.filesystem.CustomSoftAssertions;
 import com.github.fge.filesystem.driver.FileSystemDriver;
 import com.github.fge.filesystem.fs.FileSystemBase;
+import com.github.fge.filesystem.provider.FileSystemRepository;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -42,6 +43,7 @@ public final class GenericPathTest
     private static final String[] NO_NAMES = new String[0];
 
     private FileSystemBase fs;
+    private FileSystemRepository repository;
     private FileSystemProvider provider;
     private FileSystemDriver driver;
     private PathElementsFactory factory;
@@ -50,10 +52,11 @@ public final class GenericPathTest
     public void initMocks()
     {
         provider = mock(FileSystemProvider.class);
+        repository = mock(FileSystemRepository.class);
         driver = mock(FileSystemDriver.class);
         factory = mock(PathElementsFactory.class);
         when(driver.getPathElementsFactory()).thenReturn(factory);
-        fs = new FileSystemBase(driver, provider);
+        fs = new FileSystemBase(repository, driver, provider);
     }
 
     @Test

@@ -22,6 +22,7 @@ import com.github.fge.filesystem.driver.FileSystemDriver;
 import com.github.fge.filesystem.path.GenericPath;
 import com.github.fge.filesystem.path.PathElements;
 import com.github.fge.filesystem.path.PathElementsFactory;
+import com.github.fge.filesystem.provider.FileSystemRepository;
 
 import javax.annotation.Nonnull;
 import java.io.File;
@@ -63,14 +64,16 @@ public final class FileSystemBase
 {
     private volatile boolean open = true;
 
-    private final FileSystemDriver driver;
+    private final FileSystemRepository repository;
     private final FileSystemProvider provider;
+    private final FileSystemDriver driver;
     private final PathElementsFactory factory;
     private final String separator;
 
-    public FileSystemBase(final FileSystemDriver driver,
-        final FileSystemProvider provider)
+    public FileSystemBase(final FileSystemRepository repository,
+        final FileSystemDriver driver, final FileSystemProvider provider)
     {
+        this.repository = repository;
         this.driver = driver;
         this.provider = provider;
         factory = driver.getPathElementsFactory();
@@ -117,6 +120,7 @@ public final class FileSystemBase
     {
         open = false;
         driver.close();
+        repository.unregister(driver.getUri());
     }
 
     /**
