@@ -19,92 +19,29 @@
 package com.github.fge.filesystem.provider;
 
 import com.github.fge.filesystem.driver.FileSystemDriver;
-import com.github.fge.filesystem.fs.FileSystemBase;
 
-import javax.annotation.Nullable;
-import javax.annotation.ParametersAreNonnullByDefault;
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.FileSystem;
-import java.nio.file.FileSystemAlreadyExistsException;
-import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.spi.FileSystemProvider;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
-// TODO: need to find a way to remove a FileSystem/driver on close
-@ParametersAreNonnullByDefault
-public abstract class FileSystemRepository
+public interface FileSystemRepository
 {
-    private final String scheme;
-    private final Map<URI, FileSystemBase> filesystems = new HashMap<>();
-
-    protected FileSystemRepository(final String scheme)
-    {
-        this.scheme = scheme;
-    }
-
-    public abstract FileSystemDriver createDriver(final URI uri,
-        final Map<String, ?> env)
+    @Nonnull
+    FileSystemDriver createDriver(URI uri, Map<String, ?> env)
         throws IOException;
 
-    public final String getScheme()
-    {
-        return scheme;
-    }
+    String getScheme();
 
-    public final FileSystem createFileSystem(final FileSystemProvider provider,
-        final URI uri, final Map<String, ?> env)
-        throws IOException
-    {
-        Objects.requireNonNull(provider);
-        Objects.requireNonNull(env);
-        checkURI(uri);
+    FileSystem createFileSystem(FileSystemProvider provider, URI uri,
+        Map<String, ?> env)
+            throws IOException;
 
-        synchronized (filesystems) {
-            if (filesystems.containsKey(uri))
-                throw new FileSystemAlreadyExistsException();
-            final FileSystemDriver driver = createDriver(uri, env);
-            final FileSystemBase fs = new FileSystemBase(this, driver,
-                provider);
-            filesystems.put(uri, fs);
-            return fs;
-        }
-    }
+    FileSystem getFileSystem(URI uri);
 
-    public final FileSystem getFileSystem(final URI uri)
-    {
-        checkURI(uri);
-
-        final FileSystem fs;
-
-        synchronized (filesystems) {
-            fs = filesystems.get(uri);
-        }
-
-        if (fs == null)
-            throw new FileSystemNotFoundException();
-
-        return fs;
-    }
     // Called ONLY after the driver and fs have been successfully closed
     // uri is guaranteed to exist
-    public final void unregister(final URI uri)
-    {
-        Objects.requireNonNull(uri);
-        synchronized (filesystems) {
-            filesystems.remove(uri);
-        }
-    }
-
-    private static void checkURI(@Nullable final URI uri)
-    {
-        Objects.requireNonNull(uri);
-        if (!uri.isAbsolute())
-            throw new IllegalArgumentException("uri is not absolute");
-        if (uri.isOpaque())
-            throw new IllegalArgumentException("uri is not hierarchical "
-                + "(.isOpaque() returns true)");
-    }
+    void unregister(URI uri);
 }
