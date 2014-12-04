@@ -118,9 +118,20 @@ public final class FileSystemBase
     public void close()
         throws IOException
     {
+        IOException exception = null;
+
         open = false;
-        driver.close();
+
+        try {
+            driver.close();
+        } catch (IOException e) {
+            exception = e;
+        }
+
         repository.unregister(driver.getUri());
+
+        if (exception != null)
+            throw exception;
     }
 
     /**

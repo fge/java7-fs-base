@@ -30,6 +30,8 @@ import java.net.URI;
 import java.nio.file.spi.FileSystemProvider;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -68,6 +70,31 @@ public final class FileSystemBaseTest
         final InOrder inOrder = inOrder(repository, driver);
 
         fs.close();
+
+        inOrder.verify(driver).close();
+        inOrder.verify(repository).unregister(uri);
+
+        assertThat(fs.isOpen()).isFalse();
+    }
+
+    @Test
+    public void filesystemIsUnregisteredEvenIfDriverFailsToClose()
+        throws IOException
+    {
+        final URI uri = URI.create("foo://bar");
+        final IOException exception = new IOException("meh");
+
+        when(driver.getUri()).thenReturn(uri);
+        doThrow(exception).when(driver).close();
+
+        final InOrder inOrder = inOrder(repository, driver);
+
+        try {
+            fs.close();
+            failBecauseExceptionWasNotThrown(IOException.class);
+        } catch (IOException e) {
+            assertThat(e).isSameAs(exception);
+        }
 
         inOrder.verify(driver).close();
         inOrder.verify(repository).unregister(uri);
