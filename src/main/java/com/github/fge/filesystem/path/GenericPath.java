@@ -18,7 +18,7 @@
 
 package com.github.fge.filesystem.path;
 
-import com.github.fge.filesystem.fs.FileSystemBase;
+import com.github.fge.filesystem.fs.GenericFileSystem;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -63,7 +63,7 @@ import java.util.Objects;
 public final class GenericPath
     implements Path
 {
-    private final FileSystemBase fs;
+    private final GenericFileSystem fs;
 
     private final PathElementsFactory factory;
     // visible for testing
@@ -77,7 +77,7 @@ public final class GenericPath
      * @param factory the path elements factory
      * @param elements the path elements
      */
-    public GenericPath(final FileSystemBase fs,
+    public GenericPath(final GenericFileSystem fs,
         final PathElementsFactory factory, final PathElements elements)
     {
         this.fs = Objects.requireNonNull(fs);

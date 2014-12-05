@@ -59,7 +59,7 @@ import java.util.regex.PatternSyntaxException;
  *     one {@link FileSystem#getFileStores() file store}.</li>
  * </ul>
  */
-public final class FileSystemBase
+public final class GenericFileSystem
     extends FileSystem
 {
     private volatile boolean open = true;
@@ -70,7 +70,7 @@ public final class FileSystemBase
     private final PathElementsFactory factory;
     private final String separator;
 
-    public FileSystemBase(final FileSystemRepository repository,
+    public GenericFileSystem(final FileSystemRepository repository,
         final FileSystemDriver driver, final FileSystemProvider provider)
     {
         this.repository = Objects.requireNonNull(repository);

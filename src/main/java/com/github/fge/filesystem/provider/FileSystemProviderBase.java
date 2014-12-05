@@ -19,7 +19,7 @@
 package com.github.fge.filesystem.provider;
 
 import com.github.fge.filesystem.driver.FileSystemDriver;
-import com.github.fge.filesystem.fs.FileSystemBase;
+import com.github.fge.filesystem.fs.GenericFileSystem;
 
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -773,7 +773,7 @@ public abstract class FileSystemProviderBase
     public final FileStore getFileStore(final Path path)
         throws IOException
     {
-        // See FileSystemBase: only one file store per filesystem
+        // See GenericFileSystem: only one file store per filesystem
         return path.getFileSystem().getFileStores().iterator().next();
     }
 
@@ -832,7 +832,7 @@ public abstract class FileSystemProviderBase
     @Nonnull
     private static FileSystemDriver getDriver(final Path path)
     {
-        final FileSystemBase fs = (FileSystemBase) path.getFileSystem();
+        final GenericFileSystem fs = (GenericFileSystem) path.getFileSystem();
         if (!fs.isOpen())
             throw new ClosedFileSystemException();
         return fs.getDriver();

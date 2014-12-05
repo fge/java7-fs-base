@@ -36,9 +36,9 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public final class FileSystemBaseTest
+public final class GenericFileSystemTest
 {
-    private FileSystemBase fs;
+    private GenericFileSystem fs;
     private FileSystemRepository repository;
     private PathElementsFactory factory;
     private FileSystemDriver driver;
@@ -52,7 +52,7 @@ public final class FileSystemBaseTest
         driver = mock(FileSystemDriver.class);
         when(driver.getPathElementsFactory()).thenReturn(factory);
         provider = mock(FileSystemProvider.class);
-        fs = new FileSystemBase(repository, driver, provider);
+        fs = new GenericFileSystem(repository, driver, provider);
     }
 
     @Test

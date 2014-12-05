@@ -19,7 +19,7 @@
 package com.github.fge.filesystem.provider;
 
 import com.github.fge.filesystem.driver.FileSystemDriver;
-import com.github.fge.filesystem.fs.FileSystemBase;
+import com.github.fge.filesystem.fs.GenericFileSystem;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -41,7 +41,7 @@ public abstract class FileSystemRepositoryBase
     implements FileSystemRepository
 {
     private final String scheme;
-    private final Map<URI, FileSystemBase> filesystems = new HashMap<>();
+    private final Map<URI, GenericFileSystem> filesystems = new HashMap<>();
 
     protected FileSystemRepositoryBase(final String scheme)
     {
@@ -69,7 +69,7 @@ public abstract class FileSystemRepositoryBase
             if (filesystems.containsKey(uri))
                 throw new FileSystemAlreadyExistsException();
             final FileSystemDriver driver = createDriver(uri, env);
-            final FileSystemBase fs = new FileSystemBase(this, driver,
+            final GenericFileSystem fs = new GenericFileSystem(this, driver,
                 provider);
             filesystems.put(uri, fs);
             return fs;
@@ -102,11 +102,11 @@ public abstract class FileSystemRepositoryBase
         checkURI(uri);
 
         URI tmp;
-        FileSystemBase fs;
+        GenericFileSystem fs;
         String path;
 
         synchronized (filesystems) {
-            for (final Map.Entry<URI, FileSystemBase> entry:
+            for (final Map.Entry<URI, GenericFileSystem> entry:
                 filesystems.entrySet()) {
                 tmp = uri.relativize(entry.getKey());
                 if (tmp.isAbsolute())

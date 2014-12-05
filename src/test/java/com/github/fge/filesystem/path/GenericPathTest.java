@@ -20,7 +20,7 @@ package com.github.fge.filesystem.path;
 
 import com.github.fge.filesystem.CustomSoftAssertions;
 import com.github.fge.filesystem.driver.FileSystemDriver;
-import com.github.fge.filesystem.fs.FileSystemBase;
+import com.github.fge.filesystem.fs.GenericFileSystem;
 import com.github.fge.filesystem.provider.FileSystemRepository;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -42,7 +42,7 @@ public final class GenericPathTest
 {
     private static final String[] NO_NAMES = new String[0];
 
-    private FileSystemBase fs;
+    private GenericFileSystem fs;
     private FileSystemRepository repository;
     private FileSystemProvider provider;
     private FileSystemDriver driver;
@@ -56,7 +56,7 @@ public final class GenericPathTest
         driver = mock(FileSystemDriver.class);
         factory = mock(PathElementsFactory.class);
         when(driver.getPathElementsFactory()).thenReturn(factory);
-        fs = new FileSystemBase(repository, driver, provider);
+        fs = new GenericFileSystem(repository, driver, provider);
     }
 
     @Test
@@ -154,8 +154,8 @@ public final class GenericPathTest
         final FileSystemProvider fsProvider = mock(FileSystemProvider.class);
         final PathElementsFactory elementsFactory
             = new UnixPathElementsFactory();
-        final FileSystemBase fsForP = mock(FileSystemBase.class);
-        final FileSystemBase fsForQ = mock(FileSystemBase.class);
+        final GenericFileSystem fsForP = mock(GenericFileSystem.class);
+        final GenericFileSystem fsForQ = mock(GenericFileSystem.class);
 
         when(fsForP.provider()).thenReturn(fsProvider);
         when(fsForQ.provider()).thenReturn(fsProvider);
