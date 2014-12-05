@@ -65,13 +65,29 @@ import java.util.Set;
 /**
  * Base {@link FileSystemProvider} implementation
  *
- * <p>Notes:</p>
+ * <p><strong>Important note</strong>: in order to match the behaviour of the
+ * default filesystems, you should be aware of the following:
  *
  * <ul>
- *     <li>{@link #getPath(URI)}: filesystems are never created automatically;
- *     </li>
- *     <li>{@link #newByteChannel(Path, Set, FileAttribute[])}: throws {@link
- *     UnsupportedOperationException};</li>
+ *     <li>The {@link #copy(Path, Path, CopyOption...) copy} operation will not
+ *     perform recursive copies; if the source is a non empty directory, the
+ *     operation fails with {@link DirectoryNotEmptyException}. This class
+ *     enforces this behaviour if the source and target paths are not on the
+ *     same {@link Path#getFileSystem() filesystem}; if they are, this is then
+ *     delegated to {@link FileSystemDriver#copy(Path, Path, CopyOption...) your
+ *     own copy implementation}.</li>
+ *     <li>if the target path of a {@link #move(Path, Path, CopyOption...) move}
+ *     operation exists and is a non empty directory, and you selected to
+ *     replace the existing target path, the operation fails with {@link
+ *     DirectoryNotEmptyException}; if the source and target paths are not on
+ *     the same filesystem, this behaviour is enforced by this class; if they
+ *     are on the same filesystem, this is delegated to {@link
+ *     FileSystemDriver#move(Path, Path, CopyOption...) your own move
+ *     implementation}.</li>
+ *     <li>The deletion operation ({@link #delete(Path)} and {@link
+ *     #deleteIfExists(Path)} do not perform recursive deletions; if the target
+ *     is a non empty directory, this method throws {@link
+ *     DirectoryNotEmptyException}.</li>
  * </ul>
  */
 @SuppressWarnings("OverloadedVarargsMethod")
