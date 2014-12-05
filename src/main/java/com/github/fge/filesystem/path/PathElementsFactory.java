@@ -152,7 +152,7 @@ public abstract class PathElementsFactory
      */
     protected abstract boolean isAbsolute(final PathElements pathElements);
 
-    protected abstract PathElements getRootPathElements();
+    public abstract PathElements getRootPathElements();
 
     /**
      * Convert an input string into a {@link PathElements}

@@ -80,6 +80,7 @@ public final class GenericFileSystem
         separator = factory.getSeparator();
     }
 
+    // TODO: move to PathElementsFactory
     @Nonnull
     public URI getUri()
     {

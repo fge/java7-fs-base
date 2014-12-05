@@ -88,7 +88,7 @@ public final class UnixPathElementsFactory
     }
 
     @Override
-    protected PathElements getRootPathElements()
+    public PathElements getRootPathElements()
     {
         return ROOT;
     }

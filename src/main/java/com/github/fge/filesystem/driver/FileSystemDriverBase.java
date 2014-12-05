@@ -31,11 +31,31 @@ import java.nio.file.FileStore;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.WatchService;
+import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.UserPrincipalLookupService;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
 
+/**
+ * A {@link FileSystemDriver} with some reasonable defaults
+ *
+ * <p>The (overridable) defaults are:</p>
+ *
+ * <ul>
+ *     <li>only {@link BasicFileAttributeView basic} file attributes are
+ *     supported;</li>
+ *     <li>no support for {@link UserPrincipalLookupService}s or {@link
+ *     WatchService}s (both relevant methods throw an {@link
+ *     UnsupportedOperationException});</li>
+ *     <li>no support for {@link SeekableByteChannel}s;</li>
+ *     <li>{@link #isSameFile(Path, Path)} returns true if and only if both
+ *     arguments are {@link Object#equals(Object) equal}.</li>
+ * </ul>
+ *
+ * @see UnixLikeFileSystemDriverBase
+ */
 @SuppressWarnings("OverloadedVarargsMethod")
 @ParametersAreNonnullByDefault
 public abstract class FileSystemDriverBase
@@ -43,18 +63,16 @@ public abstract class FileSystemDriverBase
 {
     private final URI uri;
     private final PathElementsFactory pathElementsFactory;
-    private final PathElements root;
     private final FileStore fileStore;
     private final PathMatcherProvider pathMatcherProvider;
 
     protected FileSystemDriverBase(final URI uri,
-        final PathElementsFactory pathElementsFactory, final PathElements root,
+        final PathElementsFactory pathElementsFactory,
         final FileStore fileStore,
         final PathMatcherProvider pathMatcherProvider)
     {
         this.uri = Objects.requireNonNull(uri);
         this.pathElementsFactory = Objects.requireNonNull(pathElementsFactory);
-        this.root = Objects.requireNonNull(root);
         this.fileStore = Objects.requireNonNull(fileStore);
         this.pathMatcherProvider = Objects.requireNonNull(pathMatcherProvider);
     }
@@ -77,7 +95,7 @@ public abstract class FileSystemDriverBase
     @Override
     public final PathElements getRoot()
     {
-        return root;
+        return pathElementsFactory.getRootPathElements();
     }
 
     @Nonnull
@@ -85,6 +103,14 @@ public abstract class FileSystemDriverBase
     public final FileStore getFileStore()
     {
         return fileStore;
+    }
+
+    @SuppressWarnings("DesignForExtension")
+    @Nonnull
+    @Override
+    public Set<String> getSupportedFileAttributeViews()
+    {
+        return Collections.singleton("basic");
     }
 
     @Nonnull
@@ -121,6 +147,7 @@ public abstract class FileSystemDriverBase
         throw new UnsupportedOperationException();
     }
 
+    @SuppressWarnings("DesignForExtension")
     @Override
     public boolean isSameFile(final Path path, final Path path2)
         throws IOException
