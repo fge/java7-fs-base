@@ -52,6 +52,7 @@ import java.nio.file.spi.FileSystemProvider;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -87,7 +88,7 @@ public final class ReadOnlyFileSystemDriver
 
     public ReadOnlyFileSystemDriver(final FileSystemDriver delegate)
     {
-        this.delegate = delegate;
+        this.delegate = Objects.requireNonNull(delegate);
     }
 
     /**
