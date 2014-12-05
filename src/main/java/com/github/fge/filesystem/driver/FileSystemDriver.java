@@ -23,13 +23,30 @@ import com.github.fge.filesystem.path.PathElementsFactory;
 import com.github.fge.filesystem.path.matchers.PathMatcherProvider;
 
 import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.Closeable;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URI;
+import java.nio.channels.SeekableByteChannel;
+import java.nio.file.AccessMode;
+import java.nio.file.CopyOption;
+import java.nio.file.DirectoryStream;
 import java.nio.file.FileStore;
+import java.nio.file.LinkOption;
+import java.nio.file.OpenOption;
+import java.nio.file.Path;
 import java.nio.file.WatchService;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.FileAttributeView;
 import java.nio.file.attribute.UserPrincipalLookupService;
+import java.util.Map;
 import java.util.Set;
 
+@SuppressWarnings("OverloadedVarargsMethod")
+@ParametersAreNonnullByDefault
 public interface FileSystemDriver
     extends Closeable
 {
@@ -56,4 +73,56 @@ public interface FileSystemDriver
 
     @Nonnull
     WatchService newWatchService();
+
+    @Nonnull
+    InputStream newInputStream(Path path, OpenOption... options)
+        throws IOException;
+
+    @Nonnull
+    OutputStream newOutputStream(Path path, OpenOption... options)
+        throws IOException;
+
+    @Nonnull
+    SeekableByteChannel newByteChannel(Path path,
+        Set<? extends OpenOption> options, FileAttribute<?>... attrs)
+        throws IOException;
+
+    @Nonnull
+    DirectoryStream<Path> newDirectoryStream(Path dir,
+        DirectoryStream.Filter<? super Path> filter)
+        throws IOException;
+
+    void createDirectory(Path dir, FileAttribute<?>... attrs)
+        throws IOException;
+
+    void delete(Path path)
+        throws IOException;
+
+    void copy(Path source, Path target, CopyOption... options)
+        throws IOException;
+
+    void move(Path source, Path target, CopyOption... options)
+        throws IOException;
+
+    boolean isSameFile(Path path, Path path2)
+        throws IOException;
+
+    boolean isHidden(Path path)
+        throws IOException;
+
+    void checkAccess(Path path, AccessMode... modes);
+
+    <V extends FileAttributeView> V getFileAttributeView(Path path,
+        Class<V> type, LinkOption... options);
+
+    <A extends BasicFileAttributes, V extends FileAttributeView> A readAttributes(
+        Path path, Class<A> type, LinkOption... options)
+        throws IOException;
+
+     Map<String, Object> readAttributes(Path path, String attributes,
+        LinkOption... options)
+        throws IOException;
+
+    void setAttribute(Path path, String attribute, Object value,
+        LinkOption... options);
 }

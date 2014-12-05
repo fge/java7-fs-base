@@ -73,9 +73,9 @@ public final class FileSystemBase
     public FileSystemBase(final FileSystemRepository repository,
         final FileSystemDriver driver, final FileSystemProvider provider)
     {
-        this.repository = repository;
-        this.driver = driver;
-        this.provider = provider;
+        this.repository = Objects.requireNonNull(repository);
+        this.driver = Objects.requireNonNull(driver);
+        this.provider = Objects.requireNonNull(provider);
         factory = driver.getPathElementsFactory();
         separator = factory.getSeparator();
     }
@@ -84,6 +84,12 @@ public final class FileSystemBase
     public URI getUri()
     {
         return driver.getUri();
+    }
+
+    @Nonnull
+    public FileSystemDriver getDriver()
+    {
+        return driver;
     }
 
     /**
