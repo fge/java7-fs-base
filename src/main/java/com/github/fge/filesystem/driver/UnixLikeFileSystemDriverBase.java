@@ -22,9 +22,12 @@ import com.github.fge.filesystem.path.UnixPathElementsFactory;
 import com.github.fge.filesystem.path.matchers.PathMatcherProvider;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.io.IOException;
 import java.net.URI;
 import java.nio.file.FileStore;
+import java.nio.file.Path;
 import java.nio.file.PathMatcher;
+import java.nio.file.spi.FileSystemProvider;
 
 /**
  * A base abstract implementation of a {@link FileSystemDriver} for Unix-like
@@ -34,7 +37,8 @@ import java.nio.file.PathMatcher;
  * abstract class defaults to a {@link UnixPathElementsFactory} for building
  * paths and a default {@link PathMatcherProvider} to provide {@link
  * PathMatcher} instances -- therefore bringing support for both {@code "glob"}
- * and {@code "regex"} path matchers.</p>
+ * and {@code "regex"} path matchers. It also considers that all paths whose
+ * last name elements begin with a dot are hidden (overridable).</p>
  */
 @ParametersAreNonnullByDefault
 public abstract class UnixLikeFileSystemDriverBase
@@ -45,5 +49,25 @@ public abstract class UnixLikeFileSystemDriverBase
     {
         super(uri, new UnixPathElementsFactory(), fileStore,
             new PathMatcherProvider());
+    }
+
+    /**
+     * Tell whether a path is to be considered hidden by this filesystem
+     * <p>Typically, on Unix systems, it means the last name element of the path
+     * starts with a dot ({@code "."}).</p>
+     *
+     * @param path the path to test
+     * @return true if this path is considered hidden
+     *
+     * @throws IOException filesystem level error, or a plain I/O error
+     * @see FileSystemProvider#isHidden(Path)
+     */
+    @SuppressWarnings("DesignForExtension")
+    @Override
+    public boolean isHidden(final Path path)
+        throws IOException
+    {
+        final Path filename = path.getFileName();
+        return filename != null && filename.toString().startsWith(".");
     }
 }
