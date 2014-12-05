@@ -76,8 +76,16 @@ repositories {
 }
 
 /*
+ * Necessary for using sun.nio.fs.Globs...
+ */
+compileJava {
+    options.compilerArgs += "-XDignore.symbol.file";
+    options.fork = true;
+    options.forkOptions.executable = "javac";
+}
+
+/*
  * Necessary! Otherwise TestNG will not be used...
- *
  */
 test {
     useTestNG() {
