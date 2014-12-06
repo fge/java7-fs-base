@@ -62,7 +62,7 @@ public abstract class FileSystemDriverBase
     implements FileSystemDriver
 {
     private final URI uri;
-    private final PathElementsFactory pathElementsFactory;
+    protected final PathElementsFactory pathElementsFactory;
     private final FileStore fileStore;
     private final PathMatcherProvider pathMatcherProvider;
 
