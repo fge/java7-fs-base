@@ -23,6 +23,8 @@ Other examples of existing, third party filesystems are:
 
 * [a `FileSystem` over FTP](https://github.com/fge/java7-fs-ftp) (by yours truly);
 * [an in-memory `FileSystem`](https://github.com/google/jimfs) (by Google).
+* [a `FileSystem` over DropBox](https://github.com/fge/java7-fs-dropbox) (by yours truly);
+
 
 ## So, why this package?
 
