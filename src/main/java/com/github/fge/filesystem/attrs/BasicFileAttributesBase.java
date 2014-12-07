@@ -25,7 +25,7 @@ import java.nio.file.attribute.FileTime;
 /**
  * A base implementation of {@link BasicFileAttributes}
  *
- * <p>This abstract class defines the following defaults:</p>
+ * <p>This abstract class defines the following (overridable) defaults:</p>
  *
  * <ul>
  *     <li>all methods returning a {@link FileTime} return Unix epoch by default
@@ -40,6 +40,9 @@ import java.nio.file.attribute.FileTime;
 public abstract class BasicFileAttributesBase
     implements BasicFileAttributes
 {
+    /**
+     * Unix epoch as a {@link FileTime}
+     */
     protected static final FileTime UNIX_EPOCH = FileTime.fromMillis(0L);
 
     /**
