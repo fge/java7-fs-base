@@ -350,7 +350,7 @@ public final class GenericFileSystem
      * that resembles regular expressions but with a simpler syntax. For
      * example:
      * <blockquote>
-     * <table border="0">
+     * <table border="0" summary="">
      * <tr>
      * <td>{@code *.java}</td>
      * <td>Matches a path that represents a file name ending in {@code
@@ -383,13 +383,13 @@ public final class GenericFileSystem
      * <td><tt>C:&#92;&#92;*</tt>
      * <td>Matches <tt>C:&#92;foo</tt> and <tt>C:&#92;bar</tt> on the Windows
      * platform (note that the backslash is escaped; as a string literal in the
-     * Java Language the pattern would be <tt>"C:&#92;&#92;&#92;&#92*"</tt>)
+     * Java Language the pattern would be <tt>"C:&#92;&#92;&#92;&#92;*"</tt>)
      * </td>
      * </tr>
      * </table>
      * </blockquote>
-     * <p> The following rules are used to interpret glob patterns:
-     * <p> <ul>
+     * <p> The following rules are used to interpret glob patterns:</p> 
+     * <ul>
      * <li><p> The {@code *} character matches zero or more {@link Character
      * characters} of a {@link Path#getName(int) name} component without
      * crossing directory boundaries. </p></li>

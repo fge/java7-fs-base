@@ -289,7 +289,7 @@ public interface FileSystemDriver
      * @param path the first path
      * @param path2 the second path
      * @return true if and only if both path
-     * @throws IOException
+     * @throws IOException filesystem level error, or a plain I/O error
      *
      * @see FileSystemProvider#isSameFile(Path, Path)
      */

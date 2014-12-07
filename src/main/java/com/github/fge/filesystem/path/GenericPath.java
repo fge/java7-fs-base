@@ -957,7 +957,7 @@ public final class GenericPath
      * objects. (This is typically implemented by converting the internal
      * address of the object into an integer, but this implementation
      * technique is not required by the
-     * Java<font size="-2"><sup>TM</sup></font> programming language.)
+     * Java<sup style="font-size=-2">TM</sup> programming language.)
      *
      * @return a hash code value for this object.
      *
