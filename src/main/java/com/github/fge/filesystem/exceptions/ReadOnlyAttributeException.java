@@ -19,7 +19,21 @@
 package com.github.fge.filesystem.exceptions;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
 
+/**
+ * An {@link IOException} defined when a file attribute is read only
+ *
+ * <p>Methods to set attributes in java.nio.file (such as {@link
+ * Files#setAttribute(Path, String, Object, LinkOption...)}) only define {@link
+ * IOException} as a possible exception; they do not seem to account for the
+ * scenario when a file attribute is read only.</p>
+ *
+ * <p>Use this exception in your custom attribute views if you want to be able
+ * to convey information about a read only attribute to user code.</p>
+ */
 public final class ReadOnlyAttributeException
     extends IOException
 {
