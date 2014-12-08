@@ -16,7 +16,7 @@
  * - ASL 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
  */
 
-package com.github.fge.filesystem.attributes.view;
+package com.github.fge.filesystem.attributes.base;
 
 import com.github.fge.filesystem.exceptions.ReadOnlyAttributeException;
 
