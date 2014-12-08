@@ -16,9 +16,8 @@
  * - ASL 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
  */
 
-package com.github.fge.filesystem.attributes.provider;
+package com.github.fge.filesystem.attributes.wrap;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
@@ -27,48 +26,32 @@ import java.nio.file.attribute.UserPrincipal;
 import java.util.Objects;
 
 @ParametersAreNonnullByDefault
-public abstract class FileOwnerAttributesProvider<V extends FileOwnerAttributeView>
-    implements FileAttributesProvider<V, Void>
+public final class FileOwnerFileAttributeWrapper
+    extends FileAttributeWrapper<FileOwnerAttributeView>
 {
-    private final V view;
-
-    protected FileOwnerAttributesProvider(final V view)
+    public FileOwnerFileAttributeWrapper(final FileOwnerAttributeView view)
     {
-        this.view = Objects.requireNonNull(view);
-    }
-
-    @Nonnull
-    @Override
-    public final V getAttributeView()
-    {
-        return view;
+        super(view);
     }
 
     @Nullable
     @Override
-    public final Void getAttributes()
+    public Object readAttribute(final String name)
         throws IOException
     {
-        return null;
-    }
-
-    @Nullable
-    @Override
-    public final Object getAttributeByName(final String name)
-        throws IOException
-    {
-        if (!"owner".equals(name))
+        if (!"owner".equals(Objects.requireNonNull(name)))
             throw new IllegalStateException("how did I get there??");
+
         return view.getOwner();
     }
 
     @Override
-    public final void setAttributeByName(final String name,
-        @Nullable final Object value)
+    public void writeAttribute(final String name, @Nullable final Object value)
         throws IOException
     {
-        if (!"owner".equals(name))
+        if (!"owner".equals(Objects.requireNonNull(name)))
             throw new IllegalStateException("how did I get there??");
+
         view.setOwner((UserPrincipal) value);
     }
 }
