@@ -36,8 +36,11 @@ that's only the "user level" view of the API.
 This package therefore brings facilities to allow you to develop custom file systems in a much
 easier way; see [the wiki](https://github.com/fge/java7-fs-base/wiki) for more information.
 
-**THIS IS STILL A WORK IN PROGRESS**. The real test will be when I write an actual implementation
-over this package ;) Javadoc is not online yet etc. All of this is in the plans, however.
+**THIS IS STILL A WORK IN PROGRESS**. At the moment there is only one implementation over this
+package but more are to come -- the next target is [https://box.com](box.com), and Amazon S3 after
+that.
+
+Javadoc is not online yet, doc is far from being complete etc.
 
 ## NOTE: JDK/JRE restrictions
 
