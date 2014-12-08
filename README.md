@@ -37,7 +37,7 @@ This package therefore brings facilities to allow you to develop custom file sys
 easier way; see [the wiki](https://github.com/fge/java7-fs-base/wiki) for more information.
 
 **THIS IS STILL A WORK IN PROGRESS**. At the moment there is only one implementation over this
-package but more are to come -- the next target is [https://box.com](box.com), and Amazon S3 after
+package but more are to come -- the next target is [box.com](https://box.com), and Amazon S3 after
 that.
 
 Javadoc is not online yet, doc is far from being complete etc.
