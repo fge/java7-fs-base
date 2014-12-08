@@ -16,17 +16,11 @@
  * - ASL 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
  */
 
-package com.github.fge.filesystem.attributes.read;
+package com.github.fge.filesystem.attributes.wrap.read;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 
 /*
  * NOTE: when we get there we are guaranteed that all attributes are supported
@@ -35,28 +29,12 @@ import java.util.Set;
 public abstract class FileAttributesReader<A>
 {
     protected final A attributes;
-    protected final Set<String> supported = new HashSet<>();
 
     protected FileAttributesReader(final A attributes)
     {
         this.attributes = Objects.requireNonNull(attributes);
     }
 
-    public final Set<String> getSupported()
-    {
-        return Collections.unmodifiableSet(supported);
-    }
-
     @Nullable
     public abstract Object readAttribute(final String name);
-
-    @Nonnull
-    public final Map<String, Object> readAttributes(final Set<String> names)
-    {
-        final Map<String, Object> ret = new HashMap<>();
-        for (final String name: Objects.requireNonNull(names))
-            ret.put(Objects.requireNonNull(name), readAttribute(name));
-
-        return ret;
-    }
 }

@@ -16,12 +16,11 @@
  * - ASL 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
  */
 
-package com.github.fge.filesystem.attributes.read;
+package com.github.fge.filesystem.attributes.wrap.read;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.nio.file.attribute.PosixFileAttributes;
-import java.util.Arrays;
 import java.util.Objects;
 
 @ParametersAreNonnullByDefault
@@ -31,11 +30,6 @@ public final class PosixFileAttributesReader
     public PosixFileAttributesReader(final PosixFileAttributes attributes)
     {
         super(attributes);
-        supported.addAll(Arrays.asList(
-            "lastModifiedTime", "lastAccessTime", "creationTime", "size",
-            "isRegularFile", "isDirectory", "isSymbolicLink", "isOther",
-            "fileKey", "owner", "group", "permissions"
-        ));
     }
 
     @SuppressWarnings("OverlyComplexMethod")

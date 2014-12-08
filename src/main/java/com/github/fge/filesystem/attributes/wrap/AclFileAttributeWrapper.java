@@ -16,9 +16,8 @@
  * - ASL 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
  */
 
-package com.github.fge.filesystem.attributes.provider;
+package com.github.fge.filesystem.attributes.wrap;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
@@ -29,41 +28,23 @@ import java.util.List;
 import java.util.Objects;
 
 @ParametersAreNonnullByDefault
-public abstract class AclFileAttributesProvider<V extends AclFileAttributeView>
-    implements FileAttributesProvider<V, Void>
+public final class AclFileAttributeWrapper
+    extends FileAttributeWrapper<AclFileAttributeView>
 {
-    private final V view;
-
-    protected AclFileAttributesProvider(final V view)
+    public AclFileAttributeWrapper(final AclFileAttributeView view)
     {
-        this.view = Objects.requireNonNull(view);
-    }
-
-    @Nonnull
-    @Override
-    public final V getAttributeView()
-    {
-        return view;
+        super(view);
     }
 
     @Nullable
     @Override
-    public final Void getAttributes()
+    public Object readAttribute(final String name)
         throws IOException
     {
-        return null;
-    }
-
-    @Nullable
-    @Override
-    public final Object getAttributeByName(final String name)
-        throws IOException
-    {
-        switch (name) {
+        switch (Objects.requireNonNull(name)) {
             /* owner */
             case "owner":
                 return view.getOwner();
-            /* acl */
             case "acl":
                 return view.getAcl();
             default:
@@ -72,11 +53,10 @@ public abstract class AclFileAttributesProvider<V extends AclFileAttributeView>
     }
 
     @Override
-    public final void setAttributeByName(final String name,
-        @Nullable final Object value)
+    public void writeAttribute(final String name, @Nullable final Object value)
         throws IOException
     {
-        switch (name) {
+        switch (Objects.requireNonNull(name)) {
             /* owner */
             case "owner":
                 view.setOwner((UserPrincipal) value);

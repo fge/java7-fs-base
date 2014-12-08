@@ -16,49 +16,35 @@
  * - ASL 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
  */
 
-package com.github.fge.filesystem.attributes.provider;
+package com.github.fge.filesystem.attributes.wrap;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.attribute.UserDefinedFileAttributeView;
+import java.util.List;
 import java.util.Objects;
 
 @ParametersAreNonnullByDefault
-public abstract class UserDefinedFileAttributesProvider<V extends UserDefinedFileAttributeView>
-    implements FileAttributesProvider<V, Void>
+public final class UserDefinedFileAttributeWrapper
+    extends FileAttributeWrapper<UserDefinedFileAttributeView>
 {
-    private final V view;
-
-    protected UserDefinedFileAttributesProvider(final V view)
+    public UserDefinedFileAttributeWrapper(
+        final UserDefinedFileAttributeView view)
     {
-        this.view = Objects.requireNonNull(view);
-    }
-
-    @Nonnull
-    @Override
-    public final V getAttributeView()
-    {
-        return view;
+        super(view);
     }
 
     @Nullable
     @Override
-    public final Void getAttributes()
+    public Object readAttribute(final String name)
         throws IOException
     {
-        return null;
-    }
+        final List<String> available = view.list();
 
-    @Nullable
-    @Override
-    public final Object getAttributeByName(final String name)
-        throws IOException
-    {
-        if (!view.list().contains(name))
-            throw new IllegalStateException("how did I get there??");
+        if (!available.contains(Objects.requireNonNull(name)))
+            throw new IllegalArgumentException(name + " is undefined");
 
         final ByteBuffer buf = ByteBuffer.allocate(view.size(name));
         view.read(name, buf);
@@ -66,13 +52,9 @@ public abstract class UserDefinedFileAttributesProvider<V extends UserDefinedFil
     }
 
     @Override
-    public final void setAttributeByName(final String name,
-        @Nullable final Object value)
+    public void writeAttribute(final String name, @Nullable final Object value)
         throws IOException
     {
-        if (!view.list().contains(name))
-            throw new IllegalStateException("how did I get there??");
-
         if (value == null)
             throw new IllegalArgumentException("null value not allowed here");
 

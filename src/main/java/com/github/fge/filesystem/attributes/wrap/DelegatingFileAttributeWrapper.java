@@ -16,29 +16,34 @@
  * - ASL 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
  */
 
-package com.github.fge.filesystem.attributes.provider;
+package com.github.fge.filesystem.attributes.wrap;
 
-import javax.annotation.Nonnull;
+import com.github.fge.filesystem.attributes.wrap.read.FileAttributesReader;
+
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
 import java.nio.file.attribute.FileAttributeView;
+import java.util.Objects;
 
 @ParametersAreNonnullByDefault
-public interface FileAttributesProvider<V extends FileAttributeView, A>
+public abstract class DelegatingFileAttributeWrapper<V extends FileAttributeView, A>
+    extends FileAttributeWrapper<V>
 {
-    @Nonnull
-    V getAttributeView();
+    protected final FileAttributesReader<A> reader;
+
+    protected DelegatingFileAttributeWrapper(final V view,
+        final FileAttributesReader<A> reader)
+    {
+        super(view);
+        this.reader = reader;
+    }
 
     @Nullable
-    A getAttributes()
-        throws IOException;
-
-    @Nullable
-    Object getAttributeByName(String name)
-        throws IOException;
-
-    // can throw ClassCastException
-    void setAttributeByName(String name, @Nullable Object value)
-        throws IOException;
+    @Override
+    public final Object readAttribute(final String name)
+        throws IOException
+    {
+        return reader.readAttribute(Objects.requireNonNull(name));
+    }
 }

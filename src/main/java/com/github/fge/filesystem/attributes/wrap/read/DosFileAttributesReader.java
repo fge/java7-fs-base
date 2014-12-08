@@ -16,26 +16,20 @@
  * - ASL 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
  */
 
-package com.github.fge.filesystem.attributes.read;
+package com.github.fge.filesystem.attributes.wrap.read;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.util.Arrays;
+import java.nio.file.attribute.DosFileAttributes;
 import java.util.Objects;
 
 @ParametersAreNonnullByDefault
-public final class BasicFileAttributesReader
-    extends FileAttributesReader<BasicFileAttributes>
+public final class DosFileAttributesReader
+    extends FileAttributesReader<DosFileAttributes>
 {
-    public BasicFileAttributesReader(final BasicFileAttributes attributes)
+    public DosFileAttributesReader(final DosFileAttributes attributes)
     {
         super(attributes);
-        supported.addAll(Arrays.asList(
-            "lastModifiedTime", "lastAccessTime", "creationTime", "size",
-            "isRegularFile", "isDirectory", "isSymbolicLink", "isOther",
-            "fileKey"
-        ));
     }
 
     @SuppressWarnings("OverlyComplexMethod")
@@ -44,6 +38,7 @@ public final class BasicFileAttributesReader
     public Object readAttribute(final String name)
     {
         switch (Objects.requireNonNull(name)) {
+            /* basic */
             case "lastModifiedTime":
                 return attributes.lastModifiedTime();
             case "lastAccessTime":
@@ -56,12 +51,21 @@ public final class BasicFileAttributesReader
                 return attributes.isRegularFile();
             case "isDirectory":
                 return attributes.isDirectory();
-            case "isSymbolicLink":
+            case "isSymbolicLinke":
                 return attributes.isSymbolicLink();
             case "isOther":
                 return attributes.isOther();
             case "fileKey":
                 return attributes.fileKey();
+            /* dos */
+            case "readonly":
+                return attributes.isReadOnly();
+            case "hidden":
+                return attributes.isHidden();
+            case "system":
+                return attributes.isSystem();
+            case "archive":
+                return attributes.isArchive();
             default:
                 throw new IllegalStateException("how did I get there??");
         }
