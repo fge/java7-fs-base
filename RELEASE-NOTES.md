@@ -1,4 +1,4 @@
-## 0.0.1 (IN PROGRESS)
+## 0.0.1
 
 * Initial version
 
