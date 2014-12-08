@@ -46,13 +46,6 @@ public enum UserDefinedAttributesDescriptor
 
     @Nullable
     @Override
-    public Class<?> getReadAttributesClass()
-    {
-        return null;
-    }
-
-    @Nullable
-    @Override
     public Set<String> getAllAttributes()
     {
         return null;

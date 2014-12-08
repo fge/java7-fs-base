@@ -16,32 +16,25 @@
  * - ASL 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
  */
 
-package com.github.fge.filesystem.attributes.descriptor;
+package com.github.fge.filesystem.attributes;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import com.github.fge.filesystem.attributes.descriptor.AttributesDescriptor;
+
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.nio.file.attribute.FileAttributeView;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
-public interface AttributesDescriptor
+@ParametersAreNonnullByDefault
+public class FileAttributesDispatcher
 {
-    @Nonnull
-    String getName();
+    private final Map<String, Class<? extends FileAttributeView>> views
+        = new HashMap<>();
 
-    @Nonnull
-    Class<? extends FileAttributeView> getViewClass();
 
-    @Nullable
-    Set<String> getAllAttributes();
-
-    @Nonnull
-    Access getAccess(@Nonnull String attributeName);
-
-    enum Access
+    protected void addDescriptor(final AttributesDescriptor descriptor)
     {
-        READ_ONLY,
-        READ_WRITE,
-        MAYBE,
-        UNKNOWN
+        Objects.requireNonNull(descriptor);
     }
 }

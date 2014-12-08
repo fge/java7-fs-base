@@ -22,13 +22,10 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.nio.file.attribute.AclFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributeView;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.DosFileAttributeView;
-import java.nio.file.attribute.DosFileAttributes;
 import java.nio.file.attribute.FileAttributeView;
 import java.nio.file.attribute.FileOwnerAttributeView;
 import java.nio.file.attribute.PosixFileAttributeView;
-import java.nio.file.attribute.PosixFileAttributes;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -43,14 +40,12 @@ public enum StandardAttributesDescriptor
     ACL(
         "acl",
         AclFileAttributeView.class,
-        null,
         Collections.<String>emptyList(),
         Arrays.asList("acl", "owner")
     ),
     BASIC(
         "basic",
         BasicFileAttributeView.class,
-        BasicFileAttributes.class,
         Arrays.asList("size", "isRegularFile", "isDirectory", "isSymbolicLink",
             "isOther", "fileKey"),
         Arrays.asList("lastModifiedTime", "lastAccessTime", "creationTime")
@@ -58,7 +53,6 @@ public enum StandardAttributesDescriptor
     DOS(
         "dos",
         DosFileAttributeView.class,
-        DosFileAttributes.class,
         Arrays.asList(
             "size", "isRegularFile", "isDirectory", "isSymbolicLink",
             "isOther", "fileKey"
@@ -71,14 +65,12 @@ public enum StandardAttributesDescriptor
     FILE_OWNER(
         "owner",
         FileOwnerAttributeView.class,
-        null,
         Collections.<String>emptyList(),
         Collections.singletonList("owner")
     ),
     POSIX(
         "posix",
         PosixFileAttributeView.class,
-        PosixFileAttributes.class,
         Arrays.asList(
             "size", "isRegularFile", "isDirectory", "isSymbolicLink",
             "isOther", "fileKey"
@@ -92,18 +84,15 @@ public enum StandardAttributesDescriptor
 
     private final String name;
     private final Class<? extends FileAttributeView> viewClass;
-    private final Class<?> readAttributesClass;
     private final Map<String, Access> attributes = new HashMap<>();
 
     StandardAttributesDescriptor(final String name,
         final Class<? extends FileAttributeView> viewClass,
-        @Nullable final Class<?> readAttributesClass,
         final List<String> readOnlyAttributes,
         final List<String> readWriteAttributes)
     {
         this.name = name;
         this.viewClass = viewClass;
-        this.readAttributesClass = readAttributesClass;
         for (final String attr: readOnlyAttributes)
             attributes.put(Objects.requireNonNull(attr), Access.READ_ONLY);
         for (final String attr: readWriteAttributes)
@@ -122,13 +111,6 @@ public enum StandardAttributesDescriptor
     public Class<? extends FileAttributeView> getViewClass()
     {
         return viewClass;
-    }
-
-    @Nullable
-    @Override
-    public Class<?> getReadAttributesClass()
-    {
-        return readAttributesClass;
     }
 
     @Nullable
