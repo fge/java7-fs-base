@@ -10,7 +10,8 @@ This is a package designed to ease the creation of custom Java 7
 
 ## Versions
 
-The current version is **0.0.1**. It is published on Maven.
+The current version is **0.0.1**. It is published on Maven. You can even see the
+[(poor) javadoc online](https://fge.github.io/java7-fs-base).
 
 Beware however that the...
 
@@ -56,8 +57,6 @@ easier way; see [the wiki](https://github.com/fge/java7-fs-base/wiki) for more i
 **THIS IS STILL A WORK IN PROGRESS**. At the moment there is only one implementation over this
 package but more are to come -- the next target is [box.com](https://box.com), and Amazon S3 after
 that.
-
-Javadoc is not online yet, doc is far from being complete etc.
 
 ## NOTE: JDK/JRE restrictions
 
