@@ -45,7 +45,7 @@ apply(plugin: "propdeps-eclipse");
 apply(plugin: "info.solidsoft.pitest");
 
 group = "com.github.fge";
-version = "0.0.1";
+version = "0.0.2-SNAPSHOT";
 description = "Helper classes for FileSystem implementations";
 sourceCompatibility = "1.7";
 targetCompatibility = "1.7"; // defaults to sourceCompatibility
