@@ -8,7 +8,24 @@ more details.
 This is a package designed to ease the creation of custom Java 7
 [`FileSystem`](https://docs.oracle.com/javase/7/docs/api/java/nio/file/FileSystem.html)s.
 
-## And what is a "Java 7 `FileSystem`" anyway?
+## Versions
+
+The current version is **0.0.1**. It is published on Maven.
+
+Beware however that the...
+
+## Status
+
+BETA. You _can_ start and work on it to develop your own filesystems ([one is
+implemented already and works](https://github.com/fge/java7-fs-dropbox), but the javadoc (and the
+documentation in general) is _very_ scarce at this point.
+
+If you have questions:
+
+* I am `idletask` on Freenode, channel `##java`; or
+* I regularly lurk in chatroom `Java` on [Stack Overflow](https://stackoverflow.com).
+
+## So, what is a "Java 7 `FileSystem`" anyway?
 
 More generally, we are talking here about the [`java.nio.file`
 API](http://docs.oracle.com/javase/8/docs/api/java/nio/file/package-frame.html) which made its
