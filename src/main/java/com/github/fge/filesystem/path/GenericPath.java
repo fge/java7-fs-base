@@ -59,6 +59,7 @@ import java.util.Objects;
  * @see PathElementsFactory
  * @see PathElements
  */
+// TODO: introduce the notion of a "current context"
 @ParametersAreNonnullByDefault
 public final class GenericPath
     implements Path
