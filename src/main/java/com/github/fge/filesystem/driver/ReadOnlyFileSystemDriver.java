@@ -86,6 +86,23 @@ public final class ReadOnlyFileSystemDriver
 
     private final FileSystemDriver delegate;
 
+    /**
+     * Create a read-only version of a {@link FileSystemDriver}, if necessary
+     *
+     * <p>If the driver is already an instance of this class, then it is
+     * returned.</p>
+     *
+     * @param driver the driver to wrap
+     * @return a new or already created read-only FileSystemDriver
+     */
+    @Nonnull
+    public static FileSystemDriver wrap(@Nonnull final FileSystemDriver driver)
+    {
+        Objects.requireNonNull(driver);
+        return driver instanceof ReadOnlyFileSystemDriver ? driver
+            : new ReadOnlyFileSystemDriver(driver);
+    }
+
     private ReadOnlyFileSystemDriver(final FileSystemDriver delegate)
     {
         this.delegate = Objects.requireNonNull(delegate);
@@ -521,20 +538,4 @@ public final class ReadOnlyFileSystemDriver
     {
         delegate.close();
     }
-    
-    /**
-     * Create a read-only version of a {@link FileSystemDriver}, if necessary
-     *
-     * <p>If the driver is already an instance of this class, then it is returned.</p>
-     *
-     * @param fs the FileSystemDriver
-     * 
-     * @return a new or already created FileSystemDriver
-     */
-    @Nonnull
-    public static FileSystemDriver wrap (@Nonnull final FileSystemDriver fs) { 
-    	Objects.requireNonNull(fs); 
-    	return fs instanceof ReadOnlyFileSystemDriver ? fs : new ReadOnlyFileSystemDriver(fs);
-    }
-    
 }
