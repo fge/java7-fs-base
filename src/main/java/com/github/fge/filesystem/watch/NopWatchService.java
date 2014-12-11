@@ -39,7 +39,6 @@ public final class NopWatchService
     public NopWatchService(@Nonnull final Path path)
     {
         this.path = Objects.requireNonNull(path);
-
     }
 
     @Override
