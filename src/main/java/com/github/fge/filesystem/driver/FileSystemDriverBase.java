@@ -20,7 +20,6 @@ package com.github.fge.filesystem.driver;
 
 import com.github.fge.filesystem.path.PathElements;
 import com.github.fge.filesystem.path.PathElementsFactory;
-import com.github.fge.filesystem.path.WatchQueue;
 import com.github.fge.filesystem.path.matchers.PathMatcherProvider;
 
 import javax.annotation.Nonnull;
@@ -31,7 +30,6 @@ import java.nio.channels.SeekableByteChannel;
 import java.nio.file.FileStore;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.WatchService;
 import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.FileAttribute;
@@ -135,18 +133,7 @@ public abstract class FileSystemDriverBase
     @Override
     public WatchService newWatchService()
     {
-    	Path directory = Paths.get(uri);
-    	WatchService watcher = null;
-		try {
-			watcher = directory.getFileSystem().newWatchService();
-	    	WatchQueue queue = new WatchQueue(watcher);
-	        Thread th = new Thread(queue, "WatchQueue");
-	        th.start();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return watcher;
+        throw new UnsupportedOperationException();
     }
 
     @SuppressWarnings("DesignForExtension")
