@@ -32,7 +32,10 @@ public interface AttributesDescriptor
     Class<? extends FileAttributeView> getViewClass();
 
     @Nullable
-    Set<String> getAllAttributes();
+    Class<?> getAttributeClass();
+
+    @Nullable
+    Set<String> getAttributeNames();
 
     @Nonnull
     Access getAccess(@Nonnull String attributeName);

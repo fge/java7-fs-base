@@ -16,7 +16,9 @@
  * - ASL 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
  */
 
-package com.github.fge.filesystem.attributes.wrap;
+package com.github.fge.filesystem.attributes.provider;
+
+import com.github.fge.filesystem.exceptions.ReadOnlyAttributeException;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -24,48 +26,78 @@ import java.io.IOException;
 import java.nio.file.attribute.AclEntry;
 import java.nio.file.attribute.AclFileAttributeView;
 import java.nio.file.attribute.UserPrincipal;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+@SuppressWarnings("DesignForExtension")
 @ParametersAreNonnullByDefault
-public final class AclFileAttributeWrapper
-    extends FileAttributeWrapper<AclFileAttributeView>
+public abstract class AclFileAttributesProvider
+    extends FileAttributesProvider
+    implements AclFileAttributeView
 {
-    public AclFileAttributeWrapper(final AclFileAttributeView view)
+    protected AclFileAttributesProvider()
     {
-        super(view);
+        super("acl");
     }
 
-    @Nullable
     @Override
-    public Object readAttribute(final String name)
+    public List<AclEntry> getAcl()
         throws IOException
     {
+        return Collections.emptyList();
+    }
+
+    /*
+     * read
+     */
+
+    /*
+     * write
+     */
+
+    @Override
+    public void setOwner(final UserPrincipal owner)
+        throws IOException
+    {
+        throw new ReadOnlyAttributeException();
+    }
+
+    /*
+     * by name
+     */
+    @Override
+    public final void setAttributeByName(final String name, final Object value)
+        throws IOException
+    {
+        Objects.requireNonNull(value);
         switch (Objects.requireNonNull(name)) {
             /* owner */
             case "owner":
-                return view.getOwner();
+                setOwner((UserPrincipal) value);
+                break;
+            /* acl */
             case "acl":
-                return view.getAcl();
+                //noinspection unchecked
+                setAcl((List<AclEntry>) value);
+                break;
             default:
                 throw new IllegalStateException("how did I get there??");
         }
     }
 
+    @Nullable
     @Override
-    public void writeAttribute(final String name, @Nullable final Object value)
+    public final Object getAttributeByName(final String name)
         throws IOException
     {
         switch (Objects.requireNonNull(name)) {
             /* owner */
             case "owner":
-                view.setOwner((UserPrincipal) value);
-                break;
-            /* owner */
+                return getOwner();
+            /* acl */
             case "acl":
-                //noinspection unchecked
-                view.setAcl((List<AclEntry>) value);
-                break;
+                return getAcl();
             default:
                 throw new IllegalStateException("how did I get there??");
         }
