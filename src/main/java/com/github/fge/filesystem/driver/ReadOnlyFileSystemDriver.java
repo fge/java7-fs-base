@@ -531,7 +531,7 @@ public final class ReadOnlyFileSystemDriver
      * 
      * @return a new or already created FileSystemDriver
      */
-    public static FileSystemDriver of(@Nonnull final FileSystemDriver fs) { 
+    public static FileSystemDriver wrap (@Nonnull final FileSystemDriver fs) { 
     	Objects.requireNonNull(fs); 
     	return fs instanceof ReadOnlyFileSystemDriver ? fs : new ReadOnlyFileSystemDriver(fs);
     }
