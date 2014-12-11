@@ -813,7 +813,7 @@ public final class GenericPath
         final WatchEvent.Modifier... modifiers)
         throws IOException
     {
-        throw new UnsupportedOperationException("TODO");
+    	return this.register(watcher, events, modifiers);
     }
 
     /**
@@ -860,7 +860,7 @@ public final class GenericPath
         final WatchEvent.Kind<?>... events)
         throws IOException
     {
-        throw new UnsupportedOperationException("TODO");
+    	return this.register(watcher, events);
     }
 
     /**

@@ -86,9 +86,19 @@ public final class ReadOnlyFileSystemDriver
 
     private final FileSystemDriver delegate;
 
-    public ReadOnlyFileSystemDriver(final FileSystemDriver delegate)
+    private ReadOnlyFileSystemDriver(final FileSystemDriver delegate)
     {
         this.delegate = Objects.requireNonNull(delegate);
+    }
+    
+    /**
+     * Creates a new {@link FileSystemDriver} if fs is not the instance of, otherwise returns the same.
+     * @param fs the FileSystemDriver
+     * @return a new or already created FileSystemDriver
+     */
+    public static FileSystemDriver of(@Nonnull final FileSystemDriver fs) { 
+    	Objects.requireNonNull(fs); 
+    	return fs instanceof ReadOnlyFileSystemDriver ? fs : new ReadOnlyFileSystemDriver(fs);
     }
 
     /**
@@ -340,6 +350,7 @@ public final class ReadOnlyFileSystemDriver
     @Nonnull
     public WatchService newWatchService()
     {
+    	//TODO: No idea if I should implement watch service for this one?
         return delegate.newWatchService();
     }
 
