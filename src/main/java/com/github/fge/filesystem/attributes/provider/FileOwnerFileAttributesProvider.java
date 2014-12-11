@@ -16,7 +16,9 @@
  * - ASL 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
  */
 
-package com.github.fge.filesystem.attributes.wrap;
+package com.github.fge.filesystem.attributes.provider;
+
+import com.github.fge.filesystem.exceptions.ReadOnlyAttributeException;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -25,33 +27,54 @@ import java.nio.file.attribute.FileOwnerAttributeView;
 import java.nio.file.attribute.UserPrincipal;
 import java.util.Objects;
 
+@SuppressWarnings("DesignForExtension")
 @ParametersAreNonnullByDefault
-public final class FileOwnerFileAttributeWrapper
-    extends FileAttributeWrapper<FileOwnerAttributeView>
+public abstract class FileOwnerFileAttributesProvider
+    extends FileAttributesProvider
+    implements FileOwnerAttributeView
 {
-    public FileOwnerFileAttributeWrapper(final FileOwnerAttributeView view)
+    protected FileOwnerFileAttributesProvider()
     {
-        super(view);
+        super("owner");
+    }
+
+    /*
+     * read
+     */
+
+    /*
+     * write
+     */
+
+    @Override
+    public void setOwner(final UserPrincipal owner)
+        throws IOException
+    {
+        throw new ReadOnlyAttributeException();
+    }
+
+    /*
+     * by name
+     */
+    @Override
+    public final void setAttributeByName(final String name, final Object value)
+        throws IOException
+    {
+        if (!"owner".equals(Objects.requireNonNull(name)))
+            throw new IllegalStateException("how did I get there??");
+
+        setOwner((UserPrincipal) Objects.requireNonNull(value));
+
     }
 
     @Nullable
     @Override
-    public Object readAttribute(final String name)
+    public final Object getAttributeByName(final String name)
         throws IOException
     {
         if (!"owner".equals(Objects.requireNonNull(name)))
             throw new IllegalStateException("how did I get there??");
 
-        return view.getOwner();
-    }
-
-    @Override
-    public void writeAttribute(final String name, @Nullable final Object value)
-        throws IOException
-    {
-        if (!"owner".equals(Objects.requireNonNull(name)))
-            throw new IllegalStateException("how did I get there??");
-
-        view.setOwner((UserPrincipal) value);
+        return getOwner();
     }
 }

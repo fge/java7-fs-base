@@ -46,7 +46,14 @@ public enum UserDefinedAttributesDescriptor
 
     @Nullable
     @Override
-    public Set<String> getAllAttributes()
+    public Class<?> getAttributeClass()
+    {
+        return null;
+    }
+
+    @Nullable
+    @Override
+    public Set<String> getAttributeNames()
     {
         return null;
     }

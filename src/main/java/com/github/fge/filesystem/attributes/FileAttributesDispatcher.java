@@ -19,9 +19,9 @@
 package com.github.fge.filesystem.attributes;
 
 import com.github.fge.filesystem.attributes.descriptor.AttributesDescriptor;
+import com.github.fge.filesystem.attributes.provider.FileAttributesProvider;
 
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.nio.file.attribute.FileAttributeView;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -29,12 +29,18 @@ import java.util.Objects;
 @ParametersAreNonnullByDefault
 public class FileAttributesDispatcher
 {
-    private final Map<String, Class<? extends FileAttributeView>> views
+    private final Map<String, AttributesDescriptor> descriptors
         = new HashMap<>();
 
-
-    protected void addDescriptor(final AttributesDescriptor descriptor)
+    protected final void addDescriptor(final AttributesDescriptor descriptor)
     {
         Objects.requireNonNull(descriptor);
+        descriptors.put(descriptor.getName(), descriptor);
+    }
+
+    protected final void addImplementation(final String name,
+        final Class<? extends FileAttributesProvider> providerClass,
+        final Class<?>... argTypes)
+    {
     }
 }

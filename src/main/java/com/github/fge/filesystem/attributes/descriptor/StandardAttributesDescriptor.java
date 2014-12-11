@@ -22,16 +22,18 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.nio.file.attribute.AclFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributeView;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.DosFileAttributeView;
+import java.nio.file.attribute.DosFileAttributes;
 import java.nio.file.attribute.FileAttributeView;
 import java.nio.file.attribute.FileOwnerAttributeView;
 import java.nio.file.attribute.PosixFileAttributeView;
+import java.nio.file.attribute.PosixFileAttributes;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 public enum StandardAttributesDescriptor
@@ -40,19 +42,24 @@ public enum StandardAttributesDescriptor
     ACL(
         "acl",
         AclFileAttributeView.class,
+        null,
         Collections.<String>emptyList(),
         Arrays.asList("acl", "owner")
     ),
     BASIC(
         "basic",
         BasicFileAttributeView.class,
-        Arrays.asList("size", "isRegularFile", "isDirectory", "isSymbolicLink",
-            "isOther", "fileKey"),
+        BasicFileAttributes.class,
+        Arrays.asList(
+            "size", "isRegularFile", "isDirectory", "isSymbolicLink",
+            "isOther", "fileKey"
+        ),
         Arrays.asList("lastModifiedTime", "lastAccessTime", "creationTime")
     ),
     DOS(
         "dos",
         DosFileAttributeView.class,
+        DosFileAttributes.class,
         Arrays.asList(
             "size", "isRegularFile", "isDirectory", "isSymbolicLink",
             "isOther", "fileKey"
@@ -65,12 +72,14 @@ public enum StandardAttributesDescriptor
     FILE_OWNER(
         "owner",
         FileOwnerAttributeView.class,
+        null,
         Collections.<String>emptyList(),
         Collections.singletonList("owner")
     ),
     POSIX(
         "posix",
         PosixFileAttributeView.class,
+        PosixFileAttributes.class,
         Arrays.asList(
             "size", "isRegularFile", "isDirectory", "isSymbolicLink",
             "isOther", "fileKey"
@@ -84,19 +93,22 @@ public enum StandardAttributesDescriptor
 
     private final String name;
     private final Class<? extends FileAttributeView> viewClass;
+    private final Class<?> attributeClass;
     private final Map<String, Access> attributes = new HashMap<>();
 
     StandardAttributesDescriptor(final String name,
         final Class<? extends FileAttributeView> viewClass,
+        final Class<?> attributeClass,
         final List<String> readOnlyAttributes,
         final List<String> readWriteAttributes)
     {
         this.name = name;
         this.viewClass = viewClass;
+        this.attributeClass = attributeClass;
         for (final String attr: readOnlyAttributes)
-            attributes.put(Objects.requireNonNull(attr), Access.READ_ONLY);
+            attributes.put(attr, Access.READ_ONLY);
         for (final String attr: readWriteAttributes)
-            attributes.put(Objects.requireNonNull(attr), Access.READ_WRITE);
+            attributes.put(attr, Access.READ_WRITE);
     }
 
     @Nonnull
@@ -115,7 +127,14 @@ public enum StandardAttributesDescriptor
 
     @Nullable
     @Override
-    public Set<String> getAllAttributes()
+    public Class<?> getAttributeClass()
+    {
+        return attributeClass;
+    }
+
+    @Nullable
+    @Override
+    public Set<String> getAttributeNames()
     {
         return Collections.unmodifiableSet(attributes.keySet());
     }
