@@ -93,12 +93,12 @@ public enum StandardAttributesDescriptor
 
     private final String name;
     private final Class<? extends FileAttributeView> viewClass;
-    private final Class<?> attributeClass;
+    private final Class<? extends BasicFileAttributes> attributeClass;
     private final Map<String, Access> attributes = new HashMap<>();
 
     StandardAttributesDescriptor(final String name,
         final Class<? extends FileAttributeView> viewClass,
-        final Class<?> attributeClass,
+        final Class<? extends BasicFileAttributes> attributeClass,
         final List<String> readOnlyAttributes,
         final List<String> readWriteAttributes)
     {
@@ -127,7 +127,7 @@ public enum StandardAttributesDescriptor
 
     @Nullable
     @Override
-    public Class<?> getAttributeClass()
+    public Class<? extends BasicFileAttributes> getAttributeClass()
     {
         return attributeClass;
     }
