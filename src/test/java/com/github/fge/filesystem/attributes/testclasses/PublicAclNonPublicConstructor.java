@@ -27,6 +27,7 @@ public final class PublicAclNonPublicConstructor
     extends AclFileAttributesProvider
 {
     PublicAclNonPublicConstructor(final ArgType1 arg)
+        throws IOException
     {
     }
 

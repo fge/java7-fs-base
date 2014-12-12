@@ -41,6 +41,7 @@ public abstract class AclFileAttributesProvider
     implements AclFileAttributeView
 {
     protected AclFileAttributesProvider()
+        throws IOException
     {
         super("acl");
     }

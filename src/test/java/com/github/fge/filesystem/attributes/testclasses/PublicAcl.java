@@ -27,6 +27,7 @@ public final class PublicAcl
     extends AclFileAttributesProvider
 {
     public PublicAcl(final ArgType1 arg)
+        throws IOException
     {
     }
 

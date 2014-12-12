@@ -25,6 +25,7 @@ import com.github.fge.filesystem.attributes.testclasses.PublicAclNonPublicConstr
 import com.github.fge.filesystem.exceptions.InvalidAttributeProviderException;
 import org.testng.annotations.Test;
 
+import java.io.IOException;
 import java.nio.file.attribute.AclFileAttributeView;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -125,6 +126,7 @@ public final class FileAttributesFactoryTest
 
     @Test(dependsOnMethods = "registeringNewProviderWorksWhenClassIsCorrect")
     public void canGenerateProviderInstanceOfExactAttributeClassName()
+        throws IOException
     {
         final FileAttributesFactory factory
             = new FileAttributesFactory()

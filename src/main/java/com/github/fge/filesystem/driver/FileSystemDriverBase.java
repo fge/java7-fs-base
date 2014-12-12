@@ -310,9 +310,9 @@ public abstract class FileSystemDriverBase
         final Object metadata;
         try {
             metadata = getPathMetadata(path.toRealPath(options));
+            return attributesFactory.getFileAttributeView(type, metadata);
         } catch (IOException e) {
             throw new UncaughtIOException("Unhandled I/O exception", e);
         }
-        return attributesFactory.getFileAttributeView(type, metadata);
     }
 }

@@ -42,6 +42,7 @@ public abstract class BasicFileAttributesProvider
     private static final FileTime UNIX_EPOCH = FileTime.fromMillis(0L);
 
     protected BasicFileAttributesProvider()
+        throws IOException
     {
         super("basic");
     }

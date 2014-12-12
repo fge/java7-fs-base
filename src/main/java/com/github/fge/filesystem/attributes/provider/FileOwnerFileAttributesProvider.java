@@ -38,6 +38,7 @@ public abstract class FileOwnerFileAttributesProvider
     implements FileOwnerAttributeView
 {
     protected FileOwnerFileAttributesProvider()
+        throws IOException
     {
         super("owner");
     }

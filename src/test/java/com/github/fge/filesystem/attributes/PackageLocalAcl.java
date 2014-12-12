@@ -29,6 +29,7 @@ final class PackageLocalAcl
     extends AclFileAttributesProvider
 {
     public PackageLocalAcl(final ArgType1 arg)
+        throws IOException
     {
     }
 

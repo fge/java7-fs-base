@@ -22,7 +22,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttributeView;
-import java.util.Set;
 
 public interface AttributesDescriptor
 {
@@ -34,18 +33,4 @@ public interface AttributesDescriptor
 
     @Nullable
     Class<? extends BasicFileAttributes> getAttributeClass();
-
-    @Nullable
-    Set<String> getAttributeNames();
-
-    @Nonnull
-    Access getAccess(@Nonnull String attributeName);
-
-    enum Access
-    {
-        READ_ONLY,
-        READ_WRITE,
-        MAYBE,
-        UNKNOWN
-    }
 }
