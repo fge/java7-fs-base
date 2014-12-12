@@ -20,6 +20,7 @@ package com.github.fge.filesystem.attributes.descriptor;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttributeView;
 import java.util.Set;
 
@@ -32,7 +33,7 @@ public interface AttributesDescriptor
     Class<? extends FileAttributeView> getViewClass();
 
     @Nullable
-    Class<?> getAttributeClass();
+    Class<? extends BasicFileAttributes> getAttributeClass();
 
     @Nullable
     Set<String> getAttributeNames();

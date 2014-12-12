@@ -20,6 +20,7 @@ package com.github.fge.filesystem.attributes.descriptor;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttributeView;
 import java.nio.file.attribute.UserDefinedFileAttributeView;
 import java.util.Objects;
@@ -46,7 +47,7 @@ public enum UserDefinedAttributesDescriptor
 
     @Nullable
     @Override
-    public Class<?> getAttributeClass()
+    public Class<? extends BasicFileAttributes> getAttributeClass()
     {
         return null;
     }
