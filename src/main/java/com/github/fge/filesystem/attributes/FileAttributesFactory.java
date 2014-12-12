@@ -33,6 +33,7 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.Modifier;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttributeView;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -56,6 +57,12 @@ public class FileAttributesFactory
         for (final AttributesDescriptor descriptor:
             StandardAttributesDescriptor.values())
             addDescriptor(descriptor);
+    }
+
+    @Nonnull
+    public final Map<String, AttributesDescriptor> getDescriptors()
+    {
+        return Collections.unmodifiableMap(descriptors);
     }
 
     @Nullable
@@ -141,6 +148,7 @@ public class FileAttributesFactory
             return null;
 
         try {
+            //noinspection unchecked
             return (C) handle.invoke(metadata);
         } catch (Error | RuntimeException | IOException e) {
             throw e;
