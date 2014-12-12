@@ -18,21 +18,33 @@
 
 package com.github.fge.filesystem.filestore;
 
+import com.github.fge.filesystem.attributes.FileAttributesFactory;
+import com.github.fge.filesystem.attributes.descriptor.AttributesDescriptor;
+
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
 import java.nio.file.FileStore;
+import java.nio.file.attribute.FileAttributeView;
 import java.nio.file.attribute.FileStoreAttributeView;
+import java.util.Collection;
 import java.util.Objects;
 
 /**
  * Base implementation of a {@link FileStore}
  *
- * <p>Limitations:</p>
+ * <p>Notes:</p>
  *
  * <ul>
- *     <li>no support for {@link FileStoreAttributeView}s</li>
+ *     <li>at the moment, there is no support for {@link
+ *     FileStoreAttributeView}s;</li>
+ *     <li>by default, all size methods return {@link Long#MAX_VALUE}; as
+ *     discussed on nio-dev, this is a reasonable value to return when the file
+ *     store has no information on the actual size.</li>
  * </ul>
+ *
+ * @see FileStore
  */
+@SuppressWarnings("DesignForExtension")
 @ParametersAreNonnullByDefault
 public abstract class FileStoreBase
     extends FileStore
@@ -40,18 +52,39 @@ public abstract class FileStoreBase
     private final String name;
     private final String type;
     private final boolean readOnly;
+    private final FileAttributesFactory factory;
 
+    /**
+     * Main constructor
+     *
+     * @param name the name of the file store
+     * @param type the type of the file store
+     * @param factory the associated {@link FileAttributesFactory}
+     * @param readOnly whether this filestore is read only
+     */
     protected FileStoreBase(final String name, final String type,
-        final boolean readOnly)
+        final FileAttributesFactory factory, final boolean readOnly)
     {
         this.readOnly = readOnly;
         this.name = Objects.requireNonNull(name);
         this.type = Objects.requireNonNull(type);
+        this.factory = Objects.requireNonNull(factory);
     }
 
-    protected FileStoreBase(final String name, final boolean readOnly)
+    /**
+     * Alternate constructor
+     *
+     * <p>This constructor assumes that the name and type are the same; apart
+     * from that, all arguments are the same as for the other constructor.</p>
+     *
+     * @param name the name (and type) of the file store
+     * @param factory the associated {@link FileAttributesFactory}
+     * @param readOnly whether this filestore is read only
+     */
+    protected FileStoreBase(final String name,
+        final FileAttributesFactory factory, final boolean readOnly)
     {
-        this(name, name, readOnly);
+        this(name, name, factory, readOnly);
     }
 
     @Override
@@ -70,6 +103,50 @@ public abstract class FileStoreBase
     public final boolean isReadOnly()
     {
         return readOnly;
+    }
+
+    @Override
+    public long getTotalSpace()
+        throws IOException
+    {
+        return Long.MAX_VALUE;
+    }
+
+    @Override
+    public long getUsableSpace()
+        throws IOException
+    {
+        return Long.MAX_VALUE;
+    }
+
+    @Override
+    public long getUnallocatedSpace()
+        throws IOException
+    {
+        return Long.MAX_VALUE;
+    }
+
+    @Override
+    public final boolean supportsFileAttributeView(
+        final Class<? extends FileAttributeView> type)
+    {
+        Objects.requireNonNull(type);
+
+        final Collection<AttributesDescriptor> descriptors
+            = factory.getDescriptors().values();
+
+        for (final AttributesDescriptor descriptor: descriptors)
+            if (type.isAssignableFrom(descriptor.getViewClass()))
+                return true;
+
+        return false;
+    }
+
+    @Override
+    public final boolean supportsFileAttributeView(final String name)
+    {
+        Objects.requireNonNull(name);
+        return factory.getDescriptors().containsKey(name);
     }
 
     @Override
