@@ -18,25 +18,37 @@
 
 package com.github.fge.filesystem.driver;
 
+import com.github.fge.filesystem.attributes.FileAttributesFactory;
+import com.github.fge.filesystem.attributes.provider.FileAttributesProvider;
+import com.github.fge.filesystem.exceptions.UncaughtIOException;
 import com.github.fge.filesystem.path.PathElements;
 import com.github.fge.filesystem.path.PathElementsFactory;
 import com.github.fge.filesystem.path.matchers.PathMatcherProvider;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.FileStore;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.WatchService;
 import java.nio.file.attribute.BasicFileAttributeView;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.FileAttributeView;
 import java.nio.file.attribute.UserPrincipalLookupService;
+import java.nio.file.spi.FileSystemProvider;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * A {@link FileSystemDriver} with some reasonable defaults
@@ -61,16 +73,21 @@ import java.util.Set;
 public abstract class FileSystemDriverBase
     implements FileSystemDriver
 {
+    private static final Pattern COMMA = Pattern.compile(",");
+
     private final URI uri;
     protected final PathElementsFactory pathElementsFactory;
     private final FileStore fileStore;
     private final PathMatcherProvider pathMatcherProvider;
+    private final FileAttributesFactory attributesFactory;
 
     protected FileSystemDriverBase(final URI uri,
         final PathElementsFactory pathElementsFactory,
         final FileStore fileStore,
-        final PathMatcherProvider pathMatcherProvider)
+        final PathMatcherProvider pathMatcherProvider,
+        final FileAttributesFactory attributesFactory)
     {
+        this.attributesFactory = attributesFactory;
         this.uri = Objects.requireNonNull(uri);
         this.pathElementsFactory = Objects.requireNonNull(pathElementsFactory);
         this.fileStore = Objects.requireNonNull(fileStore);
@@ -152,6 +169,150 @@ public abstract class FileSystemDriverBase
     public boolean isSameFile(final Path path, final Path path2)
         throws IOException
     {
-        return path.equals(path2);
+        return path.toRealPath().equals(path2.toRealPath());
+    }
+
+    /**
+     * Set an attribute for a path on this filesystem
+     *
+     * @param path the victim
+     * @param attribute the name of the attribute to set
+     * @param value the value to set
+     * @param options the link options
+     * @throws IOException filesystem level error, or a plain I/O error
+     * @throws IllegalArgumentException malformed attribute, or the specified
+     * attribute does not exist
+     * @throws UnsupportedOperationException the attribute to set is not
+     * supported by this filesystem
+     * @throws ClassCastException attribute value is of the wrong class for the
+     * specified attribute
+     * @see Files#setAttribute(Path, String, Object, LinkOption...)
+     * @see FileSystemProvider#setAttribute(Path, String, Object, LinkOption...)
+     */
+    @Override
+    public final void setAttribute(final Path path, final String attribute,
+        final Object value, final LinkOption... options)
+        throws IOException
+    {
+        final int index = attribute.indexOf(':');
+        final String type;
+        final String name;
+
+        if (index == -1) {
+            type = "basic";
+            name = attribute;
+        } else {
+            type = attribute.substring(0, index);
+            name = attribute.substring(index + 1);
+        }
+
+        final Object metadata = getPathMetadata(path);
+
+        final FileAttributesProvider provider
+            = attributesFactory.getProvider(type, metadata);
+
+        if (provider == null)
+            throw new UnsupportedOperationException();
+
+        provider.setAttributeByName(name, value);
+    }
+
+    /**
+     * Read a list of attributes from a path on this filesystem
+     *
+     * @param path the path to read attributes from
+     * @param attributes the list of attributes to read
+     * @param options the link options
+     * @return the relevant attributes as a map
+     *
+     * @throws IOException filesystem level error, or a plain I/O error
+     * @throws IllegalArgumentException malformed attributes string; or a
+     * specified attribute does not exist
+     * @throws UnsupportedOperationException one or more attribute(s) is/are not
+     * supported
+     * @see Files#readAttributes(Path, String, LinkOption...)
+     * @see FileSystemProvider#readAttributes(Path, String, LinkOption...)
+     */
+    @Override
+    public final Map<String, Object> readAttributes(final Path path,
+        final String attributes, final LinkOption... options)
+        throws IOException
+    {
+        final int index = attributes.indexOf(':');
+
+        final String type;
+        final String names;
+
+        if (index == -1) {
+            type = "basic";
+            names = attributes;
+        } else {
+            type = attributes.substring(0, index);
+            names = attributes.substring(index + 1);
+        }
+
+        final Object metadata = getPathMetadata(path.toRealPath(options));
+
+        final FileAttributesProvider provider
+            = attributesFactory.getProvider(type, metadata);
+
+        if (provider == null)
+            throw new UnsupportedOperationException();
+
+        if ("*".equals(names))
+            return provider.getAllAttributes();
+
+        final Map<String, Object> map = new HashMap<>();
+
+        for (final String name: COMMA.split(names))
+            map.put(name, provider.getAttributeByName(name));
+
+        return Collections.unmodifiableMap(map);
+    }
+
+    /**
+     * Read attributes from a path on this filesystem
+     *
+     * @param path the path to read attributes from
+     * @param type the class of attributes to read
+     * @param options the link options
+     * @return the attributes
+     *
+     * @throws IOException filesystem level error, or a plain I/O error
+     * @throws UnsupportedOperationException attribute type not supported
+     * @see FileSystemProvider#readAttributes(Path, Class, LinkOption...)
+     */
+    @Override
+    public final <A extends BasicFileAttributes> A readAttributes(
+        final Path path, final Class<A> type, final LinkOption... options)
+        throws IOException
+    {
+        final Object metadata = getPathMetadata(path.toRealPath(options));
+
+        return attributesFactory.getFileAttributes(type, metadata);
+    }
+
+    /**
+     * Read an attribute view for a given path on this filesystem
+     *
+     * @param path the path to read attributes from
+     * @param type the class of attribute view to return
+     * @param options the link options
+     * @return the attributes view; {@code null} if this view is not supported
+     *
+     * @see FileSystemProvider#getFileAttributeView(Path, Class, LinkOption...)
+     */
+    @Nullable
+    @Override
+    public final <V extends FileAttributeView> V getFileAttributeView(
+        final Path path, final Class<V> type, final LinkOption... options)
+    {
+        final Object metadata;
+        try {
+            metadata = getPathMetadata(path.toRealPath(options));
+        } catch (IOException e) {
+            throw new UncaughtIOException("Unhandled I/O exception", e);
+        }
+        return attributesFactory.getFileAttributeView(type, metadata);
     }
 }

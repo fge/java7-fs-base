@@ -1,9 +1,11 @@
 package com.github.fge.filesystem.attributes.provider;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
 import java.nio.file.attribute.FileAttributeView;
+import java.util.Map;
 import java.util.Objects;
 
 @ParametersAreNonnullByDefault
@@ -30,4 +32,7 @@ public abstract class FileAttributesProvider
     public abstract Object getAttributeByName(String name)
         throws IOException;
 
+    @Nonnull
+    public abstract Map<String, Object> getAllAttributes()
+        throws IOException;
 }

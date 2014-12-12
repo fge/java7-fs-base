@@ -399,4 +399,8 @@ public interface FileSystemDriver
     void setAttribute(Path path, String attribute, Object value,
         LinkOption... options)
         throws IOException;
+
+    @Nonnull
+    Object getPathMetadata(Path path)
+        throws IOException;
 }

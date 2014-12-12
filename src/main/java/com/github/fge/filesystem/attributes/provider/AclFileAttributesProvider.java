@@ -18,8 +18,10 @@
 
 package com.github.fge.filesystem.attributes.provider;
 
+import com.github.fge.filesystem.exceptions.NoSuchAttributeException;
 import com.github.fge.filesystem.exceptions.ReadOnlyAttributeException;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
@@ -27,7 +29,9 @@ import java.nio.file.attribute.AclEntry;
 import java.nio.file.attribute.AclFileAttributeView;
 import java.nio.file.attribute.UserPrincipal;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @SuppressWarnings("DesignForExtension")
@@ -89,7 +93,7 @@ public abstract class AclFileAttributesProvider
                 setAcl((List<AclEntry>) value);
                 break;
             default:
-                throw new IllegalStateException("how did I get there??");
+                throw new NoSuchAttributeException(name);
         }
     }
 
@@ -106,7 +110,20 @@ public abstract class AclFileAttributesProvider
             case "acl":
                 return getAcl();
             default:
-                throw new IllegalStateException("how did I get there??");
+                throw new NoSuchAttributeException(name);
         }
+    }
+
+    @Nonnull
+    @Override
+    public final Map<String, Object> getAllAttributes()
+        throws IOException
+    {
+        final Map<String, Object> map = new HashMap<>();
+
+        map.put("owner", getOwner());
+        map.put("acl", getAcl());
+
+        return Collections.unmodifiableMap(map);
     }
 }

@@ -18,6 +18,7 @@
 
 package com.github.fge.filesystem.driver;
 
+import com.github.fge.filesystem.attributes.FileAttributesFactory;
 import com.github.fge.filesystem.path.UnixPathElementsFactory;
 import com.github.fge.filesystem.path.matchers.PathMatcherProvider;
 
@@ -45,10 +46,11 @@ public abstract class UnixLikeFileSystemDriverBase
     extends FileSystemDriverBase
 {
     protected UnixLikeFileSystemDriverBase(final URI uri,
-        final FileStore fileStore)
+        final FileStore fileStore,
+        final FileAttributesFactory attributesFactory)
     {
         super(uri, new UnixPathElementsFactory(), fileStore,
-            new PathMatcherProvider());
+            new PathMatcherProvider(), attributesFactory);
     }
 
     /**
