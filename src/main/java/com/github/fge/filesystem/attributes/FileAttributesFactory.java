@@ -30,6 +30,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.lang.reflect.Modifier;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttributeView;
 import java.util.Arrays;
@@ -122,16 +123,19 @@ public class FileAttributesFactory
         if (name == null)
             return null;
 
-        final Object o;
+        final MethodHandle handle = providers.get(name);
+
+        if (handle == null)
+            return null;
+
         try {
-            o = providers.get(name).invokeExact(args);
+            return (C) handle.invokeWithArguments(args);
         } catch (Error | RuntimeException e) {
             throw e;
         } catch (Throwable throwable) {
             throw new InvalidAttributeProviderException("unable to build "
                 + "attribute provider", throwable);
         }
-        return targetClass.cast(o);
     }
 
     @Nullable
