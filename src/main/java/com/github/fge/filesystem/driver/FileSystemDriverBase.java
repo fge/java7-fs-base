@@ -37,7 +37,6 @@ import java.nio.file.LinkOption;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.WatchService;
-import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.FileAttributeView;
@@ -56,14 +55,12 @@ import java.util.regex.Pattern;
  * <p>The (overridable) defaults are:</p>
  *
  * <ul>
- *     <li>only {@link BasicFileAttributeView basic} file attributes are
- *     supported;</li>
  *     <li>no support for {@link UserPrincipalLookupService}s or {@link
  *     WatchService}s (both relevant methods throw an {@link
  *     UnsupportedOperationException});</li>
  *     <li>no support for {@link SeekableByteChannel}s;</li>
  *     <li>{@link #isSameFile(Path, Path)} returns true if and only if both
- *     arguments are {@link Object#equals(Object) equal}.</li>
+ *     their absolute versions are {@link Object#equals(Object) equal}.</li>
  * </ul>
  *
  * @see UnixLikeFileSystemDriverBase
@@ -169,7 +166,7 @@ public abstract class FileSystemDriverBase
     public boolean isSameFile(final Path path, final Path path2)
         throws IOException
     {
-        return path.toRealPath().equals(path2.toRealPath());
+        return path.toAbsolutePath().equals(path2.toAbsolutePath());
     }
 
     /**

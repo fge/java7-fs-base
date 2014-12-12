@@ -39,7 +39,7 @@ import java.nio.file.spi.FileSystemProvider;
  * paths and a default {@link PathMatcherProvider} to provide {@link
  * PathMatcher} instances -- therefore bringing support for both {@code "glob"}
  * and {@code "regex"} path matchers. It also considers that all paths whose
- * last name elements begin with a dot are hidden (overridable).</p>
+ * last name element begin with a dot are hidden (overridable).</p>
  */
 @ParametersAreNonnullByDefault
 public abstract class UnixLikeFileSystemDriverBase
