@@ -18,13 +18,17 @@
 
 package com.github.fge.filesystem.attributes.provider;
 
+import com.github.fge.filesystem.exceptions.NoSuchAttributeException;
 import com.github.fge.filesystem.exceptions.ReadOnlyAttributeException;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
 import java.nio.file.attribute.FileOwnerAttributeView;
 import java.nio.file.attribute.UserPrincipal;
+import java.util.Collections;
+import java.util.Map;
 import java.util.Objects;
 
 @SuppressWarnings("DesignForExtension")
@@ -61,10 +65,9 @@ public abstract class FileOwnerFileAttributesProvider
         throws IOException
     {
         if (!"owner".equals(Objects.requireNonNull(name)))
-            throw new IllegalStateException("how did I get there??");
+            throw new NoSuchAttributeException(name);
 
         setOwner((UserPrincipal) Objects.requireNonNull(value));
-
     }
 
     @Nullable
@@ -73,8 +76,16 @@ public abstract class FileOwnerFileAttributesProvider
         throws IOException
     {
         if (!"owner".equals(Objects.requireNonNull(name)))
-            throw new IllegalStateException("how did I get there??");
+            throw new NoSuchAttributeException(name);
 
         return getOwner();
+    }
+
+    @Nonnull
+    @Override
+    public Map<String, Object> getAllAttributes()
+        throws IOException
+    {
+        return Collections.<String, Object>singletonMap("owner", getOwner());
     }
 }

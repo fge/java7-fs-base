@@ -18,6 +18,7 @@
 
 package com.github.fge.filesystem.attributes.provider;
 
+import com.github.fge.filesystem.exceptions.NoSuchAttributeException;
 import com.github.fge.filesystem.exceptions.ReadOnlyAttributeException;
 
 import javax.annotation.Nonnull;
@@ -31,6 +32,9 @@ import java.nio.file.attribute.PosixFileAttributes;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.nio.file.attribute.UserPrincipal;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -142,6 +146,46 @@ public abstract class PosixFileAttributesProvider
     /*
      * By name
      */
+    @Override
+    public void setAttributeByName(final String name, final Object value)
+        throws IOException
+    {
+        Objects.requireNonNull(value);
+        switch (Objects.requireNonNull(name)) {
+            /* basic */
+            case "lastModifiedTime":
+                setTimes((FileTime) value, null, null);
+                break;
+            case "lastAccessTime":
+                setTimes(null, (FileTime) value, null);
+                break;
+            case "creationTime":
+                setTimes(null, null, (FileTime) value);
+                break;
+            /* owner */
+            case "owner":
+                setOwner((UserPrincipal) value);
+                break;
+            /* posix */
+            case "group":
+                setGroup((GroupPrincipal) value);
+                break;
+            case "permissions":
+                //noinspection unchecked
+                setPermissions((Set<PosixFilePermission>) value);
+                break;
+            case "size":
+            case "isRegularFile":
+            case "isDirectory":
+            case "isSymbolicLink":
+            case "isOther":
+            case "fileKey":
+                throw new ReadOnlyAttributeException(name);
+            default:
+                throw new NoSuchAttributeException(name);
+        }
+    }
+
     @SuppressWarnings("OverlyComplexMethod")
     @Nonnull
     @Override
@@ -177,40 +221,30 @@ public abstract class PosixFileAttributesProvider
             case "permissions":
                 return permissions();
             default:
-                throw new IllegalStateException("how did I get there??");
+                throw new NoSuchAttributeException(name);
         }
     }
 
+    @Nonnull
     @Override
-    public void setAttributeByName(final String name, final Object value)
+    public final Map<String, Object> getAllAttributes()
         throws IOException
     {
-        Objects.requireNonNull(value);
-        switch (Objects.requireNonNull(name)) {
-            /* basic */
-            case "lastModifiedTime":
-                setTimes((FileTime) value, null, null);
-                break;
-            case "lastAccessTime":
-                setTimes(null, (FileTime) value, null);
-                break;
-            case "creationTime":
-                setTimes(null, null, (FileTime) value);
-                break;
-            /* owner */
-            case "owner":
-                setOwner((UserPrincipal) value);
-                break;
-            /* posix */
-            case "group":
-                setGroup((GroupPrincipal) value);
-                break;
-            case "permissions":
-                //noinspection unchecked
-                setPermissions((Set<PosixFilePermission>) value);
-                break;
-            default:
-                throw new IllegalStateException("how did I get there??");
-        }
+        final Map<String, Object> map = new HashMap<>();
+
+        map.put("lastModifiedTime", lastModifiedTime());
+        map.put("lastAccessTime", lastAccessTime());
+        map.put("creationTime", creationTime());
+        map.put("size", size());
+        map.put("isRegularFile", isRegularFile());
+        map.put("isDirectory", isDirectory());
+        map.put("isSymbolicLink", isSymbolicLink());
+        map.put("isOther", isOther());
+        map.put("fileKey", fileKey());
+        map.put("owner", owner());
+        map.put("group", group());
+        map.put("permissions", permissions());
+
+        return Collections.unmodifiableMap(map);
     }
 }

@@ -20,11 +20,15 @@ package com.github.fge.filesystem.attributes.provider;
 
 import com.github.fge.filesystem.exceptions.ReadOnlyAttributeException;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.attribute.UserDefinedFileAttributeView;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 @SuppressWarnings("DesignForExtension")
@@ -96,5 +100,23 @@ public abstract class UserDefinedFileAttributesProvider
         final ByteBuffer buf = ByteBuffer.allocate(size(name));
         read(name, buf);
         return buf.array();
+    }
+
+    @Nonnull
+    @Override
+    public Map<String, Object> getAllAttributes()
+        throws IOException
+    {
+        final Map<String, Object> map = new HashMap<>();
+
+        ByteBuffer buf;
+
+        for (final String name: list()) {
+            buf = ByteBuffer.allocate(size(name));
+            write(name, buf);
+            map.put(name, buf.array());
+        }
+
+        return Collections.unmodifiableMap(map);
     }
 }

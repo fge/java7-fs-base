@@ -27,6 +27,7 @@ import com.github.fge.filesystem.exceptions.InvalidAttributeProviderException;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.io.IOException;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
@@ -52,13 +53,31 @@ public class FileAttributesFactory
 
     private final Map<String, MethodHandle> providers = new HashMap<>();
 
-
     public FileAttributesFactory()
     {
         for (final AttributesDescriptor descriptor:
             StandardAttributesDescriptor.values())
             addDescriptor(descriptor);
         addDescriptor(UserDefinedAttributesDescriptor.INSTANCE);
+    }
+
+    @Nullable
+    public final FileAttributesProvider getProvider(final String name,
+        final Object metadata)
+        throws IOException
+    {
+        final MethodHandle handle = providers.get(Objects.requireNonNull(name));
+
+        if (handle == null)
+            return null;
+
+        try {
+            return (FileAttributesProvider) handle.invoke(metadata);
+        } catch (Error | RuntimeException | IOException e) {
+            throw e;
+        } catch (Throwable throwable) {
+            throw new InvalidAttributeProviderException(throwable);
+        }
     }
 
     @Nullable

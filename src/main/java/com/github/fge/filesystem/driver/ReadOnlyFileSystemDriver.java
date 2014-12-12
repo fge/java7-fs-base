@@ -525,6 +525,14 @@ public final class ReadOnlyFileSystemDriver
         return delegate.readAttributes(path, attributes, options);
     }
 
+    @Nonnull
+    @Override
+    public Object getPathMetadata(final Path path)
+        throws IOException
+    {
+        return delegate.getPathMetadata(path);
+    }
+
     /**
      * Closes this stream and releases any system resources associated
      * with it. If the stream is already closed then invoking this
