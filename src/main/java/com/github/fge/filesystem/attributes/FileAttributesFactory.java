@@ -20,7 +20,6 @@ package com.github.fge.filesystem.attributes;
 
 import com.github.fge.filesystem.attributes.descriptor.AttributesDescriptor;
 import com.github.fge.filesystem.attributes.descriptor.StandardAttributesDescriptor;
-import com.github.fge.filesystem.attributes.descriptor.UserDefinedAttributesDescriptor;
 import com.github.fge.filesystem.attributes.provider.FileAttributesProvider;
 import com.github.fge.filesystem.exceptions.InvalidAttributeProviderException;
 
@@ -34,7 +33,6 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.Modifier;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttributeView;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -58,7 +56,6 @@ public class FileAttributesFactory
         for (final AttributesDescriptor descriptor:
             StandardAttributesDescriptor.values())
             addDescriptor(descriptor);
-        addDescriptor(UserDefinedAttributesDescriptor.INSTANCE);
     }
 
     @Nullable
@@ -82,24 +79,20 @@ public class FileAttributesFactory
 
     @Nullable
     public final <V extends FileAttributeView> V getFileAttributeView(
-        final Class<V> targetClass, final Object... args
+        final Class<V> targetClass, final Object metadata
     )
+        throws IOException
     {
-        return getProviderInstance(targetClass, viewMap, args);
+        return getProviderInstance(targetClass, viewMap, metadata);
     }
 
     @Nullable
     public final <A extends BasicFileAttributes> A getFileAttributes(
-        final Class<A> targetClass, final Object... args
+        final Class<A> targetClass, final Object metadata
     )
+        throws IOException
     {
-        return getProviderInstance(targetClass, attrMap, args);
-    }
-
-    @Nullable
-    public final AttributesDescriptor getDescriptor(final String name)
-    {
-        return descriptors.get(name);
+        return getProviderInstance(targetClass, attrMap, metadata);
     }
 
     protected final void addDescriptor(final AttributesDescriptor descriptor)
@@ -115,12 +108,11 @@ public class FileAttributesFactory
 
     protected final void addImplementation(final String name,
         final Class<? extends FileAttributesProvider> providerClass,
-        final Class<?>... argTypes)
+        final Class<?> metadataClass)
     {
         Objects.requireNonNull(name);
         Objects.requireNonNull(providerClass);
-        for (final Class<?> c: argTypes)
-            Objects.requireNonNull(c);
+        Objects.requireNonNull(metadataClass);
 
         final AttributesDescriptor descriptor
             = descriptors.get(Objects.requireNonNull(name));
@@ -130,12 +122,13 @@ public class FileAttributesFactory
                 + "attribute type " + name);
 
         checkCasts(providerClass, descriptor);
-        providers.put(name, getConstructor(providerClass, argTypes));
+        providers.put(name, getConstructor(providerClass, metadataClass));
     }
 
     @Nullable
     private <C> C getProviderInstance(final Class<C> targetClass,
-        final Map<String, Class<?>> map, final Object... args)
+        final Map<String, Class<?>> map, final Object metadata)
+        throws IOException
     {
         final String name = getBestFit(targetClass, map);
 
@@ -148,12 +141,11 @@ public class FileAttributesFactory
             return null;
 
         try {
-            return (C) handle.invokeWithArguments(args);
-        } catch (Error | RuntimeException e) {
+            return (C) handle.invoke(metadata);
+        } catch (Error | RuntimeException | IOException e) {
             throw e;
         } catch (Throwable throwable) {
-            throw new InvalidAttributeProviderException("unable to build "
-                + "attribute provider", throwable);
+            throw new InvalidAttributeProviderException(throwable);
         }
     }
 
@@ -221,17 +213,17 @@ public class FileAttributesFactory
     @Nonnull
     private static MethodHandle getConstructor(
         final Class<? extends FileAttributesProvider> providerClass,
-        final Class<?>... argTypes
+        final Class<?> metadataClass
     )
     {
         final MethodHandle handle;
         try {
             handle = LOOKUP.findConstructor(providerClass,
-                MethodType.methodType(void.class, argTypes));
+                MethodType.methodType(void.class, metadataClass));
         } catch (NoSuchMethodException | IllegalAccessException e) {
             throw new InvalidAttributeProviderException("no constructor found"
-                + " for class " + providerClass + " with parameters "
-                + Arrays.toString(argTypes), e);
+                + " for class " + providerClass + " with parameter "
+                + metadataClass, e);
         }
 
         final MethodType type = handle.type().changeReturnType(providerClass);

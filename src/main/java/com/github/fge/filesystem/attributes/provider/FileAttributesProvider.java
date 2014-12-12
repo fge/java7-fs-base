@@ -15,6 +15,7 @@ public abstract class FileAttributesProvider
     private final String name;
 
     protected FileAttributesProvider(final String name)
+        throws IOException
     {
         this.name = Objects.requireNonNull(name);
     }

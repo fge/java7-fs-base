@@ -38,6 +38,7 @@ public abstract class UserDefinedFileAttributesProvider
     implements UserDefinedFileAttributeView
 {
     protected UserDefinedFileAttributesProvider()
+        throws IOException
     {
         super("user");
     }

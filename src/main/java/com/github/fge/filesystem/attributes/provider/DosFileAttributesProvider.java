@@ -42,6 +42,7 @@ public abstract class DosFileAttributesProvider
     private static final FileTime UNIX_EPOCH = FileTime.fromMillis(0L);
 
     protected DosFileAttributesProvider()
+        throws IOException
     {
         super("dos");
     }

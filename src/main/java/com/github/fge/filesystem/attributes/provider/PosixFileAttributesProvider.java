@@ -51,6 +51,7 @@ public abstract class PosixFileAttributesProvider
         = PosixFilePermissions.fromString("rwxr-xr-x");
 
     protected PosixFileAttributesProvider()
+        throws IOException
     {
         super("posix");
     }

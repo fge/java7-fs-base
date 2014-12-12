@@ -29,86 +29,30 @@ import java.nio.file.attribute.FileAttributeView;
 import java.nio.file.attribute.FileOwnerAttributeView;
 import java.nio.file.attribute.PosixFileAttributeView;
 import java.nio.file.attribute.PosixFileAttributes;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.nio.file.attribute.UserDefinedFileAttributeView;
 
 public enum StandardAttributesDescriptor
     implements AttributesDescriptor
 {
-    ACL(
-        "acl",
-        AclFileAttributeView.class,
-        null,
-        Collections.<String>emptyList(),
-        Arrays.asList("acl", "owner")
-    ),
-    BASIC(
-        "basic",
-        BasicFileAttributeView.class,
-        BasicFileAttributes.class,
-        Arrays.asList(
-            "size", "isRegularFile", "isDirectory", "isSymbolicLink",
-            "isOther", "fileKey"
-        ),
-        Arrays.asList("lastModifiedTime", "lastAccessTime", "creationTime")
-    ),
-    DOS(
-        "dos",
-        DosFileAttributeView.class,
-        DosFileAttributes.class,
-        Arrays.asList(
-            "size", "isRegularFile", "isDirectory", "isSymbolicLink",
-            "isOther", "fileKey"
-        ),
-        Arrays.asList(
-            "lastModifiedTime", "lastAccessTime", "creationTime",
-            "hidden", "system", "archive", "readonly"
-        )
-    ),
-    FILE_OWNER(
-        "owner",
-        FileOwnerAttributeView.class,
-        null,
-        Collections.<String>emptyList(),
-        Collections.singletonList("owner")
-    ),
-    POSIX(
-        "posix",
-        PosixFileAttributeView.class,
-        PosixFileAttributes.class,
-        Arrays.asList(
-            "size", "isRegularFile", "isDirectory", "isSymbolicLink",
-            "isOther", "fileKey"
-        ),
-        Arrays.asList(
-            "lastModifiedTime", "lastAccessTime", "creationTime",
-            "owner", "group", "permissions"
-        )
-    ),
+    ACL("acl", AclFileAttributeView.class, null),
+    BASIC("basic", BasicFileAttributeView.class, BasicFileAttributes.class),
+    DOS("dos", DosFileAttributeView.class, DosFileAttributes.class),
+    FILE_OWNER("owner", FileOwnerAttributeView.class, null),
+    POSIX("posix", PosixFileAttributeView.class, PosixFileAttributes.class),
+    USER("user", UserDefinedFileAttributeView.class, null)
     ;
 
     private final String name;
     private final Class<? extends FileAttributeView> viewClass;
     private final Class<? extends BasicFileAttributes> attributeClass;
-    private final Map<String, Access> attributes = new HashMap<>();
 
     StandardAttributesDescriptor(final String name,
         final Class<? extends FileAttributeView> viewClass,
-        final Class<? extends BasicFileAttributes> attributeClass,
-        final List<String> readOnlyAttributes,
-        final List<String> readWriteAttributes)
+        final Class<? extends BasicFileAttributes> attributeClass)
     {
         this.name = name;
         this.viewClass = viewClass;
         this.attributeClass = attributeClass;
-        for (final String attr: readOnlyAttributes)
-            attributes.put(attr, Access.READ_ONLY);
-        for (final String attr: readWriteAttributes)
-            attributes.put(attr, Access.READ_WRITE);
     }
 
     @Nonnull
@@ -130,20 +74,5 @@ public enum StandardAttributesDescriptor
     public Class<? extends BasicFileAttributes> getAttributeClass()
     {
         return attributeClass;
-    }
-
-    @Nullable
-    @Override
-    public Set<String> getAttributeNames()
-    {
-        return Collections.unmodifiableSet(attributes.keySet());
-    }
-
-    @Nonnull
-    @Override
-    public Access getAccess(@Nonnull final String attributeName)
-    {
-        final Access access = attributes.get(attributeName);
-        return access != null ? access : Access.UNKNOWN;
     }
 }
