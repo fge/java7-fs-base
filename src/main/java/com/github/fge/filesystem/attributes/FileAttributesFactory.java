@@ -19,10 +19,8 @@
 package com.github.fge.filesystem.attributes;
 
 import com.github.fge.filesystem.attributes.descriptor.AttributesDescriptor;
-import com.github.fge.filesystem.attributes.descriptor
-    .StandardAttributesDescriptor;
-import com.github.fge.filesystem.attributes.descriptor
-    .UserDefinedAttributesDescriptor;
+import com.github.fge.filesystem.attributes.descriptor.StandardAttributesDescriptor;
+import com.github.fge.filesystem.attributes.descriptor.UserDefinedAttributesDescriptor;
 import com.github.fge.filesystem.attributes.provider.FileAttributesProvider;
 import com.github.fge.filesystem.exceptions.InvalidAttributeProviderException;
 
@@ -174,6 +172,16 @@ public class FileAttributesFactory
         final Class<? extends FileAttributesProvider> providerClass,
         final AttributesDescriptor descriptor)
     {
+        final int modifiers = providerClass.getModifiers();
+
+        if (!Modifier.isPublic(modifiers))
+            throw new InvalidAttributeProviderException("provider class must "
+                + "be public");
+
+        if (Modifier.isAbstract(modifiers))
+            throw new InvalidAttributeProviderException("provider class must "
+                + "not be abstract");
+
         Class<?> c = descriptor.getViewClass();
 
         if (!c.isAssignableFrom(providerClass))
