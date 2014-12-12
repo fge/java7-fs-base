@@ -63,6 +63,13 @@ public abstract class AclFileAttributesProvider
         throw new ReadOnlyAttributeException();
     }
 
+    @Override
+    public void setAcl(final List<AclEntry> acl)
+        throws IOException
+    {
+        throw new ReadOnlyAttributeException();
+    }
+
     /*
      * by name
      */
