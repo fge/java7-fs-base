@@ -19,22 +19,25 @@
 package com.github.fge.filesystem.attributes;
 
 import com.github.fge.filesystem.attributes.descriptor.AttributesDescriptor;
-import com.github.fge.filesystem.attributes.descriptor.StandardAttributesDescriptor;
-import com.github.fge.filesystem.attributes.descriptor.UserDefinedAttributesDescriptor;
+import com.github.fge.filesystem.attributes.descriptor
+    .StandardAttributesDescriptor;
+import com.github.fge.filesystem.attributes.descriptor
+    .UserDefinedAttributesDescriptor;
 import com.github.fge.filesystem.attributes.provider.FileAttributesProvider;
 import com.github.fge.filesystem.exceptions.InvalidAttributeProviderException;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttributeView;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 
 @ParametersAreNonnullByDefault
 public class FileAttributesFactory
@@ -45,7 +48,11 @@ public class FileAttributesFactory
     private final Map<String, AttributesDescriptor> descriptors
         = new HashMap<>();
 
+    private final Map<String, Class<?>> viewMap = new HashMap<>();
+    private final Map<String, Class<?>> attrMap = new HashMap<>();
+
     private final Map<String, MethodHandle> providers = new HashMap<>();
+
 
     public FileAttributesFactory()
     {
@@ -56,34 +63,36 @@ public class FileAttributesFactory
     }
 
     @Nullable
-    public final <V extends FileAttributeView> V getView(final Class<V> view,
-        final Object... args)
+    public final <V extends FileAttributeView> V getFileAttributeView(
+        final Class<V> targetClass, final Object... args
+    )
     {
-        /*
-         * Note: the view should never be null here. As for the args, they may
-         * be... That's up to the user.
-         */
-        final String name = getViewName(view);
+        return getProviderInstance(targetClass, viewMap, args);
+    }
 
-        if (name == null)
-            return null;
+    @Nullable
+    public final <A extends BasicFileAttributes> A getFileAttributes(
+        final Class<A> targetClass, final Object... args
+    )
+    {
+        return getProviderInstance(targetClass, attrMap, args);
+    }
 
-        final Object o;
-        try {
-            o = providers.get(name).invokeExact(args);
-        } catch (Error | RuntimeException e) {
-            throw e;
-        } catch (Throwable throwable) {
-            throw new InvalidAttributeProviderException("unable to build "
-                + "attribute provider", throwable);
-        }
-        return view.cast(o);
+    @Nullable
+    public final AttributesDescriptor getDescriptor(final String name)
+    {
+        return descriptors.get(name);
     }
 
     protected final void addDescriptor(final AttributesDescriptor descriptor)
     {
         Objects.requireNonNull(descriptor);
-        descriptors.put(descriptor.getName(), descriptor);
+        final String name = descriptor.getName();
+
+        descriptors.put(name, descriptor);
+        viewMap.put(name, descriptor.getViewClass());
+        if (descriptor.getAttributeClass() != null)
+            attrMap.put(name, descriptor.getAttributeClass());
     }
 
     protected final void addImplementation(final String name,
@@ -107,27 +116,45 @@ public class FileAttributesFactory
     }
 
     @Nullable
-    private <V extends FileAttributeView> String getViewName(
-        final Class<V> view)
+    private <C> C getProviderInstance(final Class<C> targetClass,
+        final Map<String, Class<?>> map, final Object... args)
     {
-        final Set<Map.Entry<String, AttributesDescriptor>> entries
-            = descriptors.entrySet();
+        final String name = getBestFit(targetClass, map);
 
+        if (name == null)
+            return null;
+
+        final Object o;
+        try {
+            o = providers.get(name).invokeExact(args);
+        } catch (Error | RuntimeException e) {
+            throw e;
+        } catch (Throwable throwable) {
+            throw new InvalidAttributeProviderException("unable to build "
+                + "attribute provider", throwable);
+        }
+        return targetClass.cast(o);
+    }
+
+    @Nullable
+    private static String getBestFit(final Class<?> c,
+        final Map<String, Class<?>> map)
+    {
         String ret = null;
-        Class<? extends FileAttributeView> candidate, bestFit = null;
+        Class<?> candidate, bestFit = null;
 
-        for (final Map.Entry<String, AttributesDescriptor> entry: entries) {
-            candidate = entry.getValue().getViewClass();
+        for (final Map.Entry<String, Class<?>> entry: map.entrySet()) {
+            candidate = entry.getValue();
             /*
              * We have an exact match: return
              */
-            if (candidate == view)
+            if (candidate == c)
                 return entry.getKey();
             /*
-             * Test if the candidate is a subclass of the requested view;
+             * Test if the candidate is a subclass of the requested class;
              * if not, no luck, try next.
              */
-            if (!view.isAssignableFrom(candidate))
+            if (!c.isAssignableFrom(candidate))
                 continue;
             /*
              * OK, it is a subclass. Test this against the best candidate we
@@ -160,9 +187,11 @@ public class FileAttributesFactory
                 + providerClass + " is not a subclass of " + c);
     }
 
+    @Nonnull
     private static MethodHandle getConstructor(
         final Class<? extends FileAttributesProvider> providerClass,
-        final Class<?>... argTypes)
+        final Class<?>... argTypes
+    )
     {
         final MethodHandle handle;
         try {
@@ -171,7 +200,7 @@ public class FileAttributesFactory
         } catch (NoSuchMethodException | IllegalAccessException e) {
             throw new InvalidAttributeProviderException("no constructor found"
                 + " for class " + providerClass + " with parameters "
-                + Arrays.toString(argTypes));
+                + Arrays.toString(argTypes), e);
         }
 
         final MethodType type = handle.type().changeReturnType(providerClass);
