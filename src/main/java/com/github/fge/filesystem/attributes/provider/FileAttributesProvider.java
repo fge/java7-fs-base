@@ -15,9 +15,9 @@ import java.util.Objects;
 /**
  * Basic file attribute view provider class
  *
- * <p>Use this class if you want to implement your own file attribute view.
- * Note that you should not pick a name already taken by the JDK views (see
- * {@link com.github.fge.filesystem.attributes} for a list).</p>
+ * <p>Use this class if you want to implement your own file attribute view.See
+ * <a href="http://java7fs.wikia.com/wiki/Implementing_file_attributes">this
+ * page</a>for an example.</p>
  *
  * <p>Unless otherwise noted, all methods defined by this class do not accept
  * null arguments, and will throw a {@link NullPointerException} if a null

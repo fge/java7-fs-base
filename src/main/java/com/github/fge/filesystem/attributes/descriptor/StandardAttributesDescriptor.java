@@ -32,7 +32,8 @@ import java.nio.file.attribute.PosixFileAttributes;
 import java.nio.file.attribute.UserDefinedFileAttributeView;
 
 /**
- * File attribute descriptors for all standard views defined by the JDK
+ * File attribute descriptors for all {@link FileAttributeView}s defined by
+ * the JDK
  */
 public enum StandardAttributesDescriptor
     implements AttributesDescriptor

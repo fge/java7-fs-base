@@ -323,7 +323,6 @@ public final class ReadOnlyFileSystemDriver
      * @return a path matcher provider
      *
      * @see FileSystem#getPathMatcher(String)
-     * @see com.github.fge.filesystem.path.matchers
      */
     @Override
     @Nonnull

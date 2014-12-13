@@ -134,7 +134,6 @@ public interface FileSystemDriver
      * @return a path matcher provider
      *
      * @see FileSystem#getPathMatcher(String)
-     * @see com.github.fge.filesystem.path.matchers
      */
     @Nonnull
     PathMatcherProvider getPathMatcherProvider();

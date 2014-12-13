@@ -53,10 +53,9 @@
  *
  * <p>All views (except for {@code "user"} also define the set of attribute
  * names they support; however, this class does not have this information. This
- * is left to the {@link com.github.fge.filesystem.attributes.provider
+ * is left to the {@link
+ * com.github.fge.filesystem.attributes.provider.FileAttributesProvider
  * attribute providers} to deal with.</p>
- *
- * @see java.nio.file.attribute
  */
 
 package com.github.fge.filesystem.attributes.descriptor;

@@ -20,6 +20,9 @@ package com.github.fge.filesystem.attributes.descriptor;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttributeView;
 
@@ -32,6 +35,8 @@ public interface AttributesDescriptor
      * Get the name of the attribute view
      *
      * @return the name
+     *
+     * @see FileAttributeView#name()
      */
     @Nonnull
     String getName();
@@ -40,6 +45,8 @@ public interface AttributesDescriptor
      * Get the file attribute view class associated with this view
      *
      * @return the view class
+     *
+     * @see Files#getFileAttributeView(Path, Class, LinkOption...)
      */
     @Nonnull
     Class<? extends FileAttributeView> getViewClass();
@@ -49,6 +56,8 @@ public interface AttributesDescriptor
      *
      * @return the attributes class, or {@code null} if this view does not
      * have an attributes class
+     *
+     * @see Files#readAttributes(Path, Class, LinkOption...)
      */
     @Nullable
     Class<? extends BasicFileAttributes> getAttributeClass();

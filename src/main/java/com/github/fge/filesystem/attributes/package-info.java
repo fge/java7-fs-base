@@ -44,8 +44,9 @@
  * <h2>Implementing attributes</h2>
  *
  * <p>This package wraps all attribute views in {@link
- * com.github.fge.filesystem.attributes.provider provider classes}. After you
- * implement the attribute providers you need, you will need to extend {@link
+ * com.github.fge.filesystem.attributes.provider.FileAttributesProvider provider
+ * classes}. After you implement the attribute providers you need, you will need
+ * to extend {@link
  * com.github.fge.filesystem.attributes.FileAttributesFactory} and register your
  * attribute providers. For instance:</p>
  *

@@ -45,7 +45,6 @@
  * by throwning a {@link
  * com.github.fge.filesystem.exceptions.ReadOnlyAttributeException}.</p>
  *
- * @see java.nio.file.attribute
  * @see com.github.fge.filesystem.attributes.FileAttributesFactory
  */
 package com.github.fge.filesystem.attributes.provider;
