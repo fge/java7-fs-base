@@ -27,6 +27,7 @@ import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.nio.file.attribute.AclFileAttributeView;
+import java.nio.file.attribute.FileOwnerAttributeView;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
@@ -36,12 +37,32 @@ import static org.testng.Assert.assertTrue;
 public final class FileAttributesFactoryTest
 {
     @Test
+    public void cannotRegisterProviderWithoutMetadataClass()
+    {
+        try {
+            new FileAttributesFactory()
+            {
+                {
+                    addImplementation("acl", PublicAcl.class);
+                }
+            };
+            failBecauseExceptionWasNotThrown(
+                IllegalArgumentException.class
+            );
+        } catch (IllegalArgumentException e) {
+            assertThat(e).hasMessage("metadata class has not been set");
+        }
+    }
+
+
+    @Test
     public void registeringNewProviderWorksWhenClassIsCorrect()
     {
         new FileAttributesFactory()
         {
             {
-                addImplementation("acl", PublicAcl.class, ArgType1.class);
+                setMetadataClass(ArgType1.class);
+                addImplementation("acl", PublicAcl.class);
             }
         };
 
@@ -55,7 +76,8 @@ public final class FileAttributesFactoryTest
             new FileAttributesFactory()
             {
                 {
-                    addImplementation("acl", ProtectedAcl.class,ArgType1.class);
+                    setMetadataClass(ArgType1.class);
+                    addImplementation("acl", ProtectedAcl.class);
                 }
             };
             failBecauseExceptionWasNotThrown(
@@ -73,8 +95,8 @@ public final class FileAttributesFactoryTest
             new FileAttributesFactory()
             {
                 {
-                    addImplementation("acl", PackageLocalAcl.class,
-                        ArgType1.class);
+                    setMetadataClass(ArgType1.class);
+                    addImplementation("acl", PackageLocalAcl.class);
                 }
             };
             failBecauseExceptionWasNotThrown(
@@ -92,8 +114,9 @@ public final class FileAttributesFactoryTest
             new FileAttributesFactory()
             {
                 {
+                    setMetadataClass(ArgType1.class);
                     addImplementation("acl",
-                        PublicAclNonPublicConstructor.class, ArgType1.class);
+                        PublicAclNonPublicConstructor.class);
                 }
             };
             failBecauseExceptionWasNotThrown(
@@ -112,7 +135,8 @@ public final class FileAttributesFactoryTest
             new FileAttributesFactory()
             {
                 {
-                    addImplementation("acl", PublicAcl.class, Object.class);
+                    setMetadataClass(Object.class);
+                    addImplementation("acl", PublicAcl.class);
                 }
             };
             failBecauseExceptionWasNotThrown(
@@ -132,12 +156,34 @@ public final class FileAttributesFactoryTest
             = new FileAttributesFactory()
         {
             {
-                addImplementation("acl", PublicAcl.class, ArgType1.class);
+                setMetadataClass(ArgType1.class);
+                addImplementation("acl", PublicAcl.class);
             }
         };
 
         final AclFileAttributeView view
             = factory.getFileAttributeView(AclFileAttributeView.class,
+                mock(ArgType1.class));
+
+        assertThat(view).isNotNull()
+            .isExactlyInstanceOf(PublicAcl.class);
+    }
+
+    @Test(dependsOnMethods = "registeringNewProviderWorksWhenClassIsCorrect")
+    public void canReturnSubclassOfRequiredAttributeViewClass()
+        throws IOException
+    {
+        final FileAttributesFactory factory
+            = new FileAttributesFactory()
+        {
+            {
+                setMetadataClass(ArgType1.class);
+                addImplementation("acl", PublicAcl.class);
+            }
+        };
+
+        final FileOwnerAttributeView view
+            = factory.getFileAttributeView(FileOwnerAttributeView.class,
                 mock(ArgType1.class));
 
         assertThat(view).isNotNull()

@@ -52,6 +52,8 @@ public class FileAttributesFactory
 
     private final Map<String, MethodHandle> providers = new HashMap<>();
 
+    private Class<?> metadataClass = null;
+
     public FileAttributesFactory()
     {
         for (final AttributesDescriptor descriptor:
@@ -107,6 +109,9 @@ public class FileAttributesFactory
         Objects.requireNonNull(descriptor);
         final String name = descriptor.getName();
 
+        if (descriptors.containsKey(name))
+            throw new IllegalArgumentException("a descriptor already exists "
+                + "for view " + name);
         descriptors.put(name, descriptor);
         viewMap.put(name, descriptor.getViewClass());
         if (descriptor.getAttributeClass() != null)
@@ -114,22 +119,23 @@ public class FileAttributesFactory
     }
 
     protected final void addImplementation(final String name,
-        final Class<? extends FileAttributesProvider> providerClass,
-        final Class<?> metadataClass)
+        final Class<? extends FileAttributesProvider> providerClass)
     {
         Objects.requireNonNull(name);
         Objects.requireNonNull(providerClass);
-        Objects.requireNonNull(metadataClass);
+        if (metadataClass == null)
+            throw new IllegalArgumentException("metadata class has not been "
+                + "set");
 
         final AttributesDescriptor descriptor
             = descriptors.get(Objects.requireNonNull(name));
 
         if (descriptor == null)
-            throw new InvalidAttributeProviderException("no descriptor for "
-                + "attribute type " + name);
+            throw new IllegalArgumentException("no descriptor for attribute"
+                + " type " + name);
 
         checkCasts(providerClass, descriptor);
-        providers.put(name, getConstructor(providerClass, metadataClass));
+        providers.put(name, getConstructor(providerClass));
     }
 
     @Nullable
@@ -137,12 +143,7 @@ public class FileAttributesFactory
         final Map<String, Class<?>> map, final Object metadata)
         throws IOException
     {
-        final String name = getBestFit(targetClass, map);
-
-        if (name == null)
-            return null;
-
-        final MethodHandle handle = providers.get(name);
+        final MethodHandle handle = getHandle(targetClass, map);
 
         if (handle == null)
             return null;
@@ -158,19 +159,16 @@ public class FileAttributesFactory
     }
 
     @Nullable
-    private static String getBestFit(final Class<?> c,
+    private MethodHandle getHandle(final Class<?> c,
         final Map<String, Class<?>> map)
     {
-        String ret = null;
+        MethodHandle ret = null;
         Class<?> candidate, bestFit = null;
+        String name;
 
         for (final Map.Entry<String, Class<?>> entry: map.entrySet()) {
+            name = entry.getKey();
             candidate = entry.getValue();
-            /*
-             * We have an exact match: return
-             */
-            if (candidate == c)
-                return entry.getKey();
             /*
              * Test if the candidate is a subclass of the requested class;
              * if not, no luck, try next.
@@ -183,8 +181,10 @@ public class FileAttributesFactory
              * of our current best, it is our new current best.
              */
             if (bestFit == null || candidate.isAssignableFrom(bestFit)) {
+                if (!providers.containsKey(name))
+                    continue;
                 bestFit = candidate;
-                ret = entry.getKey();
+                ret = providers.get(name);
             }
         }
 
@@ -211,6 +211,7 @@ public class FileAttributesFactory
             throw new InvalidAttributeProviderException("provider class "
                 + providerClass + " is not a subclass of " + c);
 
+        //noinspection ReuseOfLocalVariable
         c = descriptor.getAttributeClass();
 
         if (c != null && !c.isAssignableFrom(providerClass))
@@ -219,9 +220,8 @@ public class FileAttributesFactory
     }
 
     @Nonnull
-    private static MethodHandle getConstructor(
-        final Class<? extends FileAttributesProvider> providerClass,
-        final Class<?> metadataClass
+    private MethodHandle getConstructor(
+        final Class<? extends FileAttributesProvider> providerClass
     )
     {
         final MethodHandle handle;
