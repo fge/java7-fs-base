@@ -23,14 +23,33 @@ import javax.annotation.Nullable;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttributeView;
 
+/**
+ * One file attribute descriptor
+ */
 public interface AttributesDescriptor
 {
+    /**
+     * Get the name of the attribute view
+     *
+     * @return the name
+     */
     @Nonnull
     String getName();
 
+    /**
+     * Get the file attribute view class associated with this view
+     *
+     * @return the view class
+     */
     @Nonnull
     Class<? extends FileAttributeView> getViewClass();
 
+    /**
+     * Get the file attributes class (if any) associated with this view
+     *
+     * @return the attributes class, or {@code null} if this view does not
+     * have an attributes class
+     */
     @Nullable
     Class<? extends BasicFileAttributes> getAttributeClass();
 }
