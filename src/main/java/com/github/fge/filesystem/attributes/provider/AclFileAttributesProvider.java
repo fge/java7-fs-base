@@ -34,6 +34,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * Provider for the {@code "acl"} file attribute view
+ *
+ * <p>By default, the list of provided ACLs is empty.</p>
+ *
+ * @see AclFileAttributeView
+ */
 @SuppressWarnings("DesignForExtension")
 @ParametersAreNonnullByDefault
 public abstract class AclFileAttributesProvider

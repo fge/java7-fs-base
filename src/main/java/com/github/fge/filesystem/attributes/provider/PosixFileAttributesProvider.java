@@ -38,16 +38,27 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+/**
+ * Provider for the {@code "posix"} file attribute view
+ *
+ * <p>The default values are the same as {@link BasicFileAttributesProvider};
+ * in addition, the default permissions are {@code "rwxr-wr-x"} for directories
+ * and {@code rw-r--r--} for all other types.</p>
+ *
+ * @see PosixFileAttributeView
+ * @see PosixFileAttributes
+ * @see PosixFilePermissions
+ */
 @SuppressWarnings("DesignForExtension")
 @ParametersAreNonnullByDefault
 public abstract class PosixFileAttributesProvider
     extends FileAttributesProvider
     implements PosixFileAttributeView, PosixFileAttributes
 {
-    private static final FileTime UNIX_EPOCH = FileTime.fromMillis(0L);
-    private static final Set<PosixFilePermission> DEFAULT_FILE_PERMS
+    protected static final FileTime UNIX_EPOCH = FileTime.fromMillis(0L);
+    protected static final Set<PosixFilePermission> DEFAULT_OTHER_PERMS
         = PosixFilePermissions.fromString("rw-r--r--");
-    private static final Set<PosixFilePermission> DEFAULT_DIRECTORY_PERMS
+    protected static final Set<PosixFilePermission> DEFAULT_DIRECTORY_PERMS
         = PosixFilePermissions.fromString("rwxr-xr-x");
 
     protected PosixFileAttributesProvider()
@@ -108,7 +119,7 @@ public abstract class PosixFileAttributesProvider
     @Override
     public Set<PosixFilePermission> permissions()
     {
-        return isRegularFile() ? DEFAULT_FILE_PERMS : DEFAULT_DIRECTORY_PERMS;
+        return isRegularFile() ? DEFAULT_OTHER_PERMS : DEFAULT_DIRECTORY_PERMS;
     }
 
     /*

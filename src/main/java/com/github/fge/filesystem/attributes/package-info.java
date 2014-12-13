@@ -16,8 +16,6 @@
  * - ASL 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
  */
 
-package com.github.fge.filesystem.attributes;
-
 /**
  * File attributes and attribute views
  *
@@ -100,3 +98,5 @@ package com.github.fge.filesystem.attributes;
  * <p>Note that this is an error to try and register a descriptor with the same
  * name twice.</p>
  */
+
+package com.github.fge.filesystem.attributes;
