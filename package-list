@@ -1,4 +1,6 @@
-com.github.fge.filesystem.attrs
+com.github.fge.filesystem.attributes
+com.github.fge.filesystem.attributes.descriptor
+com.github.fge.filesystem.attributes.provider
 com.github.fge.filesystem.driver
 com.github.fge.filesystem.exceptions
 com.github.fge.filesystem.filestore
@@ -6,4 +8,5 @@ com.github.fge.filesystem.fs
 com.github.fge.filesystem.path
 com.github.fge.filesystem.path.matchers
 com.github.fge.filesystem.provider
+com.github.fge.filesystem.watch
 sun.nio.fs
