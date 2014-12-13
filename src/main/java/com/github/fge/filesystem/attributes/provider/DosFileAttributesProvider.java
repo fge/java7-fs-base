@@ -33,13 +33,22 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * Provider for the {@code "dos"} file attribute view
+ *
+ * <p>The defaults are the same as those defined by {@link
+ * BasicFileAttributesProvider}, with no other defaults added.</p>
+ *
+ * @see DosFileAttributeView
+ * @see DosFileAttributes
+ */
 @SuppressWarnings("DesignForExtension")
 @ParametersAreNonnullByDefault
 public abstract class DosFileAttributesProvider
     extends FileAttributesProvider
     implements DosFileAttributeView, DosFileAttributes
 {
-    private static final FileTime UNIX_EPOCH = FileTime.fromMillis(0L);
+    protected static final FileTime UNIX_EPOCH = FileTime.fromMillis(0L);
 
     protected DosFileAttributesProvider()
         throws IOException
@@ -138,6 +147,7 @@ public abstract class DosFileAttributesProvider
     /*
      * by name
      */
+
     @SuppressWarnings("OverlyLongMethod")
     @Override
     public final void setAttributeByName(final String name, final Object value)
@@ -216,7 +226,7 @@ public abstract class DosFileAttributesProvider
             case "archive":
                 return isArchive();
             default:
-                throw new IllegalStateException("how did I get there??");
+                throw new NoSuchAttributeException(name);
         }
     }
 

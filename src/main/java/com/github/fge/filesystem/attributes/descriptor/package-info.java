@@ -59,6 +59,5 @@
  * @see java.nio.file.attribute
  */
 
-
 package com.github.fge.filesystem.attributes.descriptor;
 

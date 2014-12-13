@@ -31,6 +31,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * Provider for the {@code "user"} file attribute view
+ *
+ * @see UserDefinedFileAttributeView
+ */
 @SuppressWarnings("DesignForExtension")
 @ParametersAreNonnullByDefault
 public abstract class UserDefinedFileAttributesProvider

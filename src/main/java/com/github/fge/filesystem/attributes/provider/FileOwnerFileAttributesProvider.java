@@ -31,6 +31,11 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * Provider for the {@code "owner"} file attribute view
+ *
+ * @see FileOwnerAttributeView
+ */
 @SuppressWarnings("DesignForExtension")
 @ParametersAreNonnullByDefault
 public abstract class FileOwnerFileAttributesProvider

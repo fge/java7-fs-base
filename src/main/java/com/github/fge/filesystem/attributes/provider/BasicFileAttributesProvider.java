@@ -33,13 +33,28 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * Provider for the {@code "basic"} file attribute view
+ *
+ * <p>The defaults are:</p>
+ *
+ * <ul>
+ *     <li>all timestamp attribute query methods return Unix epoch;</li>
+ *     <li>{@link #isSymbolicLink()} and {@link #isOther()} return {@code
+ *     false};</li>
+ *     <li>{@link #fileKey()} returns {@code null}.</li>
+ * </ul>
+ *
+ * @see BasicFileAttributeView
+ * @see BasicFileAttributes
+ */
 @SuppressWarnings("DesignForExtension")
 @ParametersAreNonnullByDefault
 public abstract class BasicFileAttributesProvider
     extends FileAttributesProvider
     implements BasicFileAttributeView, BasicFileAttributes
 {
-    private static final FileTime UNIX_EPOCH = FileTime.fromMillis(0L);
+    protected static final FileTime UNIX_EPOCH = FileTime.fromMillis(0L);
 
     protected BasicFileAttributesProvider()
         throws IOException
