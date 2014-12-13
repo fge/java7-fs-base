@@ -63,16 +63,14 @@ import java.util.Objects;
  * #addDescriptor(AttributesDescriptor)} (do this <em>before</em> registering
  * implementations).</p>
  *
- * <p>See {@link com.github.fge.filesystem.attributes this package's
- * description} for a sample use.</p>
+ * <p>See <a
+ * href="http://java7fs.wikia.com/wiki/Implementing_file_attributes">this
+ * page</a>for a sample use.</p>
  *
  * <p>Unless otherwise noted, all methods of this class will throw a {@link
  * NullPointerException} if a null argument is passed.</p>
  *
  * @see FileSystemDriverBase
- * @see com.github.fge.filesystem.attributes
- * @see com.github.fge.filesystem.attributes.descriptor
- * @see com.github.fge.filesystem.attributes.provider
  */
 @ParametersAreNonnullByDefault
 public class FileAttributesFactory
@@ -212,7 +210,6 @@ public class FileAttributesFactory
      * @throws IllegalArgumentException a metadata class has already been set
      *
      * @see FileSystemDriverBase#getPathMetadata(Path)
-     * @see com.github.fge.filesystem.attributes.provider
      */
     protected final void setMetadataClass(final Class<?> metadataClass)
     {
