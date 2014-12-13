@@ -20,7 +20,9 @@ package com.github.fge.filesystem.attributes;
 
 import com.github.fge.filesystem.attributes.descriptor.AttributesDescriptor;
 import com.github.fge.filesystem.attributes.descriptor.StandardAttributesDescriptor;
+import com.github.fge.filesystem.attributes.provider.BasicFileAttributesProvider;
 import com.github.fge.filesystem.attributes.provider.FileAttributesProvider;
+import com.github.fge.filesystem.driver.FileSystemDriverBase;
 import com.github.fge.filesystem.exceptions.InvalidAttributeProviderException;
 
 import javax.annotation.Nonnull;
@@ -31,13 +33,47 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Modifier;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.DosFileAttributeView;
+import java.nio.file.attribute.DosFileAttributes;
 import java.nio.file.attribute.FileAttributeView;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * File attributes factory
+ *
+ * <p>This class allows you to register attribute providers and add
+ * implementations. You must provide one such factory per filesystem and at
+ * least provide an implementation of the {@link BasicFileAttributesProvider
+ * basic file attributes}, as required by the API.</p>
+ *
+ * <p>It is also responsible for generating instances of attribute provider
+ * classes at runtime (using {@link MethodHandle}s).</p>
+ *
+ * <p>You must extend this class, provide the metadata class used when
+ * building attribute providers and then register your attribute provider
+ * classes using {@link #addImplementation(String, Class)}; you can even
+ * register your own attribute views using {@link
+ * #addDescriptor(AttributesDescriptor)} (do this <em>before</em> registering
+ * implementations).</p>
+ *
+ * <p>See {@link com.github.fge.filesystem.attributes this package's
+ * description} for a sample use.</p>
+ *
+ * <p>Unless otherwise noted, all methods of this class will throw a {@link
+ * NullPointerException} if a null argument is passed.</p>
+ *
+ * @see FileSystemDriverBase
+ * @see com.github.fge.filesystem.attributes
+ * @see com.github.fge.filesystem.attributes.descriptor
+ * @see com.github.fge.filesystem.attributes.provider
+ */
 @ParametersAreNonnullByDefault
 public class FileAttributesFactory
 {
@@ -54,6 +90,9 @@ public class FileAttributesFactory
 
     private Class<?> metadataClass = null;
 
+    /**
+     * Constructor to extend
+     */
     public FileAttributesFactory()
     {
         for (final AttributesDescriptor descriptor:
@@ -61,12 +100,32 @@ public class FileAttributesFactory
             addDescriptor(descriptor);
     }
 
+    /**
+     * Return a list of all attribute descriptors registered with this factory
+     *
+     * @return an immutable map (where keys are the names of the views and
+     * values are the descriptors themselves)
+     */
     @Nonnull
     public final Map<String, AttributesDescriptor> getDescriptors()
     {
         return Collections.unmodifiableMap(descriptors);
     }
 
+    /**
+     * Instantiate a new provider for a given attribute view with the given
+     * metadata
+     *
+     * @param name the attribute view name
+     * @param metadata the metadata to use to instantiate the provider
+     * @return the provider, or {@code null} if this view is not supported
+     * @throws IOException failed to generate the provider
+     *
+     * @see FileSystemDriverBase#readAttributes(Path, String, LinkOption...)
+     * @see FileSystemDriverBase#setAttribute(Path, String, Object,
+     * LinkOption...)
+     * @see MethodHandle#invoke(Object...)
+     */
     @Nullable
     public final FileAttributesProvider getProvider(final String name,
         final Object metadata)
@@ -86,6 +145,26 @@ public class FileAttributesFactory
         }
     }
 
+    /**
+     * Generate an attribute provider implementing the target attribute view
+     * class
+     *
+     * <p>Note that the returned target may not "strictly" implement the view;
+     * it may be a subclass of it. For instance, if you only have an
+     * implementation for {@link DosFileAttributeView}, this is what will be
+     * returned if you ask for a {@link BasicFileAttributeView} (since the
+     * former extends the latter).</p>
+     *
+     * @param targetClass the target view
+     * @param metadata the metadata to generate the provider with
+     * @param <V> type parameter of the target view
+     * @return a matching provider downcast to the given class, or {@code null}
+     * if this view is not supported
+     * @throws IOException failed to generate the attribute provider
+     *
+     * @see FileSystemDriverBase#getFileAttributeView(Path, Class,
+     * LinkOption...)
+     */
     @Nullable
     public final <V extends FileAttributeView> V getFileAttributeView(
         final Class<V> targetClass, final Object metadata
@@ -95,6 +174,24 @@ public class FileAttributesFactory
         return getProviderInstance(targetClass, viewMap, metadata);
     }
 
+    /**
+     * Generate an attribute provider matching the target attributes class
+     *
+     * <p>Note that the returned target may not "strictly" implement the
+     * attribute class; it may be a subclass of it. For instance, if you only
+     * have an implementation for {@link DosFileAttributes}, this is what will
+     * be returned if you ask for a {@link BasicFileAttributes} (since the
+     * former extends the latter).</p>
+     *
+     * @param targetClass the target attribute class
+     * @param metadata the metadata to generate the provider with
+     * @param <A> type parameter of the target attribute class
+     * @return a matching provider downcast to the given class, or {@code null}
+     * if this attribute class is not supported
+     * @throws IOException failed to generate the attribute provider
+     *
+     * @see FileSystemDriverBase#readAttributes(Path, Class, LinkOption...)
+     */
     @Nullable
     public final <A extends BasicFileAttributes> A getFileAttributes(
         final Class<A> targetClass, final Object metadata
@@ -104,6 +201,37 @@ public class FileAttributesFactory
         return getProviderInstance(targetClass, attrMap, metadata);
     }
 
+    /**
+     * Set the metadata class used when constructing new attribute provider
+     * instances
+     *
+     * <p>This method <strong>must</strong> be called before registering
+     * attribute provider implementations.</p>
+     *
+     * @param metadataClass the class
+     * @throws IllegalArgumentException a metadata class has already been set
+     *
+     * @see FileSystemDriverBase#getPathMetadata(Path)
+     * @see com.github.fge.filesystem.attributes.provider
+     */
+    protected final void setMetadataClass(final Class<?> metadataClass)
+    {
+        //noinspection VariableNotUsedInsideIf
+        if (this.metadataClass != null)
+            throw new IllegalArgumentException("metadata class has already "
+                + "been set");
+        this.metadataClass = Objects.requireNonNull(metadataClass);
+    }
+
+    /**
+     * Add an attribute view descriptor
+     *
+     * @param descriptor the descriptor to add
+     * @throws IllegalArgumentException a descriptor by that name is already
+     * registered
+     *
+     * @see AttributesDescriptor#getName()
+     */
     protected final void addDescriptor(final AttributesDescriptor descriptor)
     {
         Objects.requireNonNull(descriptor);
@@ -118,6 +246,20 @@ public class FileAttributesFactory
             attrMap.put(name, descriptor.getAttributeClass());
     }
 
+    /**
+     * Add an implementation for a given attribute view
+     *
+     * @param name the name of the view
+     * @param providerClass the attribute provider class
+     * @throws IllegalArgumentException no metadata class has been set, or no
+     * descriptor associated with that view
+     * @throws InvalidAttributeProviderException provided class is not a
+     * concrete class; or no suitable constructor has been found; or it is not a
+     * subclass of the associated view class and (if any) attribute class
+     *
+     * @see AttributesDescriptor#getViewClass()
+     * @see AttributesDescriptor#getAttributeClass()
+     */
     protected final void addImplementation(final String name,
         final Class<? extends FileAttributesProvider> providerClass)
     {
