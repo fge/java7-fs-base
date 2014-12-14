@@ -24,21 +24,23 @@ import java.nio.file.LinkOption;
 import java.nio.file.OpenOption;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
 @ParametersAreNonnullByDefault
-public class FileSystemOptionsFactory
+public class FileSystemOptionsRepository
 {
-
 	private final Set<OpenOption> openOptions = new HashSet<>();
 	private final Set<CopyOption> copyOptions = new HashSet<>();
-	private final Set<LinkOption> linkOptions = new HashSet<>();
+	private final Set<LinkOption> linkOptions
+		= EnumSet.noneOf(LinkOption.class);
 
-	public FileSystemOptionsFactory()
+	public FileSystemOptionsRepository()
 	{
 		addCopyOption(StandardCopyOption.REPLACE_EXISTING);
+
 		addOpenOption(StandardOpenOption.CREATE);
 		addOpenOption(StandardOpenOption.CREATE_NEW);
 		addOpenOption(StandardOpenOption.READ);
@@ -47,40 +49,18 @@ public class FileSystemOptionsFactory
 		addOpenOption(StandardOpenOption.WRITE);
 	}
 
-	/**
-	 * <p>This method will take an OpenOption parameter and add it
-	 * as OpenOption.</p>
-	 *
-	 * @param openOption OpenOption parameter
-	 * @throws NullPointerException if openOption is null
-	 */
 	protected final void addOpenOption(final OpenOption openOption)
 	{
 		openOptions.add(Objects.requireNonNull(openOption));
 	}
 
-	/**
-	 * <p>This method will take a CopyOption parameter and add it
-	 * as CopyOption.</p>
-	 *
-	 * @param copyOption CopyOption parameter
-	 * @throws NullPointerException if copyOption is null
-	 */
 	protected final void addCopyOption(final CopyOption copyOption)
 	{
 		copyOptions.add(Objects.requireNonNull(copyOption));
 	}
 
-	/**
-	 * <p>This method will take a LinkOption parameter and add it
-	 * as LinkOption.</p>
-	 *
-	 * @param linkOption LinkOption parameter
-	 * @throws NullPointerException if linkOption is null
-	 */
 	protected final void addLinkOption(final LinkOption linkOption)
 	{
 		linkOptions.add(Objects.requireNonNull(linkOption));
 	}
-
 }
