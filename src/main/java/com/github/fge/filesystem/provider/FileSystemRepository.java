@@ -19,98 +19,131 @@
 package com.github.fge.filesystem.provider;
 
 import com.github.fge.filesystem.driver.FileSystemDriver;
+import com.github.fge.filesystem.fs.GenericFileSystem;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.FileSystem;
+import java.nio.file.FileSystemAlreadyExistsException;
 import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.Path;
 import java.nio.file.spi.FileSystemProvider;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
-/**
- * File system repository
- *
- * <p>A {@link FileSystemProvider} delegates all filesystem creation/unregister
- * operations to an implementation of this interface.</p>
- *
- * <p>Unless otherwise noted, all methods of this interface do not support null
- * arguments; calling one method with a null argument will result in the
- * caller being "greeted" with a {@link NullPointerException}.</p>
- */
-// TODO: that should be an abstract class, really
 @ParametersAreNonnullByDefault
-public interface FileSystemRepository
+public abstract class FileSystemRepository
 {
-    /**
-     * Create a filesystem driver for a particular URI and configuration
-     *
-     * <p>When this method is called, the URI is guaranteed to be well formed
-     * (ie, a hierarchical URI).</p>
-     *
-     * @param uri the URI
-     * @param env the environment
-     * @return a filesystem driver
-     * @throws IOException driver could not be created
-     *
-     * @see FileSystemProvider#newFileSystem(URI, Map)
-     */
-    @Nonnull
-    FileSystemDriver createDriver(URI uri, Map<String, ?> env)
-        throws IOException;
+    private final String scheme;
+    private final Map<URI, GenericFileSystem> filesystems = new HashMap<>();
 
-    /**
-     * Return the scheme associated with this provider
-     *
-     * @return the scheme
-     *
-     * @see FileSystemProvider#getScheme()
-     */
-    @Nonnull
-    String getScheme();
+    protected FileSystemRepository(final String scheme)
+    {
+        this.scheme = scheme;
+    }
 
-    /**
-     * Create a new filesystem
-     *
-     * @param provider the associated provider
-     * @param uri the URI
-     * @param env the filesystem configuration
-     * @return a new filesystem
-     * @throws IOException failure to create the filesystem
-     *
-     * @see FileSystemProvider#newFileSystem(URI, Map)
-     */
-    // TODO: not sure about this and createDriver
     @Nonnull
-    FileSystem createFileSystem(FileSystemProvider provider, URI uri,
+    public final String getScheme()
+    {
+        return scheme;
+    }
+
+    @Nonnull
+    protected abstract FileSystemDriver createDriver(URI uri,
         Map<String, ?> env)
         throws IOException;
 
-    /**
-     * Get a filesystem associated with a URI
-     *
-     * @param uri the URI
-     * @return the filesystem
-     * @throws FileSystemNotFoundException filesystem does not exist and cannot
-     * be automatically created
-     *
-     * @see FileSystemProvider#getFileSystem(URI)
-     */
     @Nonnull
-    FileSystem getFileSystem(URI uri);
+    public final FileSystem createFileSystem(final FileSystemProvider provider,
+        final URI uri, final Map<String, ?> env)
+        throws IOException
+    {
+        Objects.requireNonNull(provider);
+        Objects.requireNonNull(env);
+        checkURI(uri);
 
-    /**
-     * Get a path associated to a URI
-     *
-     * @param uri the URI
-     * @return the path
-     */
+        synchronized (filesystems) {
+            if (filesystems.containsKey(uri))
+                throw new FileSystemAlreadyExistsException();
+            final FileSystemDriver driver = createDriver(uri, env);
+            final GenericFileSystem fs = new GenericFileSystem(this, driver,
+                provider);
+            filesystems.put(uri, fs);
+            return fs;
+        }
+    }
+
     @Nonnull
-    Path getPath(URI uri);
+    public final FileSystem getFileSystem(final URI uri)
+    {
+        checkURI(uri);
+
+        final FileSystem fs;
+
+        synchronized (filesystems) {
+            fs = filesystems.get(uri);
+        }
+
+        if (fs == null)
+            throw new FileSystemNotFoundException();
+
+        return fs;
+    }
+
+    // Note: fs never created automatically
+    @Nonnull
+    public final Path getPath(final URI uri)
+    {
+        checkURI(uri);
+
+        URI tmp;
+        GenericFileSystem fs;
+        String path;
+
+        synchronized (filesystems) {
+            for (final Map.Entry<URI, GenericFileSystem> entry:
+                filesystems.entrySet()) {
+                tmp = uri.relativize(entry.getKey());
+                if (tmp.isAbsolute())
+                    continue;
+                fs = entry.getValue();
+                // TODO: can happen...
+                if (!fs.isOpen())
+                    continue;
+                path = tmp.getPath();
+                if (path == null)
+                    path = "";
+                return entry.getValue().getPath(path);
+            }
+        }
+
+        throw new FileSystemNotFoundException();
+    }
 
     // Called ONLY after the driver and fs have been successfully closed
     // uri is guaranteed to exist
-    void unregister(URI uri);
+    public final void unregister(final URI uri)
+    {
+        Objects.requireNonNull(uri);
+        synchronized (filesystems) {
+            filesystems.remove(uri);
+        }
+    }
+
+    // TODO: should be checked at the provider level, not here
+    private void checkURI(@Nullable final URI uri)
+    {
+        Objects.requireNonNull(uri);
+        if (!uri.isAbsolute())
+            throw new IllegalArgumentException("uri is not absolute");
+        if (uri.isOpaque())
+            throw new IllegalArgumentException("uri is not hierarchical "
+                + "(.isOpaque() returns true)");
+        if (!scheme.equals(uri.getScheme()))
+            throw new IllegalArgumentException("bad scheme");
+    }
 }
