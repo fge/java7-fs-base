@@ -109,6 +109,7 @@ public interface FileSystemDriver
      *
      * @return a {@link FileStore}
      *
+     * @see FileSystem#getFileStores()
      * @see FileStoreBase
      */
     @Nonnull
@@ -133,6 +134,7 @@ public interface FileSystemDriver
      *
      * @return a path matcher provider
      *
+     * @see PathMatcherProvider
      * @see FileSystem#getPathMatcher(String)
      */
     @Nonnull
@@ -228,7 +230,7 @@ public interface FileSystemDriver
      * @param attrs the attributes with which the directory should be created
      * @throws IOException filesystem level error, or a plain I/O error
      *
-     * @see FileSystemProvider#newDirectoryStream(Path, DirectoryStream.Filter)
+     * @see FileSystemProvider#createDirectory(Path, FileAttribute[])
      */
     void createDirectory(Path dir, FileAttribute<?>... attrs)
         throws IOException;
@@ -336,6 +338,7 @@ public interface FileSystemDriver
      *
      * @see FileSystemProvider#getFileAttributeView(Path, Class, LinkOption...)
      */
+    // TODO: attribute view should be lazy loaded
     @Nullable
     <V extends FileAttributeView> V getFileAttributeView(Path path,
         Class<V> type, LinkOption... options);

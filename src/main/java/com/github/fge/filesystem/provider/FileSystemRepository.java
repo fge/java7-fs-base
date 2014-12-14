@@ -42,13 +42,14 @@ public interface FileSystemRepository
     @Nonnull
     FileSystem createFileSystem(FileSystemProvider provider, URI uri,
         Map<String, ?> env)
-            throws IOException;
+        throws IOException;
 
     @Nonnull
     FileSystem getFileSystem(URI uri);
 
     @Nonnull
     Path getPath(URI uri);
+
     // Called ONLY after the driver and fs have been successfully closed
     // uri is guaranteed to exist
     void unregister(URI uri);

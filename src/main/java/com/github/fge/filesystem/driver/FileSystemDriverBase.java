@@ -32,7 +32,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.FileStore;
-import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
@@ -41,7 +40,6 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.FileAttributeView;
 import java.nio.file.attribute.UserPrincipalLookupService;
-import java.nio.file.spi.FileSystemProvider;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -169,23 +167,6 @@ public abstract class FileSystemDriverBase
         return path.toAbsolutePath().equals(path2.toAbsolutePath());
     }
 
-    /**
-     * Set an attribute for a path on this filesystem
-     *
-     * @param path the victim
-     * @param attribute the name of the attribute to set
-     * @param value the value to set
-     * @param options the link options
-     * @throws IOException filesystem level error, or a plain I/O error
-     * @throws IllegalArgumentException malformed attribute, or the specified
-     * attribute does not exist
-     * @throws UnsupportedOperationException the attribute to set is not
-     * supported by this filesystem
-     * @throws ClassCastException attribute value is of the wrong class for the
-     * specified attribute
-     * @see Files#setAttribute(Path, String, Object, LinkOption...)
-     * @see FileSystemProvider#setAttribute(Path, String, Object, LinkOption...)
-     */
     @Override
     public final void setAttribute(final Path path, final String attribute,
         final Object value, final LinkOption... options)
@@ -214,22 +195,6 @@ public abstract class FileSystemDriverBase
         provider.setAttributeByName(name, value);
     }
 
-    /**
-     * Read a list of attributes from a path on this filesystem
-     *
-     * @param path the path to read attributes from
-     * @param attributes the list of attributes to read
-     * @param options the link options
-     * @return the relevant attributes as a map
-     *
-     * @throws IOException filesystem level error, or a plain I/O error
-     * @throws IllegalArgumentException malformed attributes string; or a
-     * specified attribute does not exist
-     * @throws UnsupportedOperationException one or more attribute(s) is/are not
-     * supported
-     * @see Files#readAttributes(Path, String, LinkOption...)
-     * @see FileSystemProvider#readAttributes(Path, String, LinkOption...)
-     */
     @Override
     public final Map<String, Object> readAttributes(final Path path,
         final String attributes, final LinkOption... options)
@@ -267,18 +232,6 @@ public abstract class FileSystemDriverBase
         return Collections.unmodifiableMap(map);
     }
 
-    /**
-     * Read attributes from a path on this filesystem
-     *
-     * @param path the path to read attributes from
-     * @param type the class of attributes to read
-     * @param options the link options
-     * @return the attributes
-     *
-     * @throws IOException filesystem level error, or a plain I/O error
-     * @throws UnsupportedOperationException attribute type not supported
-     * @see FileSystemProvider#readAttributes(Path, Class, LinkOption...)
-     */
     @Override
     public final <A extends BasicFileAttributes> A readAttributes(
         final Path path, final Class<A> type, final LinkOption... options)
@@ -289,16 +242,6 @@ public abstract class FileSystemDriverBase
         return attributesFactory.getFileAttributes(type, metadata);
     }
 
-    /**
-     * Read an attribute view for a given path on this filesystem
-     *
-     * @param path the path to read attributes from
-     * @param type the class of attribute view to return
-     * @param options the link options
-     * @return the attributes view; {@code null} if this view is not supported
-     *
-     * @see FileSystemProvider#getFileAttributeView(Path, Class, LinkOption...)
-     */
     @Nullable
     @Override
     public final <V extends FileAttributeView> V getFileAttributeView(
