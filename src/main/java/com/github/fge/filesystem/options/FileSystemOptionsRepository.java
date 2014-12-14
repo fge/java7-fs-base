@@ -18,21 +18,60 @@
 
 package com.github.fge.filesystem.options;
 
+import com.github.fge.filesystem.exceptions.IllegalOptionSetException;
+import com.github.fge.filesystem.exceptions.UnsupportedOptionException;
+
+import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.nio.file.CopyOption;
 import java.nio.file.LinkOption;
 import java.nio.file.OpenOption;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+/**
+ * Repository of options supported by a filesystem
+ *
+ * <p>The default implementation supposes support for the following options:</p>
+ *
+ * <ul>
+ *     <li>{@link StandardOpenOption#CREATE};</li>
+ *     <li>{@link StandardOpenOption#CREATE_NEW};</li>
+ *     <li>{@link StandardOpenOption#READ};</li>
+ *     <li>{@link StandardOpenOption#SPARSE};</li>
+ *     <li>{@link StandardOpenOption#TRUNCATE_EXISTING};</li>
+ *     <li>{@link StandardOpenOption#WRITE};</li>
+ *     <li>{@link StandardCopyOption#REPLACE_EXISTING}.</li>
+ * </ul>
+ *
+ * <p>Extend this class if you want to add support for further options. For
+ * instance, if atomic move is supported:</p>
+ *
+ * <pre>
+ *     public final class MyFileSystemOptionsRepository
+ *         extends FileSystemOptionsRepository
+ *     {
+ *         public MyFileSystemOptionsRepository()
+ *         {
+ *             addCopyOption(StandardCopyOption.ATOMIC_MOVE);
+ *         }
+ *     }
+ * </pre>
+ *
+ * <p>Unless otherwise noted, all methods in this class will throw a {@link
+ * NullPointerException} if a null argument is passed.</p>
+ */
 @ParametersAreNonnullByDefault
 public class FileSystemOptionsRepository
 {
-	private final Set<OpenOption> openOptions = new HashSet<>();
+	private final Set<OpenOption> readOpenOptions = new HashSet<>();
+	private final Set<OpenOption> writeOpenOptions = new HashSet<>();
 	private final Set<CopyOption> copyOptions = new HashSet<>();
 	private final Set<LinkOption> linkOptions
 		= EnumSet.noneOf(LinkOption.class);
@@ -41,26 +80,158 @@ public class FileSystemOptionsRepository
 	{
 		addCopyOption(StandardCopyOption.REPLACE_EXISTING);
 
-		addOpenOption(StandardOpenOption.CREATE);
-		addOpenOption(StandardOpenOption.CREATE_NEW);
-		addOpenOption(StandardOpenOption.READ);
+		addWriteOpenOption(StandardOpenOption.CREATE);
+		addWriteOpenOption(StandardOpenOption.CREATE_NEW);
+		addReadOpenOption(StandardOpenOption.READ);
 		addOpenOption(StandardOpenOption.SPARSE);
-		addOpenOption(StandardOpenOption.TRUNCATE_EXISTING);
-		addOpenOption(StandardOpenOption.WRITE);
+		addWriteOpenOption(StandardOpenOption.TRUNCATE_EXISTING);
+		addWriteOpenOption(StandardOpenOption.WRITE);
 	}
 
-	protected final void addOpenOption(final OpenOption openOption)
+	/**
+	 * Compile a set of read options from a given {@link OpenOption} array
+	 *
+	 * <p>The result set will have at least {@link StandardOpenOption#READ} if
+	 * it is not already present.</p>
+	 *
+	 * @param opts the options array
+	 * @return an unmodifiable set of read options
+	 * @throws UnsupportedOptionException one or more options are not supported
+	 * @throws IllegalOptionSetException some options are unsuited for read
+	 */
+	@Nonnull
+	public final Set<OpenOption> compileReadOptions(final OpenOption... opts)
 	{
-		openOptions.add(Objects.requireNonNull(openOption));
+		final Set<OpenOption> set = new HashSet<>();
+		for (final OpenOption opt: opts) {
+			if (!readOpenOptions.contains(Objects.requireNonNull(opt)))
+				throw new UnsupportedOptionException(opt.toString());
+			set.add(opt);
+		}
+
+		if (set.removeAll(writeOpenOptions))
+			throw new IllegalOptionSetException(Arrays.toString(opts));
+
+		// We want at least READ
+		set.add(StandardOpenOption.READ);
+
+		return Collections.unmodifiableSet(set);
 	}
 
-	protected final void addCopyOption(final CopyOption copyOption)
+	/**
+	 * Compile a set of read options from a given {@link OpenOption} array
+	 *
+	 * <p>The result set will have at least {@link StandardOpenOption#WRITE} if
+	 * it is not already present.</p>
+	 *
+	 * @param opts the options array
+	 * @return an unmodifiable set of write options
+	 * @throws UnsupportedOptionException one or more options are not supported
+	 * @throws IllegalOptionSetException some options are unsuited for write
+	 */
+	@Nonnull
+	public final Set<OpenOption> compileWriteOptions(final OpenOption... opts)
 	{
-		copyOptions.add(Objects.requireNonNull(copyOption));
+		final Set<OpenOption> set = new HashSet<>();
+		for (final OpenOption opt: opts) {
+			if (!writeOpenOptions.contains(Objects.requireNonNull(opt)))
+				throw new UnsupportedOptionException(opt.toString());
+			set.add(opt);
+		}
+
+		if (set.removeAll(readOpenOptions))
+			throw new IllegalOptionSetException(Arrays.toString(opts));
+
+		// We want at least WRITE
+		set.add(StandardOpenOption.WRITE);
+		// TODO: what about this one?
+		//set.add(StandardOpenOption.CREATE);
+
+		return Collections.unmodifiableSet(set);
 	}
 
-	protected final void addLinkOption(final LinkOption linkOption)
+	/**
+	 * Compile a set of copy options from a {@link CopyOption} array
+	 *
+	 * @param opts the options array
+	 * @return an unmodifiable set of options
+	 */
+	@Nonnull
+	public final Set<CopyOption> compileCopyOptions(final CopyOption... opts)
 	{
-		linkOptions.add(Objects.requireNonNull(linkOption));
+		final Set<CopyOption> set = new HashSet<>();
+		for (final CopyOption opt: opts) {
+			if (!copyOptions.contains(Objects.requireNonNull(opt)))
+				throw new UnsupportedOptionException(opt.toString());
+			set.add(opt);
+		}
+
+		return Collections.unmodifiableSet(set);
+	}
+
+	@Nonnull
+	public final Set<LinkOption> compileLinkOptions(final LinkOption... opts)
+	{
+		final Set<LinkOption> set = EnumSet.noneOf(LinkOption.class);
+		for (final LinkOption opt: opts) {
+			if (!linkOptions.contains(Objects.requireNonNull(opt)))
+				throw new UnsupportedOptionException(opt.toString());
+			set.add(opt);
+		}
+
+		return Collections.unmodifiableSet(set);
+	}
+
+	/**
+	 * Add an open option supported for read
+	 *
+	 * @param option the option
+	 */
+	protected final void addReadOpenOption(final OpenOption option)
+	{
+		readOpenOptions.add(Objects.requireNonNull(option));
+	}
+
+	/**
+	 * Add an option option supported for write
+	 *
+	 * @param option the option
+	 */
+	protected final void addWriteOpenOption(final OpenOption option)
+	{
+		writeOpenOptions.add(Objects.requireNonNull(option));
+	}
+
+	/**
+	 * Add an option option supported for both read and write
+	 *
+	 * @param option the option
+	 */
+	protected final void addOpenOption(final OpenOption option)
+	{
+		addReadOpenOption(option);
+		addWriteOpenOption(option);
+	}
+
+	/**
+	 * Add a supported copy option
+	 *
+	 * @param option the option
+	 */
+	protected final void addCopyOption(final CopyOption option)
+	{
+		copyOptions.add(Objects.requireNonNull(option));
+	}
+
+	/**
+	 * Add a supported link option
+	 *
+	 * @param option the option
+	 */
+	protected final void addLinkOption(final LinkOption option)
+	{
+		linkOptions.add(Objects.requireNonNull(option));
+		addOpenOption(option);
+		copyOptions.add(option);
 	}
 }
