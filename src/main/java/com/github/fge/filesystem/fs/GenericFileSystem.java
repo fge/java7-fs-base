@@ -39,7 +39,10 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * Base {@link FileSystem} implementation
+ * Generic {@link FileSystem} implementation
+ *
+ * <p>The design of this package makes it so that this class is final. All its
+ * methods are delegated to the matching component.</p>
  *
  * <p>Limitations:</p>
  *
@@ -59,6 +62,13 @@ public final class GenericFileSystem
     private final PathElementsFactory factory;
     private final String separator;
 
+    /**
+     * Constructor
+     *
+     * @param repository the filesystem repository
+     * @param driver the filesystem driver
+     * @param provider the filesystem provider
+     */
     public GenericFileSystem(final FileSystemRepository repository,
         final FileSystemDriver driver, final FileSystemProvider provider)
     {
@@ -129,6 +139,7 @@ public final class GenericFileSystem
     @Override
     public Iterable<Path> getRootDirectories()
     {
+        // TODO: that's ugly
         return Collections.<Path>singletonList(
             new GenericPath(this, factory, driver.getRoot())
         );

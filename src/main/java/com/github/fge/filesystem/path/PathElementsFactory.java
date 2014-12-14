@@ -21,6 +21,7 @@ package com.github.fge.filesystem.path;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.net.URI;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -474,6 +475,8 @@ public abstract class PathElementsFactory
      * @param prefix the URI path prefix (may be null)
      * @param elements the path elements
      * @return a raw (unencoded) path suitable for use in a URI
+     *
+     * @see URI
      */
     @Nonnull
     protected final String toUriPath(@Nullable final String prefix,

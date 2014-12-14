@@ -39,7 +39,13 @@ import java.util.Iterator;
 import java.util.Objects;
 
 /**
- * A generic {@link Path} implementation
+ * Generic {@link Path} implementation
+ *
+ * <p><strong>IMPORTANT:</strong> unlike the definition of {@link Path}, an
+ * empty path has no name elements. In theory, an empty path is a path with a
+ * single, empty name element, but this is an outright bug, since no filesystem
+ * suports empty name elements. At the moment is it NOT planned to "fix" this.
+ * </p>
  *
  * <p>Most of the heavy lifting of path manipulation (resolution, parent etc)
  * is delegated to the {@link PathElementsFactory} provided as an argument to
@@ -51,6 +57,7 @@ import java.util.Objects;
  * @see PathElementsFactory
  * @see PathElements
  */
+// TODO: empty path problem?
 // TODO: introduce the notion of a "current context"
 @ParametersAreNonnullByDefault
 public final class GenericPath

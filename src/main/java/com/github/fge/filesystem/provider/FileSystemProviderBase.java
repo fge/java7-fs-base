@@ -35,9 +35,6 @@ import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.FileStore;
 import java.nio.file.FileSystem;
-import java.nio.file.FileVisitResult;
-import java.nio.file.FileVisitor;
-import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
@@ -231,7 +228,24 @@ public abstract class FileSystemProviderBase
             return;
         }
 
-        Files.walkFileTree(source, new MoveVisitor(src, source, dst, target));
+        /*
+         * Otherwise, translate the copy options and do a regular stream copy.
+         */
+        final OpenOption[] openOptions = copyToOpenOptions(options);
+        try (
+            final InputStream in = src.newInputStream(source);
+            final OutputStream out = dst.newOutputStream(source, openOptions);
+        ) {
+            final byte[] buf = new byte[BUFSIZE];
+            int bytesRead;
+
+            while ((bytesRead = in.read(buf)) != -1)
+                out.write(buf, 0, bytesRead);
+
+            out.flush();
+        }
+
+        src.delete(source);
     }
 
     @SuppressWarnings("ObjectEquality")
@@ -331,82 +345,12 @@ public abstract class FileSystemProviderBase
     }
 
     @Nonnull
+    // TODO: closed fs check done here may not be the right thing to do...
     private static FileSystemDriver getDriver(final Path path)
     {
         final GenericFileSystem fs = (GenericFileSystem) path.getFileSystem();
         if (!fs.isOpen())
             throw new ClosedFileSystemException();
         return fs.getDriver();
-    }
-
-    private static final class MoveVisitor
-        implements FileVisitor<Path>
-    {
-        private final FileSystemDriver srcDriver;
-        private final Path srcPath;
-        private final FileSystemDriver dstDriver;
-        private final Path dstPath;
-
-        MoveVisitor(final FileSystemDriver srcDriver, final Path srcPath,
-            final FileSystemDriver dstDriver, final Path dstPath)
-        {
-            this.srcDriver = srcDriver;
-            this.srcPath = srcPath;
-            this.dstDriver = dstDriver;
-            this.dstPath = dstPath;
-        }
-
-        @Override
-        public FileVisitResult preVisitDirectory(final Path dir,
-            final BasicFileAttributes attrs)
-            throws IOException
-        {
-            final String s = srcPath.relativize(dir).toString();
-            final Path toCreate = dstPath.resolve(s);
-            dstDriver.createDirectory(toCreate);
-            // TODO: set attributes?
-            return FileVisitResult.CONTINUE;
-        }
-
-        @Override
-        public FileVisitResult visitFile(final Path file,
-            final BasicFileAttributes attrs)
-            throws IOException
-        {
-            final String s = srcPath.relativize(file).toString();
-            final Path toCreate = dstPath.resolve(s);
-            try (
-                final InputStream in = srcDriver.newInputStream(srcPath);
-                final OutputStream out = dstDriver.newOutputStream(toCreate);
-            ) {
-                final byte[] buf = new byte[BUFSIZE];
-
-                int nrBytes;
-
-                while ((nrBytes = in.read(buf)) != -1)
-                    out.write(buf, 0, nrBytes);
-
-                out.flush();
-            }
-            srcDriver.delete(file);
-            return FileVisitResult.CONTINUE;
-        }
-
-        @Override
-        public FileVisitResult visitFileFailed(final Path file,
-            final IOException exc)
-            throws IOException
-        {
-            throw exc;
-        }
-
-        @Override
-        public FileVisitResult postVisitDirectory(final Path dir,
-            final IOException exc)
-            throws IOException
-        {
-            srcDriver.delete(dir);
-            return FileVisitResult.CONTINUE;
-        }
     }
 }

@@ -146,6 +146,7 @@ public abstract class FileStoreBase
     public final boolean supportsFileAttributeView(final String name)
     {
         Objects.requireNonNull(name);
+        // TODO: not good; should build this list when registering providers
         return factory.getDescriptors().containsKey(name);
     }
 
