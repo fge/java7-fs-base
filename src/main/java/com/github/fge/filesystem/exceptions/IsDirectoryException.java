@@ -40,9 +40,6 @@ import java.nio.file.spi.FileSystemProvider;
  * on a path which is a directory: such methods make no sense if the path is
  * considered to be a directory by the filesystem.</p>
  *
- * <p>As this is a filesystem level error, and not an I/O error, this exception
- * extends {@link FileSystemException} and not {@link IOException}.</p>
- *
  * @see FileSystemDriver#newInputStream(Path, OpenOption...)
  * @see FileSystemDriver#newOutputStream(Path, OpenOption...)
  * @see FileSystemProvider#newInputStream(Path, OpenOption...)
@@ -54,11 +51,29 @@ import java.nio.file.spi.FileSystemProvider;
 public final class IsDirectoryException
     extends FileSystemException
 {
+    /**
+     * Constructs an instance of this class. This constructor should be used
+     * when an operation involving one file fails and there isn't any additional
+     * information to explain the reason.
+     *
+     * @param file a string identifying the file or {@code null} if not known.
+     */
     public IsDirectoryException(final String file)
     {
         super(file);
     }
 
+    /**
+     * Constructs an instance of this class. This constructor should be used
+     * when an operation involving two files fails, or there is additional
+     * information to explain the reason.
+     *
+     * @param file a string identifying the file or {@code null} if not known.
+     * @param other a string identifying the other file or {@code null} if there
+     * isn't another file or if not known
+     * @param reason a reason message with additional information or {@code
+     * null}
+     */
     public IsDirectoryException(final String file, final String other,
         final String reason)
     {

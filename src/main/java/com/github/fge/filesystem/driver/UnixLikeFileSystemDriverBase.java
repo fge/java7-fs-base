@@ -28,6 +28,7 @@ import java.net.URI;
 import java.nio.file.FileStore;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
+import java.nio.file.spi.FileSystemProvider;
 
 /**
  * A base abstract implementation of a {@link FileSystemDriver} for Unix-like
@@ -52,12 +53,23 @@ public abstract class UnixLikeFileSystemDriverBase
             new PathMatcherProvider(), attributesFactory);
     }
 
+    /**
+     * Tell whether a path is to be considered hidden by this filesystem
+     * <p>Typically, on Unix systems, it means the last name element of the path
+     * starts with a dot ({@code "."}).</p>
+     *
+     * @param path the path to test
+     * @return true if this path is considered hidden
+     *
+     * @throws IOException filesystem level error, or a plain I/O error
+     * @see FileSystemProvider#isHidden(Path)
+     */
     @SuppressWarnings("DesignForExtension")
     @Override
     public boolean isHidden(final Path path)
         throws IOException
     {
-        return path.getNameCount() > 0
-            && path.getFileName().toString().charAt(0) == '.';
+        final Path filename = path.getFileName();
+        return filename != null && filename.toString().startsWith(".");
     }
 }

@@ -21,9 +21,6 @@ package com.github.fge.filesystem.path;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.regex.Pattern;
 
-/**
- * A {@link PathElementsFactory} for Unix-like paths
- */
 @ParametersAreNonnullByDefault
 public final class UnixPathElementsFactory
     extends PathElementsFactory

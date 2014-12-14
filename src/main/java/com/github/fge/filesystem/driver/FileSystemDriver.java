@@ -24,7 +24,7 @@ import com.github.fge.filesystem.path.PathElements;
 import com.github.fge.filesystem.path.PathElementsFactory;
 import com.github.fge.filesystem.path.matchers.PathMatcherProvider;
 import com.github.fge.filesystem.provider.FileSystemProviderBase;
-import com.github.fge.filesystem.provider.FileSystemRepositoryBase;
+import com.github.fge.filesystem.provider.FileSystemRepository;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -69,7 +69,7 @@ import java.util.Set;
  *
  * @see GenericFileSystem
  * @see FileSystemProviderBase
- * @see FileSystemRepositoryBase
+ * @see FileSystemRepository
  */
 @SuppressWarnings("OverloadedVarargsMethod")
 @ParametersAreNonnullByDefault
@@ -109,7 +109,6 @@ public interface FileSystemDriver
      *
      * @return a {@link FileStore}
      *
-     * @see FileSystem#getFileStores()
      * @see FileStoreBase
      */
     @Nonnull
@@ -134,7 +133,6 @@ public interface FileSystemDriver
      *
      * @return a path matcher provider
      *
-     * @see PathMatcherProvider
      * @see FileSystem#getPathMatcher(String)
      */
     @Nonnull
@@ -230,7 +228,7 @@ public interface FileSystemDriver
      * @param attrs the attributes with which the directory should be created
      * @throws IOException filesystem level error, or a plain I/O error
      *
-     * @see FileSystemProvider#createDirectory(Path, FileAttribute[])
+     * @see FileSystemProvider#newDirectoryStream(Path, DirectoryStream.Filter)
      */
     void createDirectory(Path dir, FileAttribute<?>... attrs)
         throws IOException;
@@ -338,7 +336,6 @@ public interface FileSystemDriver
      *
      * @see FileSystemProvider#getFileAttributeView(Path, Class, LinkOption...)
      */
-    // TODO: attribute view should be lazy loaded
     @Nullable
     <V extends FileAttributeView> V getFileAttributeView(Path path,
         Class<V> type, LinkOption... options);

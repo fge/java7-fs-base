@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+// TODO: need to find a way to remove a FileSystem/driver on close
 @ParametersAreNonnullByDefault
 public abstract class FileSystemRepositoryBase
     implements FileSystemRepository
@@ -47,20 +48,15 @@ public abstract class FileSystemRepositoryBase
         this.scheme = scheme;
     }
 
-    @Override
     @Nonnull
+    @Override
     public final String getScheme()
     {
         return scheme;
     }
 
     @Nonnull
-    protected abstract FileSystemDriver createDriver(URI uri,
-        Map<String, ?> env)
-        throws IOException;
-
     @Override
-    @Nonnull
     public final FileSystem createFileSystem(final FileSystemProvider provider,
         final URI uri, final Map<String, ?> env)
         throws IOException
@@ -80,8 +76,8 @@ public abstract class FileSystemRepositoryBase
         }
     }
 
-    @Override
     @Nonnull
+    @Override
     public final FileSystem getFileSystem(final URI uri)
     {
         checkURI(uri);
@@ -99,8 +95,8 @@ public abstract class FileSystemRepositoryBase
     }
 
     // Note: fs never created automatically
-    @Override
     @Nonnull
+    @Override
     public final Path getPath(final URI uri)
     {
         checkURI(uri);
@@ -140,8 +136,7 @@ public abstract class FileSystemRepositoryBase
         }
     }
 
-    // TODO: should be checked at the provider level, not here
-    private void checkURI(@Nullable final URI uri)
+    private  void checkURI(@Nullable final URI uri)
     {
         Objects.requireNonNull(uri);
         if (!uri.isAbsolute())

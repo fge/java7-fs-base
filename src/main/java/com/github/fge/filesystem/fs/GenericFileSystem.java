@@ -37,13 +37,9 @@ import java.nio.file.spi.FileSystemProvider;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Generic {@link FileSystem} implementation
- *
- * <p>The design of this package makes it so that this class is final. All its
- * methods are delegated to the matching component.</p>
+ * Base {@link FileSystem} implementation
  *
  * <p>Limitations:</p>
  *
@@ -55,7 +51,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public final class GenericFileSystem
     extends FileSystem
 {
-    private final AtomicBoolean open = new AtomicBoolean(true);
+    private volatile boolean open = true;
 
     private final FileSystemRepository repository;
     private final FileSystemProvider provider;
@@ -63,13 +59,6 @@ public final class GenericFileSystem
     private final PathElementsFactory factory;
     private final String separator;
 
-    /**
-     * Constructor
-     *
-     * @param repository the filesystem repository
-     * @param driver the filesystem driver
-     * @param provider the filesystem provider
-     */
     public GenericFileSystem(final FileSystemRepository repository,
         final FileSystemDriver driver, final FileSystemProvider provider)
     {
@@ -103,10 +92,9 @@ public final class GenericFileSystem
     public void close()
         throws IOException
     {
-        if (!open.getAndSet(false))
-            return;
-
         IOException exception = null;
+
+        open = false;
 
         try {
             driver.close();
@@ -123,7 +111,7 @@ public final class GenericFileSystem
     @Override
     public boolean isOpen()
     {
-        return open.get();
+        return open;
     }
 
     @Override
@@ -141,7 +129,6 @@ public final class GenericFileSystem
     @Override
     public Iterable<Path> getRootDirectories()
     {
-        // TODO: that's ugly
         return Collections.<Path>singletonList(
             new GenericPath(this, factory, driver.getRoot())
         );
