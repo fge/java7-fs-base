@@ -98,6 +98,22 @@ public class FileAttributesFactory
             addDescriptor(descriptor);
     }
 
+    public final boolean supportsFileAttributeView(
+        final Class<? extends FileAttributeView> viewClass
+    )
+    {
+        Objects.requireNonNull(viewClass);
+        return getHandle(viewClass, viewMap) != null;
+    }
+
+    public final boolean supportsFileAttributeView(final String name)
+    {
+        final AttributesDescriptor descriptor
+            = descriptors.get(Objects.requireNonNull(name));
+        return descriptor != null
+            && getHandle(descriptor.getViewClass(), viewMap) != null;
+    }
+
     /**
      * Return a list of all attribute descriptors registered with this factory
      *

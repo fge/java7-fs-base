@@ -19,14 +19,12 @@
 package com.github.fge.filesystem.filestore;
 
 import com.github.fge.filesystem.attributes.FileAttributesFactory;
-import com.github.fge.filesystem.attributes.descriptor.AttributesDescriptor;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
 import java.nio.file.FileStore;
 import java.nio.file.attribute.FileAttributeView;
 import java.nio.file.attribute.FileStoreAttributeView;
-import java.util.Collection;
 import java.util.Objects;
 
 /**
@@ -130,24 +128,15 @@ public abstract class FileStoreBase
     public final boolean supportsFileAttributeView(
         final Class<? extends FileAttributeView> type)
     {
-        Objects.requireNonNull(type);
-
-        final Collection<AttributesDescriptor> descriptors
-            = factory.getDescriptors().values();
-
-        for (final AttributesDescriptor descriptor: descriptors)
-            if (type.isAssignableFrom(descriptor.getViewClass()))
-                return true;
-
-        return false;
+        // null checks done by the factory
+        return factory.supportsFileAttributeView(type);
     }
 
     @Override
     public final boolean supportsFileAttributeView(final String name)
     {
-        Objects.requireNonNull(name);
-        // TODO: not good; should build this list when registering providers
-        return factory.getDescriptors().containsKey(name);
+        // null checks done by the factory
+        return factory.supportsFileAttributeView(name);
     }
 
     @Override
