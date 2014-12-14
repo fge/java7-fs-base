@@ -37,6 +37,7 @@ import java.nio.file.spi.FileSystemProvider;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Generic {@link FileSystem} implementation
@@ -54,7 +55,7 @@ import java.util.Set;
 public final class GenericFileSystem
     extends FileSystem
 {
-    private volatile boolean open = true;
+    private final AtomicBoolean open = new AtomicBoolean(true);
 
     private final FileSystemRepository repository;
     private final FileSystemProvider provider;
@@ -102,9 +103,10 @@ public final class GenericFileSystem
     public void close()
         throws IOException
     {
-        IOException exception = null;
+        if (!open.getAndSet(false))
+            return;
 
-        open = false;
+        IOException exception = null;
 
         try {
             driver.close();
@@ -121,7 +123,7 @@ public final class GenericFileSystem
     @Override
     public boolean isOpen()
     {
-        return open;
+        return open.get();
     }
 
     @Override

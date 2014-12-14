@@ -24,7 +24,7 @@ import com.github.fge.filesystem.path.PathElements;
 import com.github.fge.filesystem.path.PathElementsFactory;
 import com.github.fge.filesystem.path.matchers.PathMatcherProvider;
 import com.github.fge.filesystem.provider.FileSystemProviderBase;
-import com.github.fge.filesystem.provider.FileSystemRepository;
+import com.github.fge.filesystem.provider.FileSystemRepositoryBase;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -69,7 +69,7 @@ import java.util.Set;
  *
  * @see GenericFileSystem
  * @see FileSystemProviderBase
- * @see FileSystemRepository
+ * @see FileSystemRepositoryBase
  */
 @SuppressWarnings("OverloadedVarargsMethod")
 @ParametersAreNonnullByDefault
