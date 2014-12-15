@@ -19,6 +19,7 @@
 package com.github.fge.filesystem.attributes;
 
 import com.github.fge.filesystem.attributes.testclasses.ArgType1;
+import com.github.fge.filesystem.attributes.testclasses.DummyPosix;
 import com.github.fge.filesystem.attributes.testclasses.ProtectedAcl;
 import com.github.fge.filesystem.attributes.testclasses.PublicAcl;
 import com.github.fge.filesystem.attributes.testclasses.PublicAclNonPublicConstructor;
@@ -188,5 +189,22 @@ public final class FileAttributesFactoryTest
 
         assertThat(view).isNotNull()
             .isExactlyInstanceOf(PublicAcl.class);
+    }
+
+    @Test
+    public void attributeProviderExtendingBasicReportsBasicViewSupported()
+    {
+        final FileAttributesFactory factory
+            = new FileAttributesFactory()
+        {
+            {
+                setMetadataClass(ArgType1.class);
+                addImplementation("posix", DummyPosix.class);
+            }
+        };
+
+        assertThat(factory.supportsFileAttributeView("basic"))
+            .as("attribute provider extending basic supports basic")
+            .isTrue();
     }
 }
