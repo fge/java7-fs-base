@@ -40,8 +40,9 @@ public abstract class FileSystemRepositoryBase
     implements FileSystemRepository
 {
     private final String scheme;
-    private final FileSystemFactoryProvider factoryProvider;
     private final Map<URI, GenericFileSystem> filesystems = new HashMap<>();
+
+    protected final FileSystemFactoryProvider factoryProvider;
 
     protected FileSystemRepositoryBase(final String scheme,
         final FileSystemFactoryProvider factoryProvider)
