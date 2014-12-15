@@ -49,6 +49,7 @@ public abstract class FileSystemRepositoryBase
     {
         this.scheme = Objects.requireNonNull(scheme);
         this.factoryProvider = Objects.requireNonNull(factoryProvider);
+        factoryProvider.validate();
     }
 
     @Override
