@@ -24,6 +24,7 @@ import com.github.fge.filesystem.driver.FileSystemDriver;
 import com.github.fge.filesystem.path.GenericPath;
 import com.github.fge.filesystem.path.PathElements;
 import com.github.fge.filesystem.path.PathElementsFactory;
+import com.github.fge.filesystem.path.matchers.PathMatcherFactory;
 import com.github.fge.filesystem.provider.FileSystemRepository;
 
 import javax.annotation.Nonnull;
@@ -65,10 +66,10 @@ public final class GenericFileSystem
     private final FileSystemDriver driver;
     private final FileSystemProvider provider;
 
-    private final FileSystemFactoryProvider factoryProvider;
-
     private final PathElementsFactory pathElementsFactory;
     private final String separator;
+    private final PathMatcherFactory pathMatcherFactory;
+    private final FileAttributesFactory attributesFactory;
 
 
     /**
@@ -87,9 +88,13 @@ public final class GenericFileSystem
         this.repository = Objects.requireNonNull(repository);
         this.driver = Objects.requireNonNull(driver);
         this.provider = Objects.requireNonNull(provider);
-        factoryProvider = repository.getFactoryProvider();
+
+        final FileSystemFactoryProvider factoryProvider
+            = repository.getFactoryProvider();
         pathElementsFactory = factoryProvider.getPathElementsFactory();
         separator = pathElementsFactory.getSeparator();
+        pathMatcherFactory = factoryProvider.getPathMatcherFactory();
+        attributesFactory = factoryProvider.getAttributesFactory();
     }
 
     @Nonnull
@@ -168,8 +173,6 @@ public final class GenericFileSystem
     @Override
     public Set<String> supportedFileAttributeViews()
     {
-        final FileAttributesFactory attributesFactory
-            = factoryProvider.getAttributesFactory();
         final Set<String> set = new HashSet<>();
 
         for (final String name: attributesFactory.getDescriptors().keySet())
@@ -213,8 +216,7 @@ public final class GenericFileSystem
             arg = syntaxAndPattern.substring(index + 1);
         }
 
-        return factoryProvider.getPathMatcherFactory()
-            .getPathMatcher(type, arg);
+        return pathMatcherFactory.getPathMatcher(type, arg);
     }
 
     @Override
