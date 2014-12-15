@@ -18,6 +18,7 @@
 
 package com.github.fge.filesystem.provider;
 
+import com.github.fge.filesystem.configuration.FileSystemFactoryProvider;
 import com.github.fge.filesystem.driver.FileSystemDriver;
 import com.github.fge.filesystem.fs.GenericFileSystem;
 
@@ -40,11 +41,14 @@ public abstract class FileSystemRepositoryBase
     implements FileSystemRepository
 {
     private final String scheme;
+    private final FileSystemFactoryProvider factoryProvider;
     private final Map<URI, GenericFileSystem> filesystems = new HashMap<>();
 
-    protected FileSystemRepositoryBase(final String scheme)
+    protected FileSystemRepositoryBase(final String scheme,
+        final FileSystemFactoryProvider factoryProvider)
     {
-        this.scheme = scheme;
+        this.scheme = Objects.requireNonNull(scheme);
+        this.factoryProvider = Objects.requireNonNull(factoryProvider);
     }
 
     @Override
@@ -52,6 +56,13 @@ public abstract class FileSystemRepositoryBase
     public final String getScheme()
     {
         return scheme;
+    }
+
+    @Nonnull
+    @Override
+    public final FileSystemFactoryProvider getFactoryProvider()
+    {
+        return factoryProvider;
     }
 
     @Nonnull

@@ -20,7 +20,6 @@ package com.github.fge.filesystem.driver;
 
 import com.github.fge.filesystem.path.PathElements;
 import com.github.fge.filesystem.path.PathElementsFactory;
-import com.github.fge.filesystem.path.matchers.PathMatcherFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -174,20 +173,6 @@ public final class ReadOnlyFileSystemDriver
     public FileStore getFileStore()
     {
         return delegate.getFileStore();
-    }
-
-    @Override
-    @Nonnull
-    public Set<String> getSupportedFileAttributeViews()
-    {
-        return delegate.getSupportedFileAttributeViews();
-    }
-
-    @Override
-    @Nonnull
-    public PathMatcherFactory getPathMatcherFactory()
-    {
-        return delegate.getPathMatcherFactory();
     }
 
     @Override

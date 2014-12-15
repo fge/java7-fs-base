@@ -19,6 +19,7 @@
 package com.github.fge.filesystem.path;
 
 import com.github.fge.filesystem.CustomSoftAssertions;
+import com.github.fge.filesystem.configuration.FileSystemFactoryProvider;
 import com.github.fge.filesystem.driver.FileSystemDriver;
 import com.github.fge.filesystem.fs.GenericFileSystem;
 import com.github.fge.filesystem.provider.FileSystemRepository;
@@ -53,11 +54,13 @@ public final class GenericPathTest
     @BeforeMethod
     public void initMocks()
     {
+        final FileSystemFactoryProvider factoryProvider
+            = new FileSystemFactoryProvider();
         provider = mock(FileSystemProvider.class);
         repository = mock(FileSystemRepository.class);
+        when(repository.getFactoryProvider()).thenReturn(factoryProvider);
         driver = mock(FileSystemDriver.class);
         factory = mock(PathElementsFactory.class);
-        when(driver.getPathElementsFactory()).thenReturn(factory);
         fs = new GenericFileSystem(uri, repository, driver, provider);
     }
 

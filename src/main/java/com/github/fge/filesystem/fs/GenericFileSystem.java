@@ -18,6 +18,8 @@
 
 package com.github.fge.filesystem.fs;
 
+import com.github.fge.filesystem.attributes.FileAttributesFactory;
+import com.github.fge.filesystem.configuration.FileSystemFactoryProvider;
 import com.github.fge.filesystem.driver.FileSystemDriver;
 import com.github.fge.filesystem.path.GenericPath;
 import com.github.fge.filesystem.path.PathElements;
@@ -35,6 +37,7 @@ import java.nio.file.WatchService;
 import java.nio.file.attribute.UserPrincipalLookupService;
 import java.nio.file.spi.FileSystemProvider;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -59,10 +62,12 @@ public final class GenericFileSystem
 
     private final URI uri;
     private final FileSystemRepository repository;
+    private final FileSystemFactoryProvider factoryProvider;
+    private final PathElementsFactory pathElementsFactory;
     private final FileSystemProvider provider;
     private final FileSystemDriver driver;
-    private final PathElementsFactory factory;
     private final String separator;
+
 
     /**
      * Constructor
@@ -78,10 +83,11 @@ public final class GenericFileSystem
     {
         this.uri = Objects.requireNonNull(uri);
         this.repository = Objects.requireNonNull(repository);
+        factoryProvider = repository.getFactoryProvider();
+        pathElementsFactory = factoryProvider.getPathElementsFactory();
         this.driver = Objects.requireNonNull(driver);
         this.provider = Objects.requireNonNull(provider);
-        factory = driver.getPathElementsFactory();
-        separator = factory.getSeparator();
+        separator = pathElementsFactory.getSeparator();
     }
 
     @Nonnull
@@ -146,7 +152,7 @@ public final class GenericFileSystem
     {
         // TODO: that's ugly
         return Collections.<Path>singletonList(
-            new GenericPath(this, factory, driver.getRoot())
+            new GenericPath(this, pathElementsFactory, driver.getRoot())
         );
     }
 
@@ -159,7 +165,15 @@ public final class GenericFileSystem
     @Override
     public Set<String> supportedFileAttributeViews()
     {
-        return driver.getSupportedFileAttributeViews();
+        final FileAttributesFactory attributesFactory
+            = factoryProvider.getAttributesFactory();
+        final Set<String> set = new HashSet<>();
+
+        for (final String name: attributesFactory.getDescriptors().keySet())
+            if (attributesFactory.supportsFileAttributeView(name))
+                set.add(name);
+
+        return Collections.unmodifiableSet(set);
     }
 
     @SuppressWarnings("OverloadedVarargsMethod")
@@ -167,8 +181,8 @@ public final class GenericFileSystem
     public Path getPath(final String first, final String... more)
     {
         if (more.length == 0)
-            return new GenericPath(this, factory,
-                factory.toPathElements(first));
+            return new GenericPath(this, pathElementsFactory,
+                pathElementsFactory.toPathElements(first));
 
         final StringBuilder sb = new StringBuilder(first);
 
@@ -176,8 +190,9 @@ public final class GenericFileSystem
             if (!s.isEmpty())
                 sb.append(separator).append(s);
 
-        final PathElements elements = factory.toPathElements(sb.toString());
-        return new GenericPath(this, factory, elements);
+        final PathElements elements
+            = pathElementsFactory.toPathElements(sb.toString());
+        return new GenericPath(this, pathElementsFactory, elements);
     }
 
     @Override
@@ -195,7 +210,8 @@ public final class GenericFileSystem
             arg = syntaxAndPattern.substring(index + 1);
         }
 
-        return driver.getPathMatcherFactory().getPathMatcher(type, arg);
+        return factoryProvider.getPathMatcherFactory()
+            .getPathMatcher(type, arg);
     }
 
     @Override

@@ -18,8 +18,8 @@
 
 package com.github.fge.filesystem.fs;
 
+import com.github.fge.filesystem.configuration.FileSystemFactoryProvider;
 import com.github.fge.filesystem.driver.FileSystemDriver;
-import com.github.fge.filesystem.path.PathElementsFactory;
 import com.github.fge.filesystem.provider.FileSystemRepository;
 import org.mockito.InOrder;
 import org.testng.annotations.BeforeMethod;
@@ -43,17 +43,17 @@ public final class GenericFileSystemTest
 
     private GenericFileSystem fs;
     private FileSystemRepository repository;
-    private PathElementsFactory factory;
     private FileSystemDriver driver;
     private FileSystemProvider provider;
+    private FileSystemFactoryProvider factoryProvider;
 
     @BeforeMethod
     public void init()
     {
+        factoryProvider = new FileSystemFactoryProvider();
         repository = mock(FileSystemRepository.class);
-        factory = mock(PathElementsFactory.class);
+        when(repository.getFactoryProvider()).thenReturn(factoryProvider);
         driver = mock(FileSystemDriver.class);
-        when(driver.getPathElementsFactory()).thenReturn(factory);
         provider = mock(FileSystemProvider.class);
         fs = new GenericFileSystem(uri, repository, driver, provider);
     }

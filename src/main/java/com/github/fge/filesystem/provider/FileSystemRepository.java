@@ -18,6 +18,8 @@
 
 package com.github.fge.filesystem.provider;
 
+import com.github.fge.filesystem.configuration.FileSystemFactoryProvider;
+
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.net.URI;
@@ -38,6 +40,9 @@ public interface FileSystemRepository
 
     @Nonnull
     FileSystem getFileSystem(URI uri);
+
+    @Nonnull
+    FileSystemFactoryProvider getFactoryProvider();
 
     // Note: fs never created automatically
     @Nonnull

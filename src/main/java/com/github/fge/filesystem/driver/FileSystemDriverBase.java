@@ -110,21 +110,6 @@ public abstract class FileSystemDriverBase
     @SuppressWarnings("DesignForExtension")
     @Nonnull
     @Override
-    public Set<String> getSupportedFileAttributeViews()
-    {
-        return Collections.singleton("basic");
-    }
-
-    @Nonnull
-    @Override
-    public final PathMatcherFactory getPathMatcherFactory()
-    {
-        return pathMatcherFactory;
-    }
-
-    @SuppressWarnings("DesignForExtension")
-    @Nonnull
-    @Override
     public UserPrincipalLookupService getUserPrincipalLookupService()
     {
         throw new UnsupportedOperationException();

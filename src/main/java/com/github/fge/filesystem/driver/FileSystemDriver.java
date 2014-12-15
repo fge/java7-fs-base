@@ -22,7 +22,6 @@ import com.github.fge.filesystem.filestore.FileStoreBase;
 import com.github.fge.filesystem.fs.GenericFileSystem;
 import com.github.fge.filesystem.path.PathElements;
 import com.github.fge.filesystem.path.PathElementsFactory;
-import com.github.fge.filesystem.path.matchers.PathMatcherFactory;
 import com.github.fge.filesystem.provider.FileSystemProviderBase;
 import com.github.fge.filesystem.provider.FileSystemRepositoryBase;
 
@@ -43,7 +42,6 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
-import java.nio.file.PathMatcher;
 import java.nio.file.WatchService;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttribute;
@@ -105,31 +103,6 @@ public interface FileSystemDriver
      */
     @Nonnull
     FileStore getFileStore();
-
-    /**
-     * Get a non-modifiable set of file attribute views supported by this
-     * filesystem
-     *
-     * <p>This set (and therefore all implemented filesystems) must at least
-     * contain {@code "basic"}.</p>
-     *
-     * @return an immutable set
-     *
-     * @see FileSystem#supportedFileAttributeViews()
-     */
-    @Nonnull
-    Set<String> getSupportedFileAttributeViews();
-
-    /**
-     * Get a {@link PathMatcher} provider for this filesystem
-     *
-     * @return a path matcher provider
-     *
-     * @see PathMatcherFactory
-     * @see FileSystem#getPathMatcher(String)
-     */
-    @Nonnull
-    PathMatcherFactory getPathMatcherFactory();
 
     /**
      * Get a user/group lookup service for this filesystem
