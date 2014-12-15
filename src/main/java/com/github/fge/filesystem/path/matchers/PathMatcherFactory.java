@@ -29,7 +29,7 @@ import java.util.Map;
 import java.util.Objects;
 
 @ParametersAreNonnullByDefault
-public class PathMatcherProvider
+public class PathMatcherFactory
 {
     private static final MethodHandles.Lookup LOOKUP
         = MethodHandles.publicLookup();
@@ -39,7 +39,7 @@ public class PathMatcherProvider
     private final Map<String, MethodHandle> handleMap
         = new HashMap<>();
 
-    public PathMatcherProvider()
+    public PathMatcherFactory()
     {
         registerPathMatcher("glob", GlobPathMatcher.class);
         registerPathMatcher("regex", RegexPathMatcher.class);

@@ -23,7 +23,7 @@ import com.github.fge.filesystem.attributes.provider.FileAttributesProvider;
 import com.github.fge.filesystem.exceptions.UncaughtIOException;
 import com.github.fge.filesystem.path.PathElements;
 import com.github.fge.filesystem.path.PathElementsFactory;
-import com.github.fge.filesystem.path.matchers.PathMatcherProvider;
+import com.github.fge.filesystem.path.matchers.PathMatcherFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -71,19 +71,19 @@ public abstract class FileSystemDriverBase
 
     protected final PathElementsFactory pathElementsFactory;
     private final FileStore fileStore;
-    private final PathMatcherProvider pathMatcherProvider;
+    private final PathMatcherFactory pathMatcherFactory;
     private final FileAttributesFactory attributesFactory;
 
     protected FileSystemDriverBase(
         final PathElementsFactory pathElementsFactory,
         final FileStore fileStore,
-        final PathMatcherProvider pathMatcherProvider,
+        final PathMatcherFactory pathMatcherFactory,
         final FileAttributesFactory attributesFactory)
     {
         this.attributesFactory = attributesFactory;
         this.pathElementsFactory = Objects.requireNonNull(pathElementsFactory);
         this.fileStore = Objects.requireNonNull(fileStore);
-        this.pathMatcherProvider = Objects.requireNonNull(pathMatcherProvider);
+        this.pathMatcherFactory = Objects.requireNonNull(pathMatcherFactory);
     }
 
     @Nonnull
@@ -117,9 +117,9 @@ public abstract class FileSystemDriverBase
 
     @Nonnull
     @Override
-    public final PathMatcherProvider getPathMatcherProvider()
+    public final PathMatcherFactory getPathMatcherFactory()
     {
-        return pathMatcherProvider;
+        return pathMatcherFactory;
     }
 
     @SuppressWarnings("DesignForExtension")

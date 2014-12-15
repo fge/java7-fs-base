@@ -22,7 +22,7 @@ import com.github.fge.filesystem.filestore.FileStoreBase;
 import com.github.fge.filesystem.fs.GenericFileSystem;
 import com.github.fge.filesystem.path.PathElements;
 import com.github.fge.filesystem.path.PathElementsFactory;
-import com.github.fge.filesystem.path.matchers.PathMatcherProvider;
+import com.github.fge.filesystem.path.matchers.PathMatcherFactory;
 import com.github.fge.filesystem.provider.FileSystemProviderBase;
 import com.github.fge.filesystem.provider.FileSystemRepositoryBase;
 
@@ -125,11 +125,11 @@ public interface FileSystemDriver
      *
      * @return a path matcher provider
      *
-     * @see PathMatcherProvider
+     * @see PathMatcherFactory
      * @see FileSystem#getPathMatcher(String)
      */
     @Nonnull
-    PathMatcherProvider getPathMatcherProvider();
+    PathMatcherFactory getPathMatcherFactory();
 
     /**
      * Get a user/group lookup service for this filesystem

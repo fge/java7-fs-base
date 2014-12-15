@@ -68,7 +68,7 @@ import java.util.Set;
  * NullPointerException} if a null argument is passed.</p>
  */
 @ParametersAreNonnullByDefault
-public class FileSystemOptionsRepository
+public class FileSystemOptionsFactory
 {
 	private final Set<OpenOption> readOpenOptions = new HashSet<>();
 	private final Set<OpenOption> writeOpenOptions = new HashSet<>();
@@ -76,7 +76,7 @@ public class FileSystemOptionsRepository
 	private final Set<LinkOption> linkOptions
 		= EnumSet.noneOf(LinkOption.class);
 
-	public FileSystemOptionsRepository()
+	public FileSystemOptionsFactory()
 	{
 		addCopyOption(StandardCopyOption.REPLACE_EXISTING);
 

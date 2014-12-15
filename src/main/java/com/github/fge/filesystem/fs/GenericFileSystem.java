@@ -195,7 +195,7 @@ public final class GenericFileSystem
             arg = syntaxAndPattern.substring(index + 1);
         }
 
-        return driver.getPathMatcherProvider().getPathMatcher(type, arg);
+        return driver.getPathMatcherFactory().getPathMatcher(type, arg);
     }
 
     @Override

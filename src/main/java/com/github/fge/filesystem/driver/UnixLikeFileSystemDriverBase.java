@@ -20,7 +20,7 @@ package com.github.fge.filesystem.driver;
 
 import com.github.fge.filesystem.attributes.FileAttributesFactory;
 import com.github.fge.filesystem.path.UnixPathElementsFactory;
-import com.github.fge.filesystem.path.matchers.PathMatcherProvider;
+import com.github.fge.filesystem.path.matchers.PathMatcherFactory;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
@@ -34,7 +34,7 @@ import java.nio.file.PathMatcher;
  *
  * <p>In addition to the defaults defined in {@link FileSystemDriverBase}, this
  * abstract class defaults to a {@link UnixPathElementsFactory} for building
- * paths and a default {@link PathMatcherProvider} to provide {@link
+ * paths and a default {@link PathMatcherFactory} to provide {@link
  * PathMatcher} instances -- therefore bringing support for both {@code "glob"}
  * and {@code "regex"} path matchers. It also considers that all paths whose
  * last name element begin with a dot are hidden (overridable).</p>
@@ -47,7 +47,7 @@ public abstract class UnixLikeFileSystemDriverBase
         final FileAttributesFactory attributesFactory)
     {
         super(new UnixPathElementsFactory(), fileStore,
-            new PathMatcherProvider(), attributesFactory);
+            new PathMatcherFactory(), attributesFactory);
     }
 
     @SuppressWarnings("DesignForExtension")
