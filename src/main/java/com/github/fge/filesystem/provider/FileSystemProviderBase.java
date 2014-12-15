@@ -126,6 +126,8 @@ public abstract class FileSystemProviderBase
         final OpenOption... options)
         throws IOException
     {
+        final Set<OpenOption> opts
+            = optionsFactory.compileReadOptions(options);
         final FileSystemDriver driver = repository.getDriver(path);
         return driver.newInputStream(path, options);
     }

@@ -103,14 +103,16 @@ public class FileSystemOptionsFactory
 	public final Set<OpenOption> compileReadOptions(final OpenOption... opts)
 	{
 		final Set<OpenOption> set = new HashSet<>();
-		for (final OpenOption opt: opts) {
-			if (!readOpenOptions.contains(Objects.requireNonNull(opt)))
-				throw new UnsupportedOptionException(opt.toString());
-			set.add(opt);
-		}
+
+		for (final OpenOption opt: opts)
+			set.add(Objects.requireNonNull(opt));
 
 		if (set.removeAll(writeOpenOptions))
 			throw new IllegalOptionSetException(Arrays.toString(opts));
+
+		for (final OpenOption opt: set)
+			if (!readOpenOptions.contains(opt))
+				throw new UnsupportedOptionException(opt.toString());
 
 		// We want at least READ
 		set.add(StandardOpenOption.READ);
