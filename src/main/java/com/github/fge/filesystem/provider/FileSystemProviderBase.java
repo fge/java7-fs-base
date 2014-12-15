@@ -85,10 +85,12 @@ public abstract class FileSystemProviderBase
     private static final OpenOption[] NO_OPEN_OPTIONS = new OpenOption[0];
 
     protected final FileSystemRepository repository;
+    protected final FileSystemOptionsFactory optionsFactory;
 
     protected FileSystemProviderBase(final FileSystemRepository repository)
     {
         this.repository = Objects.requireNonNull(repository);
+        optionsFactory = repository.getFactoryProvider().getOptionsFactory();
     }
 
     @Override
