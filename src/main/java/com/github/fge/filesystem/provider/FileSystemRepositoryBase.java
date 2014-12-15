@@ -18,7 +18,6 @@
 
 package com.github.fge.filesystem.provider;
 
-import com.github.fge.filesystem.configuration.FileSystemFactoryProvider;
 import com.github.fge.filesystem.driver.FileSystemDriver;
 import com.github.fge.filesystem.fs.GenericFileSystem;
 

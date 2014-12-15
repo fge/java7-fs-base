@@ -18,8 +18,6 @@
 
 package com.github.fge.filesystem.provider;
 
-import com.github.fge.filesystem.configuration.FileSystemFactoryProvider;
-
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.net.URI;

@@ -16,7 +16,7 @@
  * - ASL 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
  */
 
-package com.github.fge.filesystem.configuration;
+package com.github.fge.filesystem.provider;
 
 import com.github.fge.filesystem.attributes.FileAttributesFactory;
 import com.github.fge.filesystem.options.FileSystemOptionsFactory;

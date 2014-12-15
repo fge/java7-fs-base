@@ -18,7 +18,7 @@
 
 package com.github.fge.filesystem.fs;
 
-import com.github.fge.filesystem.configuration.FileSystemFactoryProvider;
+import com.github.fge.filesystem.provider.FileSystemFactoryProvider;
 import com.github.fge.filesystem.driver.FileSystemDriver;
 import com.github.fge.filesystem.provider.FileSystemRepository;
 import org.mockito.InOrder;

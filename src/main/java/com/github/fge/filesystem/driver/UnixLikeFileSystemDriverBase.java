@@ -18,7 +18,7 @@
 
 package com.github.fge.filesystem.driver;
 
-import com.github.fge.filesystem.configuration.FileSystemFactoryProvider;
+import com.github.fge.filesystem.provider.FileSystemFactoryProvider;
 import com.github.fge.filesystem.path.UnixPathElementsFactory;
 import com.github.fge.filesystem.path.matchers.PathMatcherFactory;
 

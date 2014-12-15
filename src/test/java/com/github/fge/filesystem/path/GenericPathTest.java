@@ -19,7 +19,7 @@
 package com.github.fge.filesystem.path;
 
 import com.github.fge.filesystem.CustomSoftAssertions;
-import com.github.fge.filesystem.configuration.FileSystemFactoryProvider;
+import com.github.fge.filesystem.provider.FileSystemFactoryProvider;
 import com.github.fge.filesystem.driver.FileSystemDriver;
 import com.github.fge.filesystem.fs.GenericFileSystem;
 import com.github.fge.filesystem.provider.FileSystemRepository;

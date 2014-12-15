@@ -20,7 +20,7 @@ package com.github.fge.filesystem.driver;
 
 import com.github.fge.filesystem.attributes.FileAttributesFactory;
 import com.github.fge.filesystem.attributes.provider.FileAttributesProvider;
-import com.github.fge.filesystem.configuration.FileSystemFactoryProvider;
+import com.github.fge.filesystem.provider.FileSystemFactoryProvider;
 import com.github.fge.filesystem.exceptions.UncaughtIOException;
 
 import javax.annotation.Nonnull;

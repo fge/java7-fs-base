@@ -19,7 +19,7 @@
 package com.github.fge.filesystem.fs;
 
 import com.github.fge.filesystem.attributes.FileAttributesFactory;
-import com.github.fge.filesystem.configuration.FileSystemFactoryProvider;
+import com.github.fge.filesystem.provider.FileSystemFactoryProvider;
 import com.github.fge.filesystem.driver.FileSystemDriver;
 import com.github.fge.filesystem.path.GenericPath;
 import com.github.fge.filesystem.path.PathElements;
