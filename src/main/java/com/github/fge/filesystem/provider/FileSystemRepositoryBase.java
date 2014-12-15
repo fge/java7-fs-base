@@ -26,6 +26,7 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.file.ClosedFileSystemException;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystemAlreadyExistsException;
 import java.nio.file.FileSystemNotFoundException;
@@ -135,6 +136,26 @@ public abstract class FileSystemRepositoryBase
                 if (path == null)
                     path = "";
                 return entry.getValue().getPath(path);
+            }
+        }
+
+        throw new FileSystemNotFoundException();
+    }
+
+    @Nonnull
+    @Override
+    public final FileSystemDriver getDriver(final Path path)
+    {
+        final FileSystem fs = Objects.requireNonNull(path).getFileSystem();
+
+        synchronized (filesystems) {
+            for (final GenericFileSystem gfs: filesystems.values()) {
+                //noinspection ObjectEquality
+                if (gfs != fs)
+                    continue;
+                if (!gfs.isOpen())
+                    throw new ClosedFileSystemException();
+                return gfs.getDriver();
             }
         }
 

@@ -19,9 +19,8 @@
 package com.github.fge.filesystem.provider;
 
 import com.github.fge.filesystem.driver.FileSystemDriver;
-import com.github.fge.filesystem.fs.GenericFileSystem;
+import com.github.fge.filesystem.options.FileSystemOptionsFactory;
 
-import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,7 +28,6 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.AccessMode;
-import java.nio.file.ClosedFileSystemException;
 import java.nio.file.CopyOption;
 import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.DirectoryStream;
@@ -126,7 +124,7 @@ public abstract class FileSystemProviderBase
         final OpenOption... options)
         throws IOException
     {
-        final FileSystemDriver driver = getDriver(path);
+        final FileSystemDriver driver = repository.getDriver(path);
         return driver.newInputStream(path, options);
     }
 
@@ -135,7 +133,7 @@ public abstract class FileSystemProviderBase
         final OpenOption... options)
         throws IOException
     {
-        final FileSystemDriver driver = getDriver(path);
+        final FileSystemDriver driver = repository.getDriver(path);
         return driver.newOutputStream(path, options);
     }
 
@@ -145,7 +143,7 @@ public abstract class FileSystemProviderBase
         final FileAttribute<?>... attrs)
         throws IOException
     {
-        final FileSystemDriver driver = getDriver(path);
+        final FileSystemDriver driver = repository.getDriver(path);
         return driver.newByteChannel(path, options, attrs);
     }
 
@@ -154,7 +152,7 @@ public abstract class FileSystemProviderBase
         final DirectoryStream.Filter<? super Path> filter)
         throws IOException
     {
-        final FileSystemDriver driver = getDriver(dir);
+        final FileSystemDriver driver = repository.getDriver(dir);
         return driver.newDirectoryStream(dir, filter);
     }
 
@@ -163,14 +161,14 @@ public abstract class FileSystemProviderBase
         final FileAttribute<?>... attrs)
         throws IOException
     {
-        getDriver(dir).createDirectory(dir, attrs);
+        repository.getDriver(dir).createDirectory(dir, attrs);
     }
 
     @Override
     public final void delete(final Path path)
         throws IOException
     {
-        getDriver(path).delete(path);
+        repository.getDriver(path).delete(path);
     }
 
     @Override
@@ -178,8 +176,8 @@ public abstract class FileSystemProviderBase
         final CopyOption... options)
         throws IOException
     {
-        final FileSystemDriver src = getDriver(source);
-        final FileSystemDriver dst = getDriver(target);
+        final FileSystemDriver src = repository.getDriver(source);
+        final FileSystemDriver dst = repository.getDriver(target);
 
         /*
          * If the same filesystem, call the (hopefully optimize) copy method
@@ -215,8 +213,8 @@ public abstract class FileSystemProviderBase
         throws IOException
     {
         // TODO: DirectoryNotEmptyException
-        final FileSystemDriver src = getDriver(source);
-        final FileSystemDriver dst = getDriver(target);
+        final FileSystemDriver src = repository.getDriver(source);
+        final FileSystemDriver dst = repository.getDriver(target);
 
         /*
          * If the same filesystem, call the (hopefully optimize) move method
@@ -253,8 +251,8 @@ public abstract class FileSystemProviderBase
     public final boolean isSameFile(final Path path, final Path path2)
         throws IOException
     {
-        final FileSystemDriver driver = getDriver(path);
-        final FileSystemDriver driver2 = getDriver(path2);
+        final FileSystemDriver driver = repository.getDriver(path);
+        final FileSystemDriver driver2 = repository.getDriver(path2);
 
         return driver == driver2 && driver.isSameFile(path, path2);
     }
@@ -263,21 +261,22 @@ public abstract class FileSystemProviderBase
     public final boolean isHidden(final Path path)
         throws IOException
     {
-        return getDriver(path).isHidden(path);
+        return repository.getDriver(path).isHidden(path);
     }
 
     @Override
     public final void checkAccess(final Path path, final AccessMode... modes)
         throws IOException
     {
-        getDriver(path).checkAccess(path, modes);
+        repository.getDriver(path).checkAccess(path, modes);
     }
 
     @Override
     public final <V extends FileAttributeView> V getFileAttributeView(
         final Path path, final Class<V> type, final LinkOption... options)
     {
-        return getDriver(path).getFileAttributeView(path, type, options);
+        return repository.getDriver(path)
+            .getFileAttributeView(path, type, options);
     }
 
     @Override
@@ -285,7 +284,7 @@ public abstract class FileSystemProviderBase
         final Path path, final Class<A> type, final LinkOption... options)
         throws IOException
     {
-        final FileSystemDriver driver = getDriver(path);
+        final FileSystemDriver driver = repository.getDriver(path);
         return driver.readAttributes(path, type, options);
     }
 
@@ -294,7 +293,8 @@ public abstract class FileSystemProviderBase
         final String attributes, final LinkOption... options)
         throws IOException
     {
-        return getDriver(path).readAttributes(path, attributes, options);
+        return repository.getDriver(path)
+            .readAttributes(path, attributes, options);
     }
 
     @Override
@@ -302,7 +302,8 @@ public abstract class FileSystemProviderBase
         final Object value, final LinkOption... options)
         throws IOException
     {
-        getDriver(path).setAttribute(path, attribute, value, options);
+        repository.getDriver(path)
+            .setAttribute(path, attribute, value, options);
     }
 
     @Override
@@ -342,15 +343,5 @@ public abstract class FileSystemProviderBase
         }
         return set.isEmpty() ? NO_OPEN_OPTIONS
             : set.toArray(new OpenOption[set.size()]);
-    }
-
-    @Nonnull
-    // TODO: closed fs check done here may not be the right thing to do...
-    private static FileSystemDriver getDriver(final Path path)
-    {
-        final GenericFileSystem fs = (GenericFileSystem) path.getFileSystem();
-        if (!fs.isOpen())
-            throw new ClosedFileSystemException();
-        return fs.getDriver();
     }
 }

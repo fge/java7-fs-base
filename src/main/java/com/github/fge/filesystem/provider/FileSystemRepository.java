@@ -18,6 +18,8 @@
 
 package com.github.fge.filesystem.provider;
 
+import com.github.fge.filesystem.driver.FileSystemDriver;
+
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.net.URI;
@@ -45,6 +47,9 @@ public interface FileSystemRepository
     // Note: fs never created automatically
     @Nonnull
     Path getPath(URI uri);
+
+    @Nonnull
+    FileSystemDriver getDriver(Path path);
 
     // Called ONLY after the driver and fs have been successfully closed
     // uri is guaranteed to exist
