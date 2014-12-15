@@ -29,7 +29,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
-import java.net.URI;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.FileStore;
 import java.nio.file.LinkOption;
@@ -70,30 +69,21 @@ public abstract class FileSystemDriverBase
 {
     private static final Pattern COMMA = Pattern.compile(",");
 
-    private final URI uri;
     protected final PathElementsFactory pathElementsFactory;
     private final FileStore fileStore;
     private final PathMatcherProvider pathMatcherProvider;
     private final FileAttributesFactory attributesFactory;
 
-    protected FileSystemDriverBase(final URI uri,
+    protected FileSystemDriverBase(
         final PathElementsFactory pathElementsFactory,
         final FileStore fileStore,
         final PathMatcherProvider pathMatcherProvider,
         final FileAttributesFactory attributesFactory)
     {
         this.attributesFactory = attributesFactory;
-        this.uri = Objects.requireNonNull(uri);
         this.pathElementsFactory = Objects.requireNonNull(pathElementsFactory);
         this.fileStore = Objects.requireNonNull(fileStore);
         this.pathMatcherProvider = Objects.requireNonNull(pathMatcherProvider);
-    }
-
-    @Nonnull
-    @Override
-    public final URI getUri()
-    {
-        return uri;
     }
 
     @Nonnull

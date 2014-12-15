@@ -57,6 +57,7 @@ public final class GenericFileSystem
 {
     private final AtomicBoolean open = new AtomicBoolean(true);
 
+    private final URI uri;
     private final FileSystemRepository repository;
     private final FileSystemProvider provider;
     private final FileSystemDriver driver;
@@ -66,13 +67,16 @@ public final class GenericFileSystem
     /**
      * Constructor
      *
+     * @param uri the filesystem URI
      * @param repository the filesystem repository
      * @param driver the filesystem driver
      * @param provider the filesystem provider
      */
-    public GenericFileSystem(final FileSystemRepository repository,
+    public GenericFileSystem(final URI uri,
+        final FileSystemRepository repository,
         final FileSystemDriver driver, final FileSystemProvider provider)
     {
+        this.uri = Objects.requireNonNull(uri);
         this.repository = Objects.requireNonNull(repository);
         this.driver = Objects.requireNonNull(driver);
         this.provider = Objects.requireNonNull(provider);
@@ -80,11 +84,10 @@ public final class GenericFileSystem
         separator = factory.getSeparator();
     }
 
-    // TODO: move to PathElementsFactory
     @Nonnull
     public URI getUri()
     {
-        return driver.getUri();
+        return uri;
     }
 
     @Nonnull
@@ -114,7 +117,7 @@ public final class GenericFileSystem
             exception = e;
         }
 
-        repository.unregister(driver.getUri());
+        repository.unregister(uri);
 
         if (exception != null)
             throw exception;

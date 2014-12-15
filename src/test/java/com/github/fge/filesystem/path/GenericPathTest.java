@@ -42,6 +42,8 @@ public final class GenericPathTest
 {
     private static final String[] NO_NAMES = new String[0];
 
+    private final URI uri = URI.create("foo://bar");
+
     private GenericFileSystem fs;
     private FileSystemRepository repository;
     private FileSystemProvider provider;
@@ -56,7 +58,7 @@ public final class GenericPathTest
         driver = mock(FileSystemDriver.class);
         factory = mock(PathElementsFactory.class);
         when(driver.getPathElementsFactory()).thenReturn(factory);
-        fs = new GenericFileSystem(repository, driver, provider);
+        fs = new GenericFileSystem(uri, repository, driver, provider);
     }
 
     @Test
@@ -222,13 +224,15 @@ public final class GenericPathTest
     }
 
     @Test(dataProvider = "toUriPathData")
-    public void toUriPathReturnsCorrectURI(final String uri, final String path,
+    public void toUriPathReturnsCorrectURI(final String s, final String path,
         final String expected)
     {
         final PathElementsFactory unixFactory = new UnixPathElementsFactory();
-        when(driver.getUri()).thenReturn(URI.create(uri));
+        final URI uri2 = URI.create(s);
+        final GenericFileSystem fs2
+            = new GenericFileSystem(uri2, repository, driver, provider);
         final PathElements elements = unixFactory.toPathElements(path);
-        final Path p = new GenericPath(fs, unixFactory, elements);
+        final Path p = new GenericPath(fs2, unixFactory, elements);
 
         assertThat(p.toUri().toString()).as("generated URI is correct")
             .isEqualTo(expected);

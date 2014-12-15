@@ -31,6 +31,7 @@ import java.nio.file.spi.FileSystemProvider;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
+import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
@@ -38,6 +39,8 @@ import static org.mockito.Mockito.when;
 
 public final class GenericFileSystemTest
 {
+    private final URI uri = URI.create("foo://bar");
+
     private GenericFileSystem fs;
     private FileSystemRepository repository;
     private PathElementsFactory factory;
@@ -52,7 +55,7 @@ public final class GenericFileSystemTest
         driver = mock(FileSystemDriver.class);
         when(driver.getPathElementsFactory()).thenReturn(factory);
         provider = mock(FileSystemProvider.class);
-        fs = new GenericFileSystem(repository, driver, provider);
+        fs = new GenericFileSystem(uri, repository, driver, provider);
     }
 
     @Test
@@ -65,14 +68,13 @@ public final class GenericFileSystemTest
     public void closedFileSystemClosesDriverAndUnregistersFromRepository()
         throws IOException
     {
-        final URI uri = URI.create("foo://bar");
-        when(driver.getUri()).thenReturn(uri);
+//        when(driver.getUri()).thenReturn(uri);
         final InOrder inOrder = inOrder(repository, driver);
 
         fs.close();
 
         inOrder.verify(driver).close();
-        inOrder.verify(repository).unregister(uri);
+        inOrder.verify(repository).unregister(same(uri));
 
         assertThat(fs.isOpen()).isFalse();
     }
@@ -81,10 +83,10 @@ public final class GenericFileSystemTest
     public void filesystemIsUnregisteredEvenIfDriverFailsToClose()
         throws IOException
     {
-        final URI uri = URI.create("foo://bar");
+//        final URI uri = URI.create("foo://bar");
         final IOException exception = new IOException("meh");
 
-        when(driver.getUri()).thenReturn(uri);
+//        when(driver.getUri()).thenReturn(uri);
         doThrow(exception).when(driver).close();
 
         final InOrder inOrder = inOrder(repository, driver);

@@ -33,7 +33,6 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URI;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.AccessMode;
 import java.nio.file.CopyOption;
@@ -76,14 +75,6 @@ import java.util.Set;
 public interface FileSystemDriver
     extends Closeable
 {
-    /**
-     * Get the URI associated with this filesystem
-     *
-     * @return a URI (always absolute and hierarchical)
-     */
-    @Nonnull
-    URI getUri();
-
     /**
      * Get the {@link PathElementsFactory} associated with this filesystem
      *

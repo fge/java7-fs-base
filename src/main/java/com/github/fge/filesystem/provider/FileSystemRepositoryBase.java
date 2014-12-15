@@ -73,8 +73,8 @@ public abstract class FileSystemRepositoryBase
             if (filesystems.containsKey(uri))
                 throw new FileSystemAlreadyExistsException();
             final FileSystemDriver driver = createDriver(uri, env);
-            final GenericFileSystem fs = new GenericFileSystem(this, driver,
-                provider);
+            final GenericFileSystem fs
+                = new GenericFileSystem(uri, this, driver, provider);
             filesystems.put(uri, fs);
             return fs;
         }

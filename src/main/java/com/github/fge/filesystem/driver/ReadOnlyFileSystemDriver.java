@@ -28,7 +28,6 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URI;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.AccessMode;
 import java.nio.file.CopyOption;
@@ -154,13 +153,6 @@ public final class ReadOnlyFileSystemDriver
         throws IOException
     {
         throw new ReadOnlyFileSystemException();
-    }
-
-    @Override
-    @Nonnull
-    public URI getUri()
-    {
-        return delegate.getUri();
     }
 
     @Override

@@ -24,7 +24,6 @@ import com.github.fge.filesystem.path.matchers.PathMatcherProvider;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
-import java.net.URI;
 import java.nio.file.FileStore;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
@@ -44,11 +43,10 @@ import java.nio.file.PathMatcher;
 public abstract class UnixLikeFileSystemDriverBase
     extends FileSystemDriverBase
 {
-    protected UnixLikeFileSystemDriverBase(final URI uri,
-        final FileStore fileStore,
+    protected UnixLikeFileSystemDriverBase(final FileStore fileStore,
         final FileAttributesFactory attributesFactory)
     {
-        super(uri, new UnixPathElementsFactory(), fileStore,
+        super(new UnixPathElementsFactory(), fileStore,
             new PathMatcherProvider(), attributesFactory);
     }
 
