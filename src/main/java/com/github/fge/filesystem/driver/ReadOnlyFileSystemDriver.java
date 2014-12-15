@@ -18,9 +18,6 @@
 
 package com.github.fge.filesystem.driver;
 
-import com.github.fge.filesystem.path.PathElements;
-import com.github.fge.filesystem.path.PathElementsFactory;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -152,20 +149,6 @@ public final class ReadOnlyFileSystemDriver
         throws IOException
     {
         throw new ReadOnlyFileSystemException();
-    }
-
-    @Override
-    @Nonnull
-    public PathElementsFactory getPathElementsFactory()
-    {
-        return delegate.getPathElementsFactory();
-    }
-
-    @Override
-    @Nonnull
-    public PathElements getRoot()
-    {
-        return delegate.getRoot();
     }
 
     @Override

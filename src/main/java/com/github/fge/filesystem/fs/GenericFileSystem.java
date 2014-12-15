@@ -62,10 +62,12 @@ public final class GenericFileSystem
 
     private final URI uri;
     private final FileSystemRepository repository;
-    private final FileSystemFactoryProvider factoryProvider;
-    private final PathElementsFactory pathElementsFactory;
-    private final FileSystemProvider provider;
     private final FileSystemDriver driver;
+    private final FileSystemProvider provider;
+
+    private final FileSystemFactoryProvider factoryProvider;
+
+    private final PathElementsFactory pathElementsFactory;
     private final String separator;
 
 
@@ -83,10 +85,10 @@ public final class GenericFileSystem
     {
         this.uri = Objects.requireNonNull(uri);
         this.repository = Objects.requireNonNull(repository);
-        factoryProvider = repository.getFactoryProvider();
-        pathElementsFactory = factoryProvider.getPathElementsFactory();
         this.driver = Objects.requireNonNull(driver);
         this.provider = Objects.requireNonNull(provider);
+        factoryProvider = repository.getFactoryProvider();
+        pathElementsFactory = factoryProvider.getPathElementsFactory();
         separator = pathElementsFactory.getSeparator();
     }
 
@@ -152,7 +154,8 @@ public final class GenericFileSystem
     {
         // TODO: that's ugly
         return Collections.<Path>singletonList(
-            new GenericPath(this, pathElementsFactory, driver.getRoot())
+            new GenericPath(this, pathElementsFactory,
+                pathElementsFactory.getRootPathElements())
         );
     }
 

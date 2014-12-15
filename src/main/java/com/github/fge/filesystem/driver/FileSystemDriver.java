@@ -20,8 +20,6 @@ package com.github.fge.filesystem.driver;
 
 import com.github.fge.filesystem.filestore.FileStoreBase;
 import com.github.fge.filesystem.fs.GenericFileSystem;
-import com.github.fge.filesystem.path.PathElements;
-import com.github.fge.filesystem.path.PathElementsFactory;
 import com.github.fge.filesystem.provider.FileSystemProviderBase;
 import com.github.fge.filesystem.provider.FileSystemRepositoryBase;
 
@@ -73,26 +71,6 @@ import java.util.Set;
 public interface FileSystemDriver
     extends Closeable
 {
-    /**
-     * Get the {@link PathElementsFactory} associated with this filesystem
-     *
-     * @return a path elements factory
-     */
-    @Nonnull
-    PathElementsFactory getPathElementsFactory();
-
-    /**
-     * Get the root path elements for this filesystem
-     *
-     * <p>Typically, for Unix-like systems, this will be {@code /}.</p>
-     *
-     * @return a {@link PathElements} representing the root of the hierarchy
-     *
-     * @see FileSystem#getRootDirectories()
-     */
-    @Nonnull
-    PathElements getRoot();
-
     /**
      * Get the {@link FileStore} associated with this filesystem
      *

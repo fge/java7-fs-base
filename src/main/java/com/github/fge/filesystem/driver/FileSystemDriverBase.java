@@ -20,10 +20,8 @@ package com.github.fge.filesystem.driver;
 
 import com.github.fge.filesystem.attributes.FileAttributesFactory;
 import com.github.fge.filesystem.attributes.provider.FileAttributesProvider;
+import com.github.fge.filesystem.configuration.FileSystemFactoryProvider;
 import com.github.fge.filesystem.exceptions.UncaughtIOException;
-import com.github.fge.filesystem.path.PathElements;
-import com.github.fge.filesystem.path.PathElementsFactory;
-import com.github.fge.filesystem.path.matchers.PathMatcherFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -69,35 +67,14 @@ public abstract class FileSystemDriverBase
 {
     private static final Pattern COMMA = Pattern.compile(",");
 
-    protected final PathElementsFactory pathElementsFactory;
     private final FileStore fileStore;
-    private final PathMatcherFactory pathMatcherFactory;
     private final FileAttributesFactory attributesFactory;
 
-    protected FileSystemDriverBase(
-        final PathElementsFactory pathElementsFactory,
-        final FileStore fileStore,
-        final PathMatcherFactory pathMatcherFactory,
-        final FileAttributesFactory attributesFactory)
+    protected FileSystemDriverBase(final FileStore fileStore,
+        final FileSystemFactoryProvider factoryProvider)
     {
-        this.attributesFactory = attributesFactory;
-        this.pathElementsFactory = Objects.requireNonNull(pathElementsFactory);
+        attributesFactory = factoryProvider.getAttributesFactory();
         this.fileStore = Objects.requireNonNull(fileStore);
-        this.pathMatcherFactory = Objects.requireNonNull(pathMatcherFactory);
-    }
-
-    @Nonnull
-    @Override
-    public final PathElementsFactory getPathElementsFactory()
-    {
-        return pathElementsFactory;
-    }
-
-    @Nonnull
-    @Override
-    public final PathElements getRoot()
-    {
-        return pathElementsFactory.getRootPathElements();
     }
 
     @Nonnull
