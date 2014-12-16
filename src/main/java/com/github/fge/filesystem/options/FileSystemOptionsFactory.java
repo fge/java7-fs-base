@@ -31,7 +31,9 @@ import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -75,15 +77,21 @@ public class FileSystemOptionsFactory
 	private final Set<CopyOption> copyOptions = new HashSet<>();
 	private final Set<LinkOption> linkOptions
 		= EnumSet.noneOf(LinkOption.class);
+	private final Map<CopyOption, Set<OpenOption>> readTranslations
+		= new HashMap<>();
+	private final Map<CopyOption, Set<OpenOption>> writeTranslations
+		= new HashMap<>();
 
 	public FileSystemOptionsFactory()
 	{
 		addCopyOption(StandardCopyOption.REPLACE_EXISTING);
 
+		addOpenOption(StandardOpenOption.SPARSE);
+
+		addReadOpenOption(StandardOpenOption.READ);
+
 		addWriteOpenOption(StandardOpenOption.CREATE);
 		addWriteOpenOption(StandardOpenOption.CREATE_NEW);
-		addReadOpenOption(StandardOpenOption.READ);
-		addOpenOption(StandardOpenOption.SPARSE);
 		addWriteOpenOption(StandardOpenOption.TRUNCATE_EXISTING);
 		addWriteOpenOption(StandardOpenOption.WRITE);
 	}
@@ -184,6 +192,18 @@ public class FileSystemOptionsFactory
 		return Collections.unmodifiableSet(set);
 	}
 
+	@Nonnull
+	public final Set<OpenOption> toReadOptions(final Set<CopyOption> options)
+	{
+		return copyTranslations(options, readTranslations);
+	}
+
+	@Nonnull
+	public final Set<OpenOption> toWriteOptions(final Set<CopyOption> options)
+	{
+		return copyTranslations(options, writeTranslations);
+	}
+
 	/**
 	 * Add an open option supported for read
 	 *
@@ -235,5 +255,54 @@ public class FileSystemOptionsFactory
 		linkOptions.add(Objects.requireNonNull(option));
 		addOpenOption(option);
 		copyOptions.add(option);
+	}
+
+	protected final void addReadTranslation(final CopyOption option,
+		final OpenOption translated)
+	{
+		if (!copyOptions.contains(Objects.requireNonNull(option)))
+			throw new IllegalArgumentException("option " + option + " is not "
+				+ "a supported copy option (did you forget to .addCopyOption"
+				+ "()?)");
+		if (!readOpenOptions.contains(Objects.requireNonNull(translated)))
+			throw new IllegalArgumentException("option " + translated + "is "
+				+ "not a supported read option (did you forget to "
+				+ ".addReadOpenOption()?)");
+		if (!readTranslations.containsKey(option))
+			readTranslations.put(option, new HashSet<OpenOption>());
+		readTranslations.get(option).add(translated);
+	}
+
+	protected final void addWriteTranslation(final CopyOption option,
+		final OpenOption translated)
+	{
+		if (!copyOptions.contains(Objects.requireNonNull(option)))
+			throw new IllegalArgumentException("option " + option + " is not "
+				+ "a supported copy option (did you forget to .addCopyOption"
+				+ "()?)");
+		if (!writeOpenOptions.contains(Objects.requireNonNull(translated)))
+			throw new IllegalArgumentException("option " + translated + "is "
+				+ "not a supported read option (did you forget to "
+				+ ".addWriteOpenOption()?)");
+		if (!writeTranslations.containsKey(option))
+			writeTranslations.put(option, new HashSet<OpenOption>());
+		writeTranslations.get(option).add(translated);
+	}
+
+	@Nonnull
+	private Set<OpenOption> copyTranslations(final Set<CopyOption> options,
+		final Map<CopyOption, Set<OpenOption>> map)
+	{
+		final Set<OpenOption> set = new HashSet<>();
+
+		for (final CopyOption option: options) {
+			if (!copyOptions.contains(Objects.requireNonNull(option)))
+				throw new UnsupportedOptionException(option.toString());
+			if (map.containsKey(option))
+				set.addAll(map.get(option));
+		}
+
+		return set.isEmpty() ? Collections.<OpenOption>emptySet()
+			: Collections.unmodifiableSet(set);
 	}
 }
