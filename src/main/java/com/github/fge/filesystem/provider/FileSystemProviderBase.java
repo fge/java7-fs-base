@@ -344,7 +344,7 @@ public abstract class FileSystemProviderBase
      * @throws NoSuchFileException source path does not exist
      * @throws FileAlreadyExistsException destination path exists and {@link
      * StandardCopyOption#REPLACE_EXISTING} was not set
-     * @throws IOException
+     * @throws IOException other I/O error
      *
      * @see FileSystemDriver#copy(Path, Path, Set)
      */

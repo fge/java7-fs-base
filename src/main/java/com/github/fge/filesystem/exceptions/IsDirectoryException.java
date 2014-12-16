@@ -25,6 +25,7 @@ import java.nio.file.FileSystemException;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.spi.FileSystemProvider;
+import java.util.Set;
 
 /**
  * Exception defined when the source or target of a filesystem I/O operation
@@ -35,16 +36,16 @@ import java.nio.file.spi.FileSystemProvider;
  * {@link IOException}) to account for situations where an operation is
  * performed on a path which is a directory where it should not be; the primary
  * candidates for such an exception are an attempt to open an {@link
- * FileSystemDriver#newInputStream(Path, OpenOption...) input stream} or an
- * {@link FileSystemDriver#newOutputStream(Path, OpenOption...) output stream}
- * on a path which is a directory: such methods make no sense if the path is
- * considered to be a directory by the filesystem.</p>
+ * FileSystemDriver#newInputStream(Path, Set)}  input stream} or an {@link
+ * FileSystemDriver#newOutputStream(Path, Set)}  output stream} on a path which
+ * is a directory: such methods make no sense if the path is considered to be a
+ * directory by the filesystem.</p>
  *
  * <p>As this is a filesystem level error, and not an I/O error, this exception
  * extends {@link FileSystemException} and not {@link IOException}.</p>
  *
- * @see FileSystemDriver#newInputStream(Path, OpenOption...)
- * @see FileSystemDriver#newOutputStream(Path, OpenOption...)
+ * @see FileSystemDriver#newInputStream(Path, Set)
+ * @see FileSystemDriver#newOutputStream(Path, Set)
  * @see FileSystemProvider#newInputStream(Path, OpenOption...)
  * @see FileSystemProvider#newOutputStream(Path, OpenOption...)
  */
