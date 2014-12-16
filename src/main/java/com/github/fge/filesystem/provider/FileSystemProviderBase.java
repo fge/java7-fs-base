@@ -75,6 +75,9 @@ import java.util.Set;
  *     is a non empty directory, this method throws {@link
  *     DirectoryNotEmptyException}.</li>
  * </ul>
+ *
+ * <p>Instances of this class perform all option checking before delegating the
+ * real I/O operations to the {@link FileSystemDriver}.</p>
  */
 @SuppressWarnings("OverloadedVarargsMethod")
 @ParametersAreNonnullByDefault
@@ -149,6 +152,7 @@ public abstract class FileSystemProviderBase
         final FileAttribute<?>... attrs)
         throws IOException
     {
+        // TODO: options not checked
         final FileSystemDriver driver = repository.getDriver(path);
         return driver.newByteChannel(path, options, attrs);
     }
@@ -292,6 +296,8 @@ public abstract class FileSystemProviderBase
     public final <V extends FileAttributeView> V getFileAttributeView(
         final Path path, final Class<V> type, final LinkOption... options)
     {
+        final Set<LinkOption> optionSet
+            = optionsFactory.compileLinkOptions(options);
         return repository.getDriver(path)
             .getFileAttributeView(path, type, options);
     }
@@ -301,6 +307,8 @@ public abstract class FileSystemProviderBase
         final Path path, final Class<A> type, final LinkOption... options)
         throws IOException
     {
+        final Set<LinkOption> optionSet
+            = optionsFactory.compileLinkOptions(options);
         final FileSystemDriver driver = repository.getDriver(path);
         return driver.readAttributes(path, type, options);
     }
@@ -310,6 +318,8 @@ public abstract class FileSystemProviderBase
         final String attributes, final LinkOption... options)
         throws IOException
     {
+        final Set<LinkOption> optionSet
+            = optionsFactory.compileLinkOptions(options);
         return repository.getDriver(path)
             .readAttributes(path, attributes, options);
     }
@@ -319,6 +329,8 @@ public abstract class FileSystemProviderBase
         final Object value, final LinkOption... options)
         throws IOException
     {
+        final Set<LinkOption> optionSet
+            = optionsFactory.compileLinkOptions(options);
         repository.getDriver(path)
             .setAttribute(path, attribute, value, options);
     }
@@ -329,36 +341,5 @@ public abstract class FileSystemProviderBase
     {
         // See GenericFileSystem: only one file store per filesystem
         return path.getFileSystem().getFileStores().iterator().next();
-    }
-
-    @SuppressWarnings({ "MethodMayBeStatic", "DesignForExtension" })
-    protected OpenOption[] copyToOpenOptions(final CopyOption... copyOptions)
-    {
-        final Set<OpenOption> set = new HashSet<>();
-
-        for (final CopyOption opt: copyOptions) {
-            if (!(opt instanceof StandardCopyOption))
-                throw new UnsupportedOperationException("unsupported option"
-                    + " class " + opt.getClass().getCanonicalName());
-            switch ((StandardCopyOption) opt) {
-                case ATOMIC_MOVE:
-                    throw new UnsupportedOperationException(opt + " not valid "
-                        + "for copies");
-                case COPY_ATTRIBUTES:
-                    throw new UnsupportedOperationException(opt + " cannot be "
-                        + "specified when copying across filesystems");
-                case REPLACE_EXISTING:
-                    set.add(StandardOpenOption.CREATE_NEW);
-                    set.add(StandardOpenOption.WRITE);
-            }
-            if (opt.equals(StandardCopyOption.ATOMIC_MOVE))
-                throw new UnsupportedOperationException(opt + " not valid"
-                    + " for copies");
-            if (opt.equals(StandardCopyOption.COPY_ATTRIBUTES))
-                throw new UnsupportedOperationException(opt + " cannot be"
-                    + " specified when copying across filesystems");
-        }
-        return set.isEmpty() ? NO_OPEN_OPTIONS
-            : set.toArray(new OpenOption[set.size()]);
     }
 }

@@ -20,16 +20,19 @@ package com.github.fge.filesystem.provider;
 
 import com.github.fge.filesystem.driver.FileSystemDriver;
 import com.github.fge.filesystem.exceptions.IllegalOptionSetException;
+import com.github.fge.filesystem.exceptions.UnsupportedOptionException;
 import com.github.fge.filesystem.options.FileSystemOptionsFactory;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
+import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.spi.FileSystemProvider;
 
 import static com.github.fge.filesystem.CustomAssertions.shouldHaveThrown;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anySet;
 import static org.mockito.Mockito.mock;
@@ -89,6 +92,25 @@ public final class FileSystemProviderBaseTest
     }
 
     @Test
+    public void unknownReadOptionsAreRejectedOnNewInputStream()
+        throws IOException
+    {
+        final OpenOption myopt = mock(OpenOption.class);
+        when(myopt.toString()).thenReturn("foo");
+
+        try {
+            provider.newInputStream(path, myopt);
+            shouldHaveThrown(UnsupportedOptionException.class);
+        } catch (UnsupportedOptionException e) {
+            assertThat(e).hasMessage("foo");
+        }
+
+        //noinspection unchecked
+        verify(driver, never())
+            .newInputStream(any(Path.class), anySet());
+    }
+
+    @Test
     public void readOptionsAreRejectedOnNewOutputStream()
         throws IOException
     {
@@ -96,6 +118,25 @@ public final class FileSystemProviderBaseTest
             provider.newOutputStream(path, StandardOpenOption.READ);
             shouldHaveThrown(IllegalOptionSetException.class);
         } catch (IllegalOptionSetException ignored) {
+        }
+
+        //noinspection unchecked
+        verify(driver, never())
+            .newOutputStream(any(Path.class), anySet());
+    }
+
+    @Test
+    public void unknownWriteOptionsAreRejectedOnNewOutputStream()
+        throws IOException
+    {
+        final OpenOption myopt = mock(OpenOption.class);
+        when(myopt.toString()).thenReturn("foo");
+
+        try {
+            provider.newOutputStream(path, myopt);
+            shouldHaveThrown(UnsupportedOptionException.class);
+        } catch (UnsupportedOptionException e) {
+            assertThat(e).hasMessage("foo");
         }
 
         //noinspection unchecked

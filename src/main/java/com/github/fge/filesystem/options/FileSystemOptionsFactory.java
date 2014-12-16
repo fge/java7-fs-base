@@ -69,6 +69,7 @@ import java.util.Set;
  * <p>Unless otherwise noted, all methods in this class will throw a {@link
  * NullPointerException} if a null argument is passed.</p>
  */
+// TODO: see newByteChannel() and its Set<? extends OpenOption>
 @ParametersAreNonnullByDefault
 public class FileSystemOptionsFactory
 {
@@ -86,6 +87,7 @@ public class FileSystemOptionsFactory
 	{
 		addCopyOption(StandardCopyOption.REPLACE_EXISTING);
 
+		// Note: Javadoc says option should be ignored if not supported, so...
 		addOpenOption(StandardOpenOption.SPARSE);
 
 		addReadOpenOption(StandardOpenOption.READ);
