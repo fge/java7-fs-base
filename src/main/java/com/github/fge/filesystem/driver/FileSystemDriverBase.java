@@ -20,6 +20,7 @@ package com.github.fge.filesystem.driver;
 
 import com.github.fge.filesystem.attributes.FileAttributesFactory;
 import com.github.fge.filesystem.attributes.provider.FileAttributesProvider;
+import com.github.fge.filesystem.options.FileSystemOptionsFactory;
 import com.github.fge.filesystem.provider.FileSystemFactoryProvider;
 import com.github.fge.filesystem.exceptions.UncaughtIOException;
 
@@ -70,10 +71,14 @@ public abstract class FileSystemDriverBase
     private final FileStore fileStore;
     private final FileAttributesFactory attributesFactory;
 
+    // Needed to translate copy options into read/write open options
+    protected final FileSystemOptionsFactory optionsFactory;
+
     protected FileSystemDriverBase(final FileStore fileStore,
         final FileSystemFactoryProvider factoryProvider)
     {
         attributesFactory = factoryProvider.getAttributesFactory();
+        optionsFactory = factoryProvider.getOptionsFactory();
         this.fileStore = Objects.requireNonNull(fileStore);
     }
 

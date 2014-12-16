@@ -25,13 +25,13 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
-import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.spi.FileSystemProvider;
 
 import static com.github.fge.filesystem.CustomAssertions.shouldHaveThrown;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anySet;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -83,7 +83,23 @@ public final class FileSystemProviderBaseTest
         } catch (IllegalOptionSetException ignored) {
         }
 
+        //noinspection unchecked
         verify(driver, never())
-            .newInputStream(any(Path.class), any(OpenOption[].class));
+            .newInputStream(any(Path.class), anySet());
+    }
+
+    @Test
+    public void readOptionsAreRejectedOnNewOutputStream()
+        throws IOException
+    {
+        try {
+            provider.newOutputStream(path, StandardOpenOption.READ);
+            shouldHaveThrown(IllegalOptionSetException.class);
+        } catch (IllegalOptionSetException ignored) {
+        }
+
+        //noinspection unchecked
+        verify(driver, never())
+            .newOutputStream(any(Path.class), anySet());
     }
 }

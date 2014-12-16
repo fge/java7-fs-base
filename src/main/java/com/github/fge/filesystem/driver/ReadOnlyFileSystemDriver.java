@@ -93,7 +93,7 @@ public final class ReadOnlyFileSystemDriver
     @Nonnull
     @Override
     public OutputStream newOutputStream(final Path path,
-        final OpenOption... options)
+        final Set<OpenOption> options)
         throws IOException
     {
         throw new ReadOnlyFileSystemException();
@@ -129,7 +129,7 @@ public final class ReadOnlyFileSystemDriver
 
     @Override
     public void copy(final Path source, final Path target,
-        final CopyOption... options)
+        final Set<CopyOption> options)
         throws IOException
     {
         throw new ReadOnlyFileSystemException();
@@ -137,7 +137,7 @@ public final class ReadOnlyFileSystemDriver
 
     @Override
     public void move(final Path source, final Path target,
-        final CopyOption... options)
+        final Set<CopyOption> options)
         throws IOException
     {
         throw new ReadOnlyFileSystemException();
@@ -175,7 +175,7 @@ public final class ReadOnlyFileSystemDriver
     @Override
     @Nonnull
     public InputStream newInputStream(final Path path,
-        final OpenOption... options)
+        final Set<OpenOption> options)
         throws IOException
     {
         return delegate.newInputStream(path, options);

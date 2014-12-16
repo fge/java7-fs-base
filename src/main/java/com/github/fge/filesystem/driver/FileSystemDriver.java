@@ -53,14 +53,16 @@ import java.util.Set;
  * The core filesystem class
  *
  * <p>This is the interface you have to implement in order to provide the guts
- * of a {@link FileSystem} implementation. Rather than implementing this class
- * directly, you want to extends {@link FileSystemDriverBase} instead, or even
- * {@link UnixLikeFileSystemDriverBase}.</p>
+ * of a {@link FileSystem} implementation. <strong>Do not implement this class
+ * directly</strong>: extend {@link FileSystemDriverBase} instead, or {@link
+ * UnixLikeFileSystemDriverBase}.</p>
  *
- * <p>Due to the design of this project, this is the core class for all
- * filesystem interactions. All methods dealing with I/O are implemented here
- * and not in {@link FileSystemProvider}; it also contains methods specifically
- * used by {@link FileSystem}.</p>
+ * <p>All methods dealing with I/O are implemented here and not in {@link
+ * FileSystemProvider}; it also contains methods specifically used by {@link
+ * FileSystem}.</p>
+ *
+ * <p>Note: when entering methods in this class, it is guaranteed that all
+ * options are supported.</p>
  *
  * @see GenericFileSystem
  * @see FileSystemProviderBase
@@ -113,7 +115,7 @@ public interface FileSystemDriver
      * @see FileSystemProvider#newInputStream(Path, OpenOption...)
      */
     @Nonnull
-    InputStream newInputStream(Path path, OpenOption... options)
+    InputStream newInputStream(Path path, Set<OpenOption> options)
         throws IOException;
 
     /**
@@ -127,7 +129,7 @@ public interface FileSystemDriver
      * @see FileSystemProvider#newOutputStream(Path, OpenOption...)
      */
     @Nonnull
-    OutputStream newOutputStream(Path path, OpenOption... options)
+    OutputStream newOutputStream(Path path, Set<OpenOption> options)
         throws IOException;
 
     /**
@@ -199,7 +201,7 @@ public interface FileSystemDriver
      *
      * @see FileSystemProvider#copy(Path, Path, CopyOption...)
      */
-    void copy(Path source, Path target, CopyOption... options)
+    void copy(Path source, Path target, Set<CopyOption> options)
         throws IOException;
 
     /**
@@ -213,7 +215,7 @@ public interface FileSystemDriver
      *
      * @see FileSystemProvider#move(Path, Path, CopyOption...)
      */
-    void move(Path source, Path target, CopyOption... options)
+    void move(Path source, Path target, Set<CopyOption> options)
         throws IOException;
 
     /**

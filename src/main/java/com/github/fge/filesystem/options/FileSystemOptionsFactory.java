@@ -143,14 +143,18 @@ public class FileSystemOptionsFactory
 	public final Set<OpenOption> compileWriteOptions(final OpenOption... opts)
 	{
 		final Set<OpenOption> set = new HashSet<>();
+
+		for (final OpenOption opt: opts)
+			set.add(Objects.requireNonNull(opt));
+
+		if (set.removeAll(readOpenOptions))
+			throw new IllegalOptionSetException(Arrays.toString(opts));
+
 		for (final OpenOption opt: opts) {
 			if (!writeOpenOptions.contains(Objects.requireNonNull(opt)))
 				throw new UnsupportedOptionException(opt.toString());
 			set.add(opt);
 		}
-
-		if (set.removeAll(readOpenOptions))
-			throw new IllegalOptionSetException(Arrays.toString(opts));
 
 		// We want at least WRITE
 		set.add(StandardOpenOption.WRITE);
@@ -195,7 +199,18 @@ public class FileSystemOptionsFactory
 	@Nonnull
 	public final Set<OpenOption> toReadOptions(final Set<CopyOption> options)
 	{
-		return copyTranslations(options, readTranslations);
+		final Set<OpenOption> set = new HashSet<>();
+
+		for (final CopyOption option: options) {
+			if (!copyOptions.contains(Objects.requireNonNull(option)))
+				throw new UnsupportedOptionException(option.toString());
+			if (readTranslations.containsKey(option))
+				set.addAll(readTranslations.get(option));
+		}
+
+		set.add(StandardOpenOption.READ);
+
+		return Collections.unmodifiableSet(set);
 	}
 
 	@Nonnull

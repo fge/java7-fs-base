@@ -60,16 +60,16 @@ import java.util.Set;
  *     operation fails with {@link DirectoryNotEmptyException}. This class
  *     enforces this behaviour if the source and target paths are not on the
  *     same {@link Path#getFileSystem() filesystem}; if they are, this is then
- *     delegated to {@link FileSystemDriver#copy(Path, Path, CopyOption...) your
- *     own copy implementation}.</li>
+ *     delegated to {@link FileSystemDriver#copy(Path, Path, Set) your own copy
+ *     implementation}.</li>
  *     <li>if the target path of a {@link #move(Path, Path, CopyOption...) move}
  *     operation exists and is a non empty directory, and you selected to
  *     replace the existing target path, the operation fails with {@link
  *     DirectoryNotEmptyException}; if the source and target paths are not on
  *     the same filesystem, this behaviour is enforced by this class; if they
  *     are on the same filesystem, this is delegated to {@link
- *     FileSystemDriver#move(Path, Path, CopyOption...) your own move
- *     implementation}.</li>
+ *     FileSystemDriver#move(Path, Path, Set) your own move implementation}.
+ *     </li>
  *     <li>The deletion operation ({@link #delete(Path)} and {@link
  *     #deleteIfExists(Path)} do not perform recursive deletions; if the target
  *     is a non empty directory, this method throws {@link
@@ -126,10 +126,10 @@ public abstract class FileSystemProviderBase
         final OpenOption... options)
         throws IOException
     {
-        final Set<OpenOption> opts
+        final Set<OpenOption> optionSet
             = optionsFactory.compileReadOptions(options);
         final FileSystemDriver driver = repository.getDriver(path);
-        return driver.newInputStream(path, options);
+        return driver.newInputStream(path, optionSet);
     }
 
     @Override
@@ -137,8 +137,10 @@ public abstract class FileSystemProviderBase
         final OpenOption... options)
         throws IOException
     {
+        final Set<OpenOption> optionSet
+            = optionsFactory.compileWriteOptions(options);
         final FileSystemDriver driver = repository.getDriver(path);
-        return driver.newOutputStream(path, options);
+        return driver.newOutputStream(path, optionSet);
     }
 
     @Override
@@ -180,6 +182,9 @@ public abstract class FileSystemProviderBase
         final CopyOption... options)
         throws IOException
     {
+        final Set<CopyOption> optionSet
+            = optionsFactory.compileCopyOptions(options);
+
         final FileSystemDriver src = repository.getDriver(source);
         final FileSystemDriver dst = repository.getDriver(target);
 
@@ -189,17 +194,20 @@ public abstract class FileSystemProviderBase
          */
         //noinspection ObjectEquality
         if (src == dst) {
-            src.copy(source, target, options);
+            src.copy(source, target, optionSet);
             return;
         }
 
         /*
          * Otherwise, translate the copy options and do a regular stream copy.
          */
-        final OpenOption[] openOptions = copyToOpenOptions(options);
+        final Set<OpenOption> readOptions
+            = optionsFactory.toReadOptions(optionSet);
+        final Set<OpenOption> writeOptions
+            = optionsFactory.toWriteOptions(optionSet);
         try (
-            final InputStream in = src.newInputStream(source);
-            final OutputStream out = dst.newOutputStream(source, openOptions);
+            final InputStream in = src.newInputStream(source, readOptions);
+            final OutputStream out = dst.newOutputStream(source, writeOptions);
         ) {
             final byte[] buf = new byte[BUFSIZE];
             int bytesRead;
@@ -216,7 +224,9 @@ public abstract class FileSystemProviderBase
         final CopyOption... options)
         throws IOException
     {
-        // TODO: DirectoryNotEmptyException
+        final Set<CopyOption> optionSet
+            = optionsFactory.compileCopyOptions(options);
+
         final FileSystemDriver src = repository.getDriver(source);
         final FileSystemDriver dst = repository.getDriver(target);
 
@@ -226,17 +236,20 @@ public abstract class FileSystemProviderBase
          */
         //noinspection ObjectEquality
         if (src == dst) {
-            src.move(source, target, options);
+            src.move(source, target, optionSet);
             return;
         }
 
         /*
          * Otherwise, translate the copy options and do a regular stream copy.
          */
-        final OpenOption[] openOptions = copyToOpenOptions(options);
+        final Set<OpenOption> readOptions
+            = optionsFactory.toReadOptions(optionSet);
+        final Set<OpenOption> writeOptions
+            = optionsFactory.toWriteOptions(optionSet);
         try (
-            final InputStream in = src.newInputStream(source);
-            final OutputStream out = dst.newOutputStream(source, openOptions);
+            final InputStream in = src.newInputStream(source, readOptions);
+            final OutputStream out = dst.newOutputStream(source, writeOptions);
         ) {
             final byte[] buf = new byte[BUFSIZE];
             int bytesRead;
