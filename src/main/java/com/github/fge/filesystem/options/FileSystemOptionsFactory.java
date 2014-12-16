@@ -198,17 +198,11 @@ public class FileSystemOptionsFactory
 		return Collections.unmodifiableSet(set);
 	}
 
-	@Nonnull
-	public final Set<LinkOption> compileLinkOptions(final LinkOption... opts)
+	public final void checkLinkOptions(final LinkOption... opts)
 	{
-		final Set<LinkOption> set = EnumSet.noneOf(LinkOption.class);
-		for (final LinkOption opt: opts) {
+		for (final LinkOption opt: opts)
 			if (!linkOptions.contains(Objects.requireNonNull(opt)))
 				throw new UnsupportedOptionException(opt.toString());
-			set.add(opt);
-		}
-
-		return Collections.unmodifiableSet(set);
 	}
 
 	@Nonnull

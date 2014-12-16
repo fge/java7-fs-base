@@ -36,14 +36,11 @@ import java.nio.file.FileSystem;
 import java.nio.file.LinkOption;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.FileAttributeView;
 import java.nio.file.spi.FileSystemProvider;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -296,8 +293,7 @@ public abstract class FileSystemProviderBase
     public final <V extends FileAttributeView> V getFileAttributeView(
         final Path path, final Class<V> type, final LinkOption... options)
     {
-        final Set<LinkOption> optionSet
-            = optionsFactory.compileLinkOptions(options);
+        optionsFactory.checkLinkOptions(options);
         return repository.getDriver(path)
             .getFileAttributeView(path, type, options);
     }
@@ -307,8 +303,7 @@ public abstract class FileSystemProviderBase
         final Path path, final Class<A> type, final LinkOption... options)
         throws IOException
     {
-        final Set<LinkOption> optionSet
-            = optionsFactory.compileLinkOptions(options);
+        optionsFactory.checkLinkOptions(options);
         final FileSystemDriver driver = repository.getDriver(path);
         return driver.readAttributes(path, type, options);
     }
@@ -318,8 +313,7 @@ public abstract class FileSystemProviderBase
         final String attributes, final LinkOption... options)
         throws IOException
     {
-        final Set<LinkOption> optionSet
-            = optionsFactory.compileLinkOptions(options);
+        optionsFactory.checkLinkOptions(options);
         return repository.getDriver(path)
             .readAttributes(path, attributes, options);
     }
@@ -329,8 +323,7 @@ public abstract class FileSystemProviderBase
         final Object value, final LinkOption... options)
         throws IOException
     {
-        final Set<LinkOption> optionSet
-            = optionsFactory.compileLinkOptions(options);
+        optionsFactory.checkLinkOptions(options);
         repository.getDriver(path)
             .setAttribute(path, attribute, value, options);
     }
