@@ -288,9 +288,23 @@ public abstract class FileSystemProviderBase
         final FileAttribute<?>... attrs)
         throws IOException
     {
+        // TODO
         if (attrs.length != 0)
             throw new UnsupportedOperationException("TODO");
-        repository.getDriver(dir).createDirectory(dir, attrs);
+
+        final FileSystemDriver driver = repository.getDriver(dir);
+
+        try {
+            checkAccess(dir);
+            throw new FileAlreadyExistsException(dir.toString());
+        } catch (NoSuchFileException ignored) {
+            /*
+             * We only ignore the exception if the entry does NOT exist; any
+             * other IOException is a problem, so let it through
+             */
+        }
+
+        driver.createDirectory(dir, attrs);
     }
 
     /**
