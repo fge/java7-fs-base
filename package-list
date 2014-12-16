@@ -5,6 +5,7 @@ com.github.fge.filesystem.driver
 com.github.fge.filesystem.exceptions
 com.github.fge.filesystem.filestore
 com.github.fge.filesystem.fs
+com.github.fge.filesystem.options
 com.github.fge.filesystem.path
 com.github.fge.filesystem.path.matchers
 com.github.fge.filesystem.provider
