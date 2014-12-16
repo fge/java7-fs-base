@@ -45,7 +45,6 @@ public final class FileSystemProviderBaseTest
 {
     private FileSystemFactoryProvider factoryProvider;
     private FileSystemOptionsFactory optionsFactory;
-    private FileSystemRepository repository;
     private FileSystemDriver driver;
     private FileSystemProvider provider;
     private Path path;
@@ -53,7 +52,8 @@ public final class FileSystemProviderBaseTest
     @BeforeMethod
     public void initMocks()
     {
-        repository = mock(FileSystemRepository.class);
+        final FileSystemRepository repository
+            = mock(FileSystemRepository.class);
 
         driver = mock(FileSystemDriver.class);
         when(repository.getDriver(any(Path.class))).thenReturn(driver);

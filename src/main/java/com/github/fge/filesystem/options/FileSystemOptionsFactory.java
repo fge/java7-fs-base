@@ -168,13 +168,19 @@ public class FileSystemOptionsFactory
 		}
 
 		// We substitute ourselves for FileSystemProvider here, so we need
-		// to set options which are present if none are provided
-		set.add(StandardOpenOption.WRITE);
-		if (!set.contains(StandardOpenOption.APPEND))
-			set.add(StandardOpenOption.TRUNCATE_EXISTING);
-		if (!set.contains(StandardOpenOption.CREATE_NEW))
+		// to set the necessary options
+		if (set.isEmpty()) {
+			// See Files.newOutputStream()
 			set.add(StandardOpenOption.CREATE);
+			set.add(StandardOpenOption.TRUNCATE_EXISTING);
+		}
 
+		set.add(StandardOpenOption.WRITE);
+
+		if (set.contains(StandardOpenOption.APPEND)
+			&& set.contains(StandardOpenOption.TRUNCATE_EXISTING))
+			throw new IllegalOptionSetException("cannot append and truncate "
+				+ "at the same time");
 
 		return Collections.unmodifiableSet(set);
 	}
