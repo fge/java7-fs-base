@@ -94,6 +94,15 @@ public class FileSystemOptionsFactory
 		addWriteOpenOption(StandardOpenOption.CREATE_NEW);
 		addWriteOpenOption(StandardOpenOption.TRUNCATE_EXISTING);
 		addWriteOpenOption(StandardOpenOption.WRITE);
+
+		addWriteTranslation(StandardCopyOption.REPLACE_EXISTING,
+			StandardOpenOption.CREATE);
+		addWriteTranslation(StandardCopyOption.REPLACE_EXISTING,
+			StandardOpenOption.TRUNCATE_EXISTING);
+		addWriteTranslation(StandardCopyOption.REPLACE_EXISTING,
+			StandardOpenOption.WRITE);
+
+		// TODO: for now, cannot add translations for unsupported options
 	}
 
 	/**
@@ -156,10 +165,14 @@ public class FileSystemOptionsFactory
 			set.add(opt);
 		}
 
-		// We want at least WRITE
+		// We substitute ourselves for FileSystemProvider here, so we need
+		// to set options which are present if none are provided
 		set.add(StandardOpenOption.WRITE);
-		// TODO: what about this one?
-		//set.add(StandardOpenOption.CREATE);
+		if (!set.contains(StandardOpenOption.APPEND))
+			set.add(StandardOpenOption.TRUNCATE_EXISTING);
+		if (!set.contains(StandardOpenOption.CREATE_NEW))
+			set.add(StandardOpenOption.CREATE);
+
 
 		return Collections.unmodifiableSet(set);
 	}
