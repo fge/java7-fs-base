@@ -279,6 +279,8 @@ public abstract class FileSystemProviderBase
      *
      * @param dir the directory to create
      * @param attrs attributes to the created directory
+     * @throws FileAlreadyExistsException path already exists (whether it is
+     * a directory or not)
      * @throws IOException directory creation failed
      *
      * @see FileSystemDriver#createDirectory(Path, FileAttribute[])
