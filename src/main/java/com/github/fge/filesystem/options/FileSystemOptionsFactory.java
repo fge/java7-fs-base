@@ -142,8 +142,8 @@ public class FileSystemOptionsFactory
 	/**
 	 * Compile a set of read options from a given {@link OpenOption} array
 	 *
-	 * <p>The result set will have at least {@link StandardOpenOption#WRITE} if
-	 * it is not already present.</p>
+	 * <p>The result set will have at least {@link StandardOpenOption#WRITE} and
+     * {@link StandardOpenOption#CREATE} if they are not already present.</p>
 	 *
 	 * @param opts the options array
 	 * @return an unmodifiable set of write options
@@ -160,6 +160,8 @@ public class FileSystemOptionsFactory
 
 		if (set.removeAll(readOpenOptions))
 			throw new IllegalOptionSetException(Arrays.toString(opts));
+
+        set.add(StandardOpenOption.CREATE);
 
 		for (final OpenOption opt: opts) {
 			if (!writeOpenOptions.contains(Objects.requireNonNull(opt)))
