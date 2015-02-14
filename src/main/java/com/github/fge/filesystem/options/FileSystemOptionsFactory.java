@@ -73,13 +73,27 @@ import java.util.Set;
 @ParametersAreNonnullByDefault
 public class FileSystemOptionsFactory
 {
-	private final Set<OpenOption> readOpenOptions = new HashSet<>();
+	// Options supported for read
+    private final Set<OpenOption> readOpenOptions = new HashSet<>();
+
+    // Options supported for write
 	private final Set<OpenOption> writeOpenOptions = new HashSet<>();
+
+    // Options supported for both read and write
+    private final Set<OpenOption> openOptions = new HashSet<>();
+
+    // Options supported for copies
 	private final Set<CopyOption> copyOptions = new HashSet<>();
+
+    // Supported link options (none for now)
 	private final Set<LinkOption> linkOptions
 		= EnumSet.noneOf(LinkOption.class);
+
+    // Translations from copy options to read only open options
 	private final Map<CopyOption, Set<OpenOption>> readTranslations
 		= new HashMap<>();
+
+    // Translations from copy options to write only open options
 	private final Map<CopyOption, Set<OpenOption>> writeTranslations
 		= new HashMap<>();
 
@@ -130,7 +144,7 @@ public class FileSystemOptionsFactory
 			throw new IllegalOptionSetException(Arrays.toString(opts));
 
 		for (final OpenOption opt: set)
-			if (!readOpenOptions.contains(opt))
+			if (!(readOpenOptions.contains(opt) || openOptions.contains(opt)))
 				throw new UnsupportedOptionException(opt.toString());
 
 		// We want at least READ
@@ -158,26 +172,22 @@ public class FileSystemOptionsFactory
 		for (final OpenOption opt: opts)
 			set.add(Objects.requireNonNull(opt));
 
-		if (set.removeAll(readOpenOptions))
-			throw new IllegalOptionSetException(Arrays.toString(opts));
+        if (set.removeAll(readOpenOptions))
+            throw new IllegalOptionSetException(Arrays.toString(opts));
+
+        // See Files.newOutputStream()
+        if (set.isEmpty())
+            set.add(StandardOpenOption.TRUNCATE_EXISTING);
 
         set.add(StandardOpenOption.CREATE);
+        set.add(StandardOpenOption.WRITE);
 
 		for (final OpenOption opt: opts) {
-			if (!writeOpenOptions.contains(Objects.requireNonNull(opt)))
+			if (!(writeOpenOptions.contains(Objects.requireNonNull(opt))
+                || openOptions.contains(opt)))
 				throw new UnsupportedOptionException(opt.toString());
 			set.add(opt);
 		}
-
-		// We substitute ourselves for FileSystemProvider here, so we need
-		// to set the necessary options
-		if (set.isEmpty()) {
-			// See Files.newOutputStream()
-			set.add(StandardOpenOption.CREATE);
-			set.add(StandardOpenOption.TRUNCATE_EXISTING);
-		}
-
-		set.add(StandardOpenOption.WRITE);
 
 		if (set.contains(StandardOpenOption.APPEND)
 			&& set.contains(StandardOpenOption.TRUNCATE_EXISTING))
@@ -263,8 +273,7 @@ public class FileSystemOptionsFactory
 	 */
 	protected final void addOpenOption(final OpenOption option)
 	{
-		addReadOpenOption(option);
-		addWriteOpenOption(option);
+        openOptions.add(Objects.requireNonNull(option));
 	}
 
 	/**

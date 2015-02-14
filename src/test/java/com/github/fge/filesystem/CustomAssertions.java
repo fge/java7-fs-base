@@ -18,13 +18,23 @@
 
 package com.github.fge.filesystem;
 
+import com.github.fge.filesystem.path.PathAssert;
 import org.assertj.core.api.Assertions;
 
+import javax.annotation.ParametersAreNullableByDefault;
+import java.nio.file.Path;
+
+@ParametersAreNullableByDefault
 public final class CustomAssertions
     extends Assertions
 {
     public static void shouldHaveThrown(final Class<? extends Throwable> e)
     {
         failBecauseExceptionWasNotThrown(e);
+    }
+
+    public static PathAssert assertThat(final Path path)
+    {
+        return new PathAssert(path);
     }
 }
