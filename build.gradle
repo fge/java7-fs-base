@@ -28,7 +28,7 @@ buildscript {
         classpath(group: "org.springframework.build.gradle",
             name: "propdeps-plugin", version: "0.0.7");
         classpath(group: "info.solidsoft.gradle.pitest",
-            name: "gradle-pitest-plugin", version: "1.1.1");
+            name: "gradle-pitest-plugin", version: "1.1.4");
     }
 };
 
@@ -47,8 +47,10 @@ apply(plugin: "info.solidsoft.pitest");
 group = "com.github.fge";
 version = "0.0.2-SNAPSHOT";
 description = "Helper classes for FileSystem implementations";
-sourceCompatibility = "1.7";
-targetCompatibility = "1.7"; // defaults to sourceCompatibility
+
+def javaVersion = JavaVersion.VERSION_1_7;
+sourceCompatibility = javaVersion;
+targetCompatibility = javaVersion; // defaults to sourceCompatibility
 
 /*
  * List of dependencies
@@ -56,13 +58,15 @@ targetCompatibility = "1.7"; // defaults to sourceCompatibility
 dependencies {
     provided(group: "com.google.code.findbugs", name: "jsr305",
         version: "3.0.0");
-    testCompile(group: "org.testng", name: "testng", version: "6.8.8") {
+    testCompile(group: "org.testng", name: "testng", version: "6.8.21") {
+        exclude(group: "org.apache.ant", module: "ant");
+        exclude(group: "com.google.inject", module: "guice");
         exclude(group: "junit", module: "junit");
         exclude(group: "org.beanshell", module: "bsh");
         exclude(group: "org.yaml", module: "snakeyaml");
     };
-    testCompile(group: "org.mockito", name: "mockito-core", version: "1.10.8");
-    testCompile(group: "org.assertj", name: "assertj-core", version: "1.7.0");
+    testCompile(group: "org.mockito", name: "mockito-core", version: "1.10.19");
+    testCompile(group: "org.assertj", name: "assertj-core", version: "1.7.1");
 }
 
 javadoc.options.links("http://docs.oracle.com/javase/7/docs/api/");
@@ -74,6 +78,15 @@ javadoc.options.links("http://jsr-305.googlecode.com/svn/trunk/javadoc/");
 repositories {
     mavenCentral();
 }
+
+task enforceVersion << {
+    def foundVersion = JavaVersion.current();
+    if (foundVersion != javaVersion)
+        throw new IllegalStateException("Wrong java version; required is " +
+            javaVersion + ", but found " + foundVersion);
+}
+
+compileJava.dependsOn(enforceVersion);
 
 /*
  * Necessary for using sun.nio.fs.Globs...
@@ -91,10 +104,6 @@ test {
     useTestNG() {
         useDefaultListeners = true;
     };
-}
-
-pitest {
-    pitestVersion = "1.1.2"; // see https://github.com/hcoles/pitest/issues/150
 }
 
 /*
@@ -117,7 +126,7 @@ artifacts {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = "2.2";
+    gradleVersion = "2.2.1";
     distributionUrl = "http://services.gradle.org/distributions/gradle-${gradleVersion}-all.zip";
 }
 
