@@ -209,9 +209,8 @@ public abstract class FileSystemProviderBase
             driver.checkAccess(path, AccessMode.WRITE);
             if (optionSet.contains(StandardOpenOption.CREATE_NEW))
                 throw new FileAlreadyExistsException(path.toString());
-        } catch (NoSuchFileException e) {
-            if (!optionSet.contains(StandardOpenOption.CREATE))
-                throw e;
+        } catch (NoSuchFileException ignored) {
+            // The set will always contain at least CREATE
         }
 
         return driver.newOutputStream(path, optionSet);
