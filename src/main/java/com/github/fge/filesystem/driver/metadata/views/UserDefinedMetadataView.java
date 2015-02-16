@@ -44,7 +44,7 @@ public abstract class UserDefinedMetadataView<M>
     protected final Path path;
     protected final MetadataDriver<M> driver;
 
-    public UserDefinedMetadataView(final Path path,
+    protected UserDefinedMetadataView(final Path path,
         final MetadataDriver<M> driver)
     {
         this.path = path;
