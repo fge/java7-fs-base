@@ -74,7 +74,6 @@ public final class ReadOnlyFileSystemDriver
         WRITE_OPTIONS = Collections.unmodifiableSet(set);
     }
 
-
     private final FileSystemDriver delegate;
 
     @Nonnull
