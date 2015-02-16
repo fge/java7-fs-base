@@ -170,7 +170,7 @@ public abstract class DosFileAttributesProvider
                 setReadOnly((Boolean) value);
                 break;
             case "hidden":
-                setReadOnly((Boolean) value);
+                setHidden((Boolean) value);
                 break;
             case "system":
                 setSystem((Boolean) value);
