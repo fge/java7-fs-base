@@ -32,7 +32,7 @@ import java.nio.file.attribute.FileTime;
 
 @ParametersAreNonnullByDefault
 public class DosMetadataView<M>
-    implements DosFileAttributeView, AttributeWriterByName
+    implements DosFileAttributeView, MetadataView<M>, AttributeWriterByName
 {
     private final String name = "dos";
     protected final Path path;

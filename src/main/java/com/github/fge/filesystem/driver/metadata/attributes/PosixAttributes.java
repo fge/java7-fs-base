@@ -21,6 +21,7 @@ package com.github.fge.filesystem.driver.metadata.attributes;
 import com.github.fge.filesystem.driver.metadata.PathMetadata;
 
 import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.nio.file.attribute.PosixFileAttributes;
 import java.util.Collections;
 import java.util.HashMap;
@@ -38,7 +39,7 @@ public abstract class PosixAttributes<M>
     }
 
     @Override
-    public Object getAttributeByName(@Nonnull final String name)
+    public Object getAttributeByName(final String name)
     {
         switch (Objects.requireNonNull(name)) {
             case "owner":

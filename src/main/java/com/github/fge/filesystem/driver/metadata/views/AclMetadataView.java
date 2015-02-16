@@ -37,7 +37,8 @@ import java.util.Map;
 
 @ParametersAreNonnullByDefault
 public class AclMetadataView<M>
-    implements AclFileAttributeView, AttributeReaderByName, AttributeWriterByName
+    implements AclFileAttributeView, MetadataView<M>, AttributeReaderByName,
+    AttributeWriterByName
 {
     private final String name = "acl";
     protected final Path path;

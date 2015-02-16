@@ -35,7 +35,8 @@ import java.util.Map;
 
 @ParametersAreNonnullByDefault
 public class FileOwnerMetadataView<M>
-    implements FileOwnerAttributeView, AttributeReaderByName, AttributeWriterByName
+    implements FileOwnerAttributeView, MetadataView<M>, AttributeReaderByName,
+    AttributeWriterByName
 {
     private final String name = "owner";
     protected final Path path;

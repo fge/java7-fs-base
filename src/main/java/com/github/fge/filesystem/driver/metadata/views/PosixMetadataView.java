@@ -36,7 +36,7 @@ import java.util.Set;
 
 @ParametersAreNonnullByDefault
 public class PosixMetadataView<M>
-    implements PosixFileAttributeView, AttributeWriterByName
+    implements PosixFileAttributeView, MetadataView<M>, AttributeWriterByName
 {
     private final String name = "posix";
     protected final Path path;

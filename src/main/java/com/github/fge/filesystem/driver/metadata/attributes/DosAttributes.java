@@ -21,6 +21,7 @@ package com.github.fge.filesystem.driver.metadata.attributes;
 import com.github.fge.filesystem.driver.metadata.PathMetadata;
 
 import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.nio.file.attribute.DosFileAttributes;
 import java.util.Collections;
 import java.util.HashMap;
@@ -28,6 +29,7 @@ import java.util.Map;
 import java.util.Objects;
 
 @SuppressWarnings("DesignForExtension")
+@ParametersAreNonnullByDefault
 public abstract class DosAttributes<M>
     extends BasicAttributes<M>
     implements DosFileAttributes
@@ -62,7 +64,7 @@ public abstract class DosAttributes<M>
     }
 
     @Override
-    public Object getAttributeByName(@Nonnull final String name)
+    public Object getAttributeByName(final String name)
     {
         switch (Objects.requireNonNull(name)) {
             case "readonly":
