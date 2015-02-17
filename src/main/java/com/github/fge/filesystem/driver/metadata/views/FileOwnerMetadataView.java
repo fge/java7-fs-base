@@ -61,6 +61,7 @@ public class FileOwnerMetadataView<M>
 
     @Override
     public final UserPrincipal getOwner()
+        throws IOException
     {
         return reader.getOwner();
     }

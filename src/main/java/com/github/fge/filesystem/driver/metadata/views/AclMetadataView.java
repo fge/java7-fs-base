@@ -62,6 +62,7 @@ public class AclMetadataView<M>
 
     @Override
     public final UserPrincipal getOwner()
+        throws IOException
     {
         return reader.getOwner();
     }

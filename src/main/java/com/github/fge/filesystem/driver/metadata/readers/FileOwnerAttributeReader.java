@@ -60,5 +60,6 @@ public abstract class FileOwnerAttributeReader<M>
         return Collections.<String, Object>singletonMap("owner", getOwner());
     }
 
-    public abstract UserPrincipal getOwner();
+    public abstract UserPrincipal getOwner()
+        throws IOException;
 }
