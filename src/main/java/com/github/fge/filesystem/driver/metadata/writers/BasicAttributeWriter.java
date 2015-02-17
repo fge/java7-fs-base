@@ -26,7 +26,6 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.FileTime;
 import java.util.Objects;
 
@@ -34,7 +33,6 @@ import java.util.Objects;
 @ParametersAreNonnullByDefault
 public abstract class BasicAttributeWriter<M>
     extends AttributeWriter<M>
-    implements BasicFileAttributeView
 {
     protected BasicAttributeWriter(final Path path,
         final MetadataDriver<M> driver)
@@ -69,7 +67,7 @@ public abstract class BasicAttributeWriter<M>
         }
     }
 
-    @Override
+    @SuppressWarnings("MethodMayBeStatic")
     public void setTimes(@Nullable final FileTime lastModifiedTime,
         @Nullable final FileTime lastAccessTime,
         @Nullable final FileTime createTime)
