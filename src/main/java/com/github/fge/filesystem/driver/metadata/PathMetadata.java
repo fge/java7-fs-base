@@ -18,6 +18,8 @@
 
 package com.github.fge.filesystem.driver.metadata;
 
+import com.github.fge.filesystem.internal.NonFinalForTesting;
+
 import java.nio.file.AccessMode;
 import java.nio.file.Path;
 import java.util.EnumSet;
@@ -27,7 +29,8 @@ import java.util.Set;
  *
  * @param <M> metadata type parameter
  */
-public final class PathMetadata<M>
+@NonFinalForTesting
+public class PathMetadata<M>
 {
     private final Path path;
     private final M metadata;

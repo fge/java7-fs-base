@@ -21,6 +21,7 @@ package com.github.fge.filesystem.driver.metadata.attributes;
 import com.github.fge.filesystem.driver.metadata.AttributesByName;
 import com.github.fge.filesystem.driver.metadata.PathMetadata;
 import com.github.fge.filesystem.exceptions.NoSuchAttributeException;
+import com.github.fge.filesystem.internal.NonFinalForTesting;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -69,26 +70,36 @@ public abstract class BasicAttributes<M>
     }
 
     @Override
-    public final boolean isRegularFile()
+    public long size()
+    {
+        return 0L;
+    }
+
+    @Override
+    @NonFinalForTesting
+    public boolean isRegularFile()
     {
         return pathMetadata.getType() == PathMetadata.Type.REGULAR_FILE;
     }
 
     @Override
-    public final boolean isDirectory()
+    @NonFinalForTesting
+    public boolean isDirectory()
     {
         return pathMetadata.getType() == PathMetadata.Type.DIR_NOTEMPTY
             || pathMetadata.getType() == PathMetadata.Type.DIR_EMPTY;
     }
 
     @Override
-    public final boolean isSymbolicLink()
+    @NonFinalForTesting
+    public boolean isSymbolicLink()
     {
         return pathMetadata.getType() == PathMetadata.Type.SYMLINK;
     }
 
     @Override
-    public final boolean isOther()
+    @NonFinalForTesting
+    public boolean isOther()
     {
         return pathMetadata.getType() == PathMetadata.Type.OTHER;
     }
