@@ -35,20 +35,18 @@ import java.util.Map;
 
 @ParametersAreNonnullByDefault
 public class FileOwnerMetadataView<M>
-    implements FileOwnerAttributeView, MetadataView<M>, AttributeReaderByName,
+    extends MetadataView<M>
+    implements FileOwnerAttributeView, AttributeReaderByName,
     AttributeWriterByName
 {
     private final String name = "owner";
-    protected final Path path;
-    protected final MetadataDriver<M> driver;
     protected final FileOwnerAttributeReader<M> reader;
     protected final FileOwnerAttributeWriter<M> writer;
 
     public FileOwnerMetadataView(final Path path,
         final MetadataDriver<M> driver)
     {
-        this.path = path;
-        this.driver = driver;
+        super(path, driver);
         reader = driver.getAttributeReader(path, name);
         writer = driver.getAttributeWriter(path, name);
     }

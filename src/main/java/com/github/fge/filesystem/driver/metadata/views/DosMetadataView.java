@@ -32,17 +32,15 @@ import java.nio.file.attribute.FileTime;
 
 @ParametersAreNonnullByDefault
 public class DosMetadataView<M>
-    implements DosFileAttributeView, MetadataView<M>, AttributeWriterByName
+    extends MetadataView<M>
+    implements DosFileAttributeView, AttributeWriterByName
 {
     private final String name = "dos";
-    protected final Path path;
-    protected final MetadataDriver<M> driver;
     protected final DosAttributeWriter<M> writer;
 
     public DosMetadataView(final Path path, final MetadataDriver<M> driver)
     {
-        this.driver = driver;
-        this.path = path;
+        super(path, driver);
         writer = driver.getAttributeWriter(path, name);
     }
 

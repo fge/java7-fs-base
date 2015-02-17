@@ -32,17 +32,15 @@ import java.nio.file.attribute.FileTime;
 
 @ParametersAreNonnullByDefault
 public class BasicMetadataView<M>
-    implements BasicFileAttributeView, MetadataView<M>, AttributeWriterByName
+    extends MetadataView<M>
+    implements BasicFileAttributeView, AttributeWriterByName
 {
     private final String name = "basic";
-    protected final Path path;
-    protected final MetadataDriver<M> driver;
     protected final BasicAttributeWriter<M> writer;
 
     public BasicMetadataView(final Path path, final MetadataDriver<M> driver)
     {
-        this.path = path;
-        this.driver = driver;
+        super(path, driver);
         writer = driver.getAttributeWriter(path, name);
     }
 

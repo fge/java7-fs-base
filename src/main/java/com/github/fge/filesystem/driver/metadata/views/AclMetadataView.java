@@ -37,19 +37,17 @@ import java.util.Map;
 
 @ParametersAreNonnullByDefault
 public class AclMetadataView<M>
-    implements AclFileAttributeView, MetadataView<M>, AttributeReaderByName,
+    extends MetadataView<M>
+    implements AclFileAttributeView, AttributeReaderByName,
     AttributeWriterByName
 {
     private final String name = "acl";
-    protected final Path path;
-    protected final MetadataDriver<M> driver;
     protected final AclAttributeReader<M> reader;
     protected final AclAttributeWriter<M> writer;
 
     public AclMetadataView(final Path path, final MetadataDriver<M> driver)
     {
-        this.path = path;
-        this.driver = driver;
+        super(path, driver);
         reader = driver.getAttributeReader(path, name);
         writer = driver.getAttributeWriter(path, name);
     }

@@ -37,18 +37,16 @@ import java.util.Objects;
 
 @ParametersAreNonnullByDefault
 public abstract class UserDefinedMetadataView<M>
-    implements UserDefinedFileAttributeView, MetadataView<M>,
-    AttributeReaderByName, AttributeWriterByName
+    extends MetadataView<M>
+    implements UserDefinedFileAttributeView, AttributeReaderByName,
+    AttributeWriterByName
 {
     private final String name = "user";
-    protected final Path path;
-    protected final MetadataDriver<M> driver;
 
     protected UserDefinedMetadataView(final Path path,
         final MetadataDriver<M> driver)
     {
-        this.path = path;
-        this.driver = driver;
+        super(path, driver);
     }
 
     @Override

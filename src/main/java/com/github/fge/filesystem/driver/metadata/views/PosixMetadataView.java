@@ -36,17 +36,15 @@ import java.util.Set;
 
 @ParametersAreNonnullByDefault
 public class PosixMetadataView<M>
-    implements PosixFileAttributeView, MetadataView<M>, AttributeWriterByName
+    extends MetadataView<M>
+    implements PosixFileAttributeView, AttributeWriterByName
 {
     private final String name = "posix";
-    protected final Path path;
-    protected final MetadataDriver<M> driver;
     protected final PosixAttributeWriter<M> writer;
 
     public PosixMetadataView(final Path path, final MetadataDriver<M> driver)
     {
-        this.driver = driver;
-        this.path = path;
+        super(path, driver);
         writer = driver.getAttributeWriter(path, name);
     }
 
