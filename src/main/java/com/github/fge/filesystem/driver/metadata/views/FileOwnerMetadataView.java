@@ -39,22 +39,15 @@ public class FileOwnerMetadataView<M>
     implements FileOwnerAttributeView, AttributeReaderByName,
     AttributeWriterByName
 {
-    private final String name = "owner";
     protected final FileOwnerAttributeReader<M> reader;
     protected final FileOwnerAttributeWriter<M> writer;
 
     public FileOwnerMetadataView(final Path path,
         final MetadataDriver<M> driver)
     {
-        super(path, driver);
+        super("owner", path, driver);
         reader = driver.getAttributeReader(path, name);
         writer = driver.getAttributeWriter(path, name);
-    }
-
-    @Override
-    public final String name()
-    {
-        return name;
     }
 
     @Override

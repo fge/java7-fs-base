@@ -41,21 +41,14 @@ public class AclMetadataView<M>
     implements AclFileAttributeView, AttributeReaderByName,
     AttributeWriterByName
 {
-    private final String name = "acl";
     protected final AclAttributeReader<M> reader;
     protected final AclAttributeWriter<M> writer;
 
     public AclMetadataView(final Path path, final MetadataDriver<M> driver)
     {
-        super(path, driver);
+        super("acl", path, driver);
         reader = driver.getAttributeReader(path, name);
         writer = driver.getAttributeWriter(path, name);
-    }
-
-    @Override
-    public final String name()
-    {
-        return name;
     }
 
     @Override

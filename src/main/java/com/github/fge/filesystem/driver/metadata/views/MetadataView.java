@@ -21,6 +21,7 @@ package com.github.fge.filesystem.driver.metadata.views;
 import com.github.fge.filesystem.driver.metadata.MetadataDriver;
 
 import java.nio.file.Path;
+import java.nio.file.attribute.FileAttributeView;
 
 /**
  * Marker interface for metadata views
@@ -30,13 +31,23 @@ import java.nio.file.Path;
  * @param <M> metadata class
  */
 public abstract class MetadataView<M>
+    implements FileAttributeView
 {
+    protected final String name;
     protected final Path path;
     protected final MetadataDriver<M> driver;
 
-    protected MetadataView(final Path path, final MetadataDriver<M> driver)
+    protected MetadataView(final String name, final Path path,
+        final MetadataDriver<M> driver)
     {
+        this.name = name;
         this.path = path;
         this.driver = driver;
+    }
+
+    @Override
+    public final String name()
+    {
+        return name;
     }
 }

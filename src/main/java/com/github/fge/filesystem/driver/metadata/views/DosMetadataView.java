@@ -35,19 +35,12 @@ public class DosMetadataView<M>
     extends MetadataView<M>
     implements DosFileAttributeView, AttributeWriterByName
 {
-    private final String name = "dos";
     protected final DosAttributeWriter<M> writer;
 
     public DosMetadataView(final Path path, final MetadataDriver<M> driver)
     {
-        super(path, driver);
+        super("dos", path, driver);
         writer = driver.getAttributeWriter(path, name);
-    }
-
-    @Override
-    public final String name()
-    {
-        return name;
     }
 
     @Override

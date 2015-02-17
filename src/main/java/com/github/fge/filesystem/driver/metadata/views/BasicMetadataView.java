@@ -35,19 +35,12 @@ public class BasicMetadataView<M>
     extends MetadataView<M>
     implements BasicFileAttributeView, AttributeWriterByName
 {
-    private final String name = "basic";
     protected final BasicAttributeWriter<M> writer;
 
     public BasicMetadataView(final Path path, final MetadataDriver<M> driver)
     {
-        super(path, driver);
+        super("basic", path, driver);
         writer = driver.getAttributeWriter(path, name);
-    }
-
-    @Override
-    public final String name()
-    {
-        return name;
     }
 
     @Override

@@ -41,18 +41,10 @@ public abstract class UserDefinedMetadataView<M>
     implements UserDefinedFileAttributeView, AttributeReaderByName,
     AttributeWriterByName
 {
-    private final String name = "user";
-
     protected UserDefinedMetadataView(final Path path,
         final MetadataDriver<M> driver)
     {
-        super(path, driver);
-    }
-
-    @Override
-    public final String name()
-    {
-        return name;
+        super("user", path, driver);
     }
 
     @Nullable

@@ -39,19 +39,12 @@ public class PosixMetadataView<M>
     extends MetadataView<M>
     implements PosixFileAttributeView, AttributeWriterByName
 {
-    private final String name = "posix";
     protected final PosixAttributeWriter<M> writer;
 
     public PosixMetadataView(final Path path, final MetadataDriver<M> driver)
     {
-        super(path, driver);
+        super("posix", path, driver);
         writer = driver.getAttributeWriter(path, name);
-    }
-
-    @Override
-    public final String name()
-    {
-        return name;
     }
 
     @Override
