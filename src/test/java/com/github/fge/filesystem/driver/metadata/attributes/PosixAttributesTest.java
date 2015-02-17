@@ -26,8 +26,6 @@ import java.nio.file.attribute.FileTime;
 import java.nio.file.attribute.GroupPrincipal;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.UserPrincipal;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,19 +35,17 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 public final class PosixAttributesTest
+    extends AttributesTest<PosixAttributes<Object>>
 {
-    private final Map<String, Object> values = new HashMap<>();
-
-    private PosixAttributes<?> attributes;
-
+    @Override
     @SuppressWarnings({ "OverlyLongMethod", "ConstantConditions" })
     @BeforeMethod
     public void init()
     {
         values.clear();
 
-        @SuppressWarnings("unchecked")
-        final PathMetadata<Object> pathMetadata = mock(PathMetadata.class);
+        //noinspection unchecked
+        pathMetadata = mock(PathMetadata.class);
         //noinspection EmptyClass
         attributes = spy(new PosixAttributes<Object>(pathMetadata)
         {
@@ -276,13 +272,5 @@ public final class PosixAttributesTest
         verify(attributes).permissions();
 
         assertThat(byName).isSameAs(byMethod);
-    }
-
-    @Test
-    public void readAllTest()
-    {
-        final Map<String, Object> all = attributes.getAllAttributes();
-
-        assertThat(all).isEqualTo(values);
     }
 }

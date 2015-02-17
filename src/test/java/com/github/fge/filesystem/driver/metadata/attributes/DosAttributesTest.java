@@ -23,8 +23,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.nio.file.attribute.FileTime;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doReturn;
@@ -33,19 +31,17 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 public final class DosAttributesTest
+    extends AttributesTest<DosAttributes<Object>>
 {
-    private final Map<String, Object> values = new HashMap<>();
-
-    private DosAttributes<?> attributes;
-
+    @Override
     @SuppressWarnings({ "OverlyLongMethod", "ConstantConditions" })
     @BeforeMethod
     public void init()
     {
         values.clear();
 
-        @SuppressWarnings("unchecked")
-        final PathMetadata<Object> pathMetadata = mock(PathMetadata.class);
+        //noinspection unchecked
+        pathMetadata = mock(PathMetadata.class);
         //noinspection EmptyClass
         attributes = spy(new DosAttributes<Object>(pathMetadata)
         {
@@ -268,13 +264,5 @@ public final class DosAttributesTest
         verify(attributes).isHidden();
 
         assertThat(byName).isSameAs(byMethod);
-    }
-
-    @Test
-    public void readAllTest()
-    {
-        final Map<String, Object> all = attributes.getAllAttributes();
-
-        assertThat(all).isEqualTo(values);
     }
 }
