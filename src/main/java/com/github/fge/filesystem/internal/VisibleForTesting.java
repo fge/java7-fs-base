@@ -18,13 +18,17 @@
 
 package com.github.fge.filesystem.internal;
 
-import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import static java.lang.annotation.ElementType.CONSTRUCTOR;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.TYPE;
+
 @Retention(RetentionPolicy.SOURCE)
-@Target({ ElementType.METHOD, ElementType.FIELD, ElementType.TYPE })
+@Target({ METHOD, FIELD, TYPE, CONSTRUCTOR })
 public @interface VisibleForTesting
 {
 }

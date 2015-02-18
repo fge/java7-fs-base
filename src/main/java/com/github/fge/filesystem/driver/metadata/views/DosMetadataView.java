@@ -18,7 +18,6 @@
 
 package com.github.fge.filesystem.driver.metadata.views;
 
-import com.github.fge.filesystem.driver.metadata.AttributeWriterByName;
 import com.github.fge.filesystem.driver.metadata.MetadataDriver;
 import com.github.fge.filesystem.driver.metadata.writers.DosAttributeWriter;
 
@@ -32,29 +31,12 @@ import java.nio.file.attribute.FileTime;
 
 @ParametersAreNonnullByDefault
 public class DosMetadataView<M>
-    extends MetadataView<M>
-    implements DosFileAttributeView, AttributeWriterByName
+    extends MetadataViewWithAttributes<M, DosAttributeWriter<M>, DosFileAttributes>
+    implements DosFileAttributeView
 {
-    protected final DosAttributeWriter<M> writer;
-
     public DosMetadataView(final Path path, final MetadataDriver<M> driver)
     {
-        super("dos", path, driver);
-        writer = driver.getAttributeWriter(path, name);
-    }
-
-    @Override
-    public final DosFileAttributes readAttributes()
-        throws IOException
-    {
-        return driver.getAttributesByName(path, name);
-    }
-
-    @Override
-    public final void setAttributeByName(final String name, final Object value)
-        throws IOException
-    {
-        writer.setAttributeByName(name, value);
+        super("dos", path, driver, DosFileAttributes.class);
     }
 
     @Override

@@ -37,7 +37,7 @@ import java.util.Objects;
 
 @ParametersAreNonnullByDefault
 public abstract class UserDefinedMetadataView<M>
-    extends MetadataView<M>
+    extends BaseMetadataView<M>
     implements UserDefinedFileAttributeView, AttributeReaderByName,
     AttributeWriterByName
 {
@@ -69,10 +69,10 @@ public abstract class UserDefinedMetadataView<M>
 
         ByteBuffer buf;
 
-        for (final String name: list()) {
-            buf = ByteBuffer.allocate(size(name));
-            write(name, buf);
-            map.put(name, buf.array());
+        for (final String attrName: list()) {
+            buf = ByteBuffer.allocate(size(attrName));
+            write(attrName, buf);
+            map.put(attrName, buf.array());
         }
 
         return Collections.unmodifiableMap(map);

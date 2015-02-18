@@ -18,33 +18,41 @@
 
 package com.github.fge.filesystem.driver.metadata.views;
 
+import com.github.fge.filesystem.driver.metadata.AttributeWriterByName;
 import com.github.fge.filesystem.driver.metadata.MetadataDriver;
-import com.github.fge.filesystem.driver.metadata.writers.BasicAttributeWriter;
+import com.github.fge.filesystem.driver.metadata.writers.AttributeWriter;
 
-import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.nio.file.attribute.FileTime;
 
 @ParametersAreNonnullByDefault
-public class BasicMetadataView<M>
-    extends MetadataViewWithAttributes<M, BasicAttributeWriter<M>, BasicFileAttributes>
-    implements BasicFileAttributeView
+public abstract class MetadataViewWithAttributes<M, W extends AttributeWriter<M>, A extends BasicFileAttributes>
+    extends BaseMetadataView<M>
+    implements AttributeWriterByName
 {
-    public BasicMetadataView(final Path path, final MetadataDriver<M> driver)
+    protected final W writer;
+    protected final Class<A> attributesClass;
+
+    protected MetadataViewWithAttributes(final String name, final Path path,
+        final MetadataDriver<M> driver, final Class<A> attributesClass)
     {
-        super("basic", path, driver, BasicFileAttributes.class);
+        super(name, path, driver);
+        this.attributesClass = attributesClass;
+        writer = driver.getAttributeWriter(path, name);
+    }
+
+    public final A readAttributes()
+        throws IOException
+    {
+        return driver.getAttributesByClass(path, attributesClass);
     }
 
     @Override
-    public final void setTimes(@Nullable final FileTime lastModifiedTime,
-        @Nullable final FileTime lastAccessTime,
-        @Nullable final FileTime createTime)
+    public final void setAttributeByName(final String name, final Object value)
         throws IOException
     {
-        writer.setTimes(lastModifiedTime, lastAccessTime, createTime);
+        writer.setAttributeByName(name, value);
     }
 }

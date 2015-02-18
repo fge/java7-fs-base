@@ -18,7 +18,6 @@
 
 package com.github.fge.filesystem.driver.metadata.views;
 
-import com.github.fge.filesystem.driver.metadata.AttributeWriterByName;
 import com.github.fge.filesystem.driver.metadata.MetadataDriver;
 import com.github.fge.filesystem.driver.metadata.writers.PosixAttributeWriter;
 
@@ -36,22 +35,12 @@ import java.util.Set;
 
 @ParametersAreNonnullByDefault
 public class PosixMetadataView<M>
-    extends MetadataView<M>
-    implements PosixFileAttributeView, AttributeWriterByName
+    extends MetadataViewWithAttributes<M, PosixAttributeWriter<M>, PosixFileAttributes>
+    implements PosixFileAttributeView
 {
-    protected final PosixAttributeWriter<M> writer;
-
     public PosixMetadataView(final Path path, final MetadataDriver<M> driver)
     {
-        super("posix", path, driver);
-        writer = driver.getAttributeWriter(path, name);
-    }
-
-    @Override
-    public final PosixFileAttributes readAttributes()
-        throws IOException
-    {
-        return driver.getAttributesByName(path, name);
+        super("posix", path, driver, PosixFileAttributes.class);
     }
 
     @Override
@@ -59,13 +48,6 @@ public class PosixMetadataView<M>
         throws IOException
     {
         return readAttributes().owner();
-    }
-
-    @Override
-    public final void setAttributeByName(final String name, final Object value)
-        throws IOException
-    {
-        writer.setAttributeByName(name, value);
     }
 
     @Override

@@ -30,14 +30,14 @@ import java.nio.file.attribute.FileAttributeView;
  *
  * @param <M> metadata class
  */
-public abstract class MetadataView<M>
+public abstract class BaseMetadataView<M>
     implements FileAttributeView
 {
     protected final String name;
     protected final Path path;
     protected final MetadataDriver<M> driver;
 
-    protected MetadataView(final String name, final Path path,
+    protected BaseMetadataView(final String name, final Path path,
         final MetadataDriver<M> driver)
     {
         this.name = name;

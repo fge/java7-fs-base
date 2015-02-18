@@ -18,36 +18,25 @@
 
 package com.github.fge.filesystem.driver.metadata.views;
 
-import com.github.fge.filesystem.driver.metadata.AttributeReaderByName;
-import com.github.fge.filesystem.driver.metadata.AttributeWriterByName;
 import com.github.fge.filesystem.driver.metadata.MetadataDriver;
 import com.github.fge.filesystem.driver.metadata.readers.FileOwnerAttributeReader;
 import com.github.fge.filesystem.driver.metadata.writers.FileOwnerAttributeWriter;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileOwnerAttributeView;
 import java.nio.file.attribute.UserPrincipal;
-import java.util.Map;
 
 @ParametersAreNonnullByDefault
 public class FileOwnerMetadataView<M>
-    extends MetadataView<M>
-    implements FileOwnerAttributeView, AttributeReaderByName,
-    AttributeWriterByName
+    extends MetadataViewNoAttributes<M, FileOwnerAttributeReader<M>, FileOwnerAttributeWriter<M>>
+    implements FileOwnerAttributeView
 {
-    protected final FileOwnerAttributeReader<M> reader;
-    protected final FileOwnerAttributeWriter<M> writer;
-
     public FileOwnerMetadataView(final Path path,
         final MetadataDriver<M> driver)
     {
         super("owner", path, driver);
-        reader = driver.getAttributeReader(path, name);
-        writer = driver.getAttributeWriter(path, name);
     }
 
     @Override
@@ -55,29 +44,6 @@ public class FileOwnerMetadataView<M>
         throws IOException
     {
         return reader.getOwner();
-    }
-
-    @Nonnull
-    @Override
-    public final Map<String, Object> getAllAttributes()
-        throws IOException
-    {
-        return reader.getAllAttributes();
-    }
-
-    @Nullable
-    @Override
-    public final Object getAttributeByName(final String name)
-        throws IOException
-    {
-        return reader.getAttributeByName(name);
-    }
-
-    @Override
-    public final void setAttributeByName(final String name, final Object value)
-        throws IOException
-    {
-        writer.setAttributeByName(name, value);
     }
 
     @Override

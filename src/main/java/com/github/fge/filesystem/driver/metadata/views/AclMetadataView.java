@@ -18,14 +18,10 @@
 
 package com.github.fge.filesystem.driver.metadata.views;
 
-import com.github.fge.filesystem.driver.metadata.AttributeReaderByName;
-import com.github.fge.filesystem.driver.metadata.AttributeWriterByName;
 import com.github.fge.filesystem.driver.metadata.MetadataDriver;
 import com.github.fge.filesystem.driver.metadata.readers.AclAttributeReader;
 import com.github.fge.filesystem.driver.metadata.writers.AclAttributeWriter;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -33,22 +29,15 @@ import java.nio.file.attribute.AclEntry;
 import java.nio.file.attribute.AclFileAttributeView;
 import java.nio.file.attribute.UserPrincipal;
 import java.util.List;
-import java.util.Map;
 
 @ParametersAreNonnullByDefault
 public class AclMetadataView<M>
-    extends MetadataView<M>
-    implements AclFileAttributeView, AttributeReaderByName,
-    AttributeWriterByName
+    extends MetadataViewNoAttributes<M, AclAttributeReader<M>, AclAttributeWriter<M>>
+    implements AclFileAttributeView
 {
-    protected final AclAttributeReader<M> reader;
-    protected final AclAttributeWriter<M> writer;
-
     public AclMetadataView(final Path path, final MetadataDriver<M> driver)
     {
         super("acl", path, driver);
-        reader = driver.getAttributeReader(path, name);
-        writer = driver.getAttributeWriter(path, name);
     }
 
     @Override
@@ -63,29 +52,6 @@ public class AclMetadataView<M>
         throws IOException
     {
         return reader.getAcl();
-    }
-
-    @Nonnull
-    @Override
-    public final Map<String, Object> getAllAttributes()
-        throws IOException
-    {
-        return reader.getAllAttributes();
-    }
-
-    @Nullable
-    @Override
-    public final Object getAttributeByName(final String name)
-        throws IOException
-    {
-        return reader.getAttributeByName(name);
-    }
-
-    @Override
-    public final void setAttributeByName(final String name, final Object value)
-        throws IOException
-    {
-        writer.setAttributeByName(name, value);
     }
 
     @Override
