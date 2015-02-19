@@ -92,7 +92,7 @@ public abstract class UserDefinedMetadataView<M>
          * Since ClassCastException can be thrown by .setAttribute(), we can
          * take the risk of the instanceof test and subsequent cast.
          */
-        final ByteBuffer buf = value instanceof  ByteBuffer
+        final ByteBuffer buf = value instanceof ByteBuffer
             ? (ByteBuffer) value
             : ByteBuffer.wrap((byte[]) value);
 
