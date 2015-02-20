@@ -18,6 +18,9 @@
 
 package com.github.fge.filesystem.driver.metadata;
 
+import com.github.fge.filesystem.driver.metadata.testclasses.MyFileAttributeView;
+
+import com.github.fge.filesystem.driver.metadata.testclasses.MyFileAttributes;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -41,10 +44,10 @@ public final class MetadataFactoryBuilderTest
     }
 
     @Test
-    public void cannotAddAlreadyDefinedView()
+    public void doAddDefinedViewAlreadyExistsTest()
     {
         try {
-            builder.addDefinedView("basic", FileAttributeView.class);
+            builder.doAddDefinedView("basic", FileAttributeView.class);
             shouldHaveThrown(IllegalArgumentException.class);
         } catch (IllegalArgumentException e) {
             assertThat(e)
@@ -67,14 +70,47 @@ public final class MetadataFactoryBuilderTest
 
 
     @Test(dataProvider = "illegalViewNames")
-    public void cannotAddIllegalViewName(final String name)
+    public void doAddDefinedViewIllegalNameTest(final String name)
     {
         try {
-            builder.addDefinedView(name, FileAttributeView.class);
+            builder.doAddDefinedView(name, FileAttributeView.class);
             shouldHaveThrown(IllegalArgumentException.class);
         } catch (IllegalArgumentException e) {
             assertThat(e)
                 .hasMessage(String.format("illegal view name \"%s\"", name));
         }
+    }
+
+    @Test
+    public void doAddDefinedViewSuccessTest()
+    {
+        final Class<MyFileAttributeView> viewClass = MyFileAttributeView.class;
+        builder.doAddDefinedView("foo", viewClass);
+
+        assertThat(builder.views.get("foo"))
+            .isSameAs(viewClass);
+    }
+
+    @Test
+    public void addDefinedViewSuccessTest()
+    {
+        final Class<MyFileAttributeView> viewClass = MyFileAttributeView.class;
+        builder.addDefinedView("foo", viewClass);
+
+        assertThat(builder.views.get("foo"))
+            .isSameAs(viewClass);
+    }
+
+    @Test
+    public void addDefinedViewWithAttributesSuccessTest()
+    {
+        final Class<MyFileAttributeView> viewClass = MyFileAttributeView.class;
+        final Class<MyFileAttributes> attributesClass = MyFileAttributes.class;
+        builder.addDefinedViewWithAttributes("foo", viewClass, attributesClass);
+
+        assertThat(builder.views.get("foo"))
+            .isSameAs(viewClass);
+        assertThat(builder.attributes.get(viewClass))
+            .isSameAs(attributesClass);
     }
 }

@@ -18,6 +18,8 @@
 
 package com.github.fge.filesystem.driver.metadata;
 
+import com.github.fge.filesystem.internal.VisibleForTesting;
+
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.nio.file.attribute.AclFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributeView;
@@ -29,6 +31,7 @@ import java.nio.file.attribute.FileOwnerAttributeView;
 import java.nio.file.attribute.PosixFileAttributeView;
 import java.nio.file.attribute.PosixFileAttributes;
 import java.nio.file.attribute.UserDefinedFileAttributeView;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -41,8 +44,9 @@ public final class MetadataFactoryBuilder
     private static final String ILLEGAL_VIEW_NAME
         = "illegal view name \"%s\"";
 
-    private static final Map<String, Class<?>> PROVIDED_JDK_VIEWS;
-    private static final Map<String, Class<?>> PROVIDED_JDK_ATTRIBUTES;
+    private static final Map<String, Class<?>> PROVIDED_VIEWS;
+
+    private static final Map<Class<?>, Class<?>> PROVIDED_ATTRIBUTES;
 
     static {
         final Map<String, Class<?>> map = new HashMap<>();
@@ -57,24 +61,21 @@ public final class MetadataFactoryBuilder
         map.put("posix", PosixFileAttributeView.class);
         map.put("user", UserDefinedFileAttributeView.class);
 
-        PROVIDED_JDK_VIEWS = new HashMap<>(map);
+        PROVIDED_VIEWS = new HashMap<>(map);
 
-        /*
-         * Then the attributes
-         */
-        map.clear();
+        final Map<Class<?>, Class<?>> classMap = new HashMap<>();
 
-        map.put("basic", BasicFileAttributes.class);
-        map.put("dos", DosFileAttributes.class);
-        map.put("posix", PosixFileAttributes.class);
+        classMap.put(BasicFileAttributeView.class, BasicFileAttributes.class);
+        classMap.put(DosFileAttributeView.class, DosFileAttributes.class);
+        classMap.put(PosixFileAttributeView.class, PosixFileAttributes.class);
 
-        PROVIDED_JDK_ATTRIBUTES = new HashMap<>(map);
+        PROVIDED_ATTRIBUTES = Collections.unmodifiableMap(classMap);
+
     }
 
-    final Map<String, Class<?>> definedViews
-        = new HashMap<>(PROVIDED_JDK_VIEWS);
-    final Map<String, Class<?>> definedAttributes
-        = new HashMap<>(PROVIDED_JDK_ATTRIBUTES);
+    final Map<String, Class<?>> views = new HashMap<>(PROVIDED_VIEWS);
+    final Map<Class<?>, Class<?>> attributes
+        = new HashMap<>(PROVIDED_ATTRIBUTES);
 
     public MetadataFactoryBuilder addDefinedView(final String name,
         final Class<? extends FileAttributeView> viewClass)
@@ -82,14 +83,36 @@ public final class MetadataFactoryBuilder
         Objects.requireNonNull(name);
         Objects.requireNonNull(viewClass);
 
+        doAddDefinedView(name, viewClass);
+
+        return this;
+    }
+
+    public MetadataFactoryBuilder addDefinedViewWithAttributes(
+        final String name, final Class<? extends FileAttributeView> viewClass,
+        final Class<? extends BasicFileAttributes> attributesClass)
+    {
+        Objects.requireNonNull(name);
+        Objects.requireNonNull(viewClass);
+        Objects.requireNonNull(attributesClass);
+
+        doAddDefinedView(name, viewClass);
+
+        attributes.put(viewClass, attributesClass);
+
+        return this;
+    }
+
+    @VisibleForTesting
+    void doAddDefinedView(final String name,
+        final Class<? extends FileAttributeView> viewClass)
+    {
         if (name.isEmpty() || name.indexOf(':') != -1)
             throw new IllegalArgumentException(
                 String.format(ILLEGAL_VIEW_NAME, name));
 
-        if (definedViews.put(name, viewClass) != null)
+        if (views.put(name, viewClass) != null)
             throw new IllegalArgumentException(
                 String.format(VIEW_ALREADY_DEFINED, name));
-
-        return this;
     }
 }
