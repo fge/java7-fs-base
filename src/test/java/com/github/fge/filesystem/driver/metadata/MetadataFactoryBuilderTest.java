@@ -21,6 +21,8 @@ package com.github.fge.filesystem.driver.metadata;
 import com.github.fge.filesystem.driver.metadata.testclasses.MyFileAttributeView;
 
 import com.github.fge.filesystem.driver.metadata.testclasses.MyFileAttributes;
+import com.github.fge.filesystem.driver.metadata.testclasses
+    .MyFileOwnerMetadataView;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -112,5 +114,17 @@ public final class MetadataFactoryBuilderTest
             .isSameAs(viewClass);
         assertThat(builder.attributes.get(viewClass))
             .isSameAs(attributesClass);
+    }
+
+    @Test
+    public void doAddImplementationNoAttributesTest()
+    {
+        final String viewName = "foo";
+        final Class<MyFileOwnerMetadataView> impl
+            = MyFileOwnerMetadataView.class;
+
+        builder.doAddImplementationNoAttributes(viewName, impl);
+
+        assertThat(builder.viewImpls).containsEntry(viewName, impl);
     }
 }

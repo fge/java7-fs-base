@@ -18,6 +18,7 @@
 
 package com.github.fge.filesystem.driver.metadata;
 
+import com.github.fge.filesystem.driver.metadata.views.MetadataViewNoAttributes;
 import com.github.fge.filesystem.internal.VisibleForTesting;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -31,8 +32,10 @@ import java.nio.file.attribute.FileOwnerAttributeView;
 import java.nio.file.attribute.PosixFileAttributeView;
 import java.nio.file.attribute.PosixFileAttributes;
 import java.nio.file.attribute.UserDefinedFileAttributeView;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -47,6 +50,8 @@ public final class MetadataFactoryBuilder
     private static final Map<String, Class<?>> PROVIDED_VIEWS;
 
     private static final Map<Class<?>, Class<?>> PROVIDED_ATTRIBUTES;
+
+    private static final Map<String, List<String>> PROVIDED_VIEW_ALIASES;
 
     static {
         final Map<String, Class<?>> map = new HashMap<>();
@@ -71,11 +76,30 @@ public final class MetadataFactoryBuilder
 
         PROVIDED_ATTRIBUTES = Collections.unmodifiableMap(classMap);
 
+        final Map<String, List<String>> aliasMap = new HashMap<>();
+
+        String name;
+        List<String> aliases;
+
+        name = "acl";
+        aliases = Collections.singletonList("owner");
+        aliasMap.put(name, aliases);
+
+        name = "dos";
+        aliases = Collections.singletonList("basic");
+        aliasMap.put(name, aliases);
+
+        name = "posix";
+        aliases = Collections.unmodifiableList(Arrays.asList("basic", "owner"));
+        aliasMap.put(name, aliases);
+
+        PROVIDED_VIEW_ALIASES = Collections.unmodifiableMap(aliasMap);
     }
 
     final Map<String, Class<?>> views = new HashMap<>(PROVIDED_VIEWS);
     final Map<Class<?>, Class<?>> attributes
         = new HashMap<>(PROVIDED_ATTRIBUTES);
+    final Map<String, Class<?>> viewImpls = new HashMap<>();
 
     public MetadataFactoryBuilder addDefinedView(final String name,
         final Class<? extends FileAttributeView> viewClass)
@@ -114,5 +138,12 @@ public final class MetadataFactoryBuilder
         if (views.put(name, viewClass) != null)
             throw new IllegalArgumentException(
                 String.format(VIEW_ALREADY_DEFINED, name));
+    }
+
+    @VisibleForTesting
+    void doAddImplementationNoAttributes(final String viewName,
+        final Class<? extends MetadataViewNoAttributes<?, ?, ?>> impl)
+    {
+        viewImpls.put(viewName, impl);
     }
 }
