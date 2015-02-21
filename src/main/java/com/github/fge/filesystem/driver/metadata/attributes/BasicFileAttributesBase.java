@@ -59,12 +59,6 @@ public abstract class BasicFileAttributesBase<M>
         return UNIX_EPOCH;
     }
 
-    @Override
-    public long size()
-    {
-        return 0L;
-    }
-
     @Nullable
     @Override
     public Object fileKey()
