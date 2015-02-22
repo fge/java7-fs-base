@@ -18,6 +18,8 @@
 
 package com.github.fge.filesystem.driver.metadata;
 
+import com.github.fge.filesystem.internal.VisibleForTesting;
+
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
@@ -39,19 +41,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public final class FileAttributeViewFactoryBuilder<D extends MetadataDriver<M>,
-    M>
+public final class AttributeFactoryBuilder<D extends MetadataDriver<M>, M>
 {
     private static final MethodHandles.Lookup LOOKUP
         = MethodHandles.publicLookup();
 
-    private static final String NO_SUCH_ATTRIBUTES
-        = "no attributes with name %s";
-    private static final String NO_SUCH_VIEW
-        = "no attribute view with name %s";
-    private static final String NOT_SUBCLASS
-        = "class %s is not a subclass of class %s";
-    private static final String NO_SUCH_CONSTRUCTOR
+    @VisibleForTesting
+    static final String NO_SUCH_ATTRIBUTES = "no attributes with name %s";
+    @VisibleForTesting
+    static final String NO_SUCH_VIEW = "no attribute view with name %s";
+    @VisibleForTesting
+    static final String NOT_SUBCLASS = "class %s is not a subclass of %s";
+    @VisibleForTesting
+    static final String NO_SUCH_CONSTRUCTOR
         = "class %s has no constructor with signature %s";
 
     private static final Map<String, Class<?>> BUILTIN_VIEWS;
@@ -162,21 +164,21 @@ public final class FileAttributeViewFactoryBuilder<D extends MetadataDriver<M>,
 
     D driver;
 
-    FileAttributeViewFactoryBuilder(final Class<M> metadataClass)
+    AttributeFactoryBuilder(final Class<M> metadataClass)
     {
         viewConstructor = MethodType.methodType(void.class, Path.class,
-            FileAttributeViewFactory.class);
+            AttributeFactory.class);
         attributesConstructor = MethodType.methodType(void.class,
             metadataClass);
     }
 
-    public FileAttributeViewFactoryBuilder<D, M> withDriver(final D driver)
+    public AttributeFactoryBuilder<D, M> withDriver(final D driver)
     {
         this.driver = Objects.requireNonNull(driver);
         return this;
     }
 
-    public <A extends BasicFileAttributes> FileAttributeViewFactoryBuilder<D, M>
+    public <A extends BasicFileAttributes> AttributeFactoryBuilder<D, M>
     addAttributesImplementation(final String name,
         final Class<A> attributesClass)
     {
@@ -192,12 +194,14 @@ public final class FileAttributeViewFactoryBuilder<D extends MetadataDriver<M>,
         if (baseClass == null)
             throw new IllegalArgumentException(errmsg);
 
-        errmsg = String.format(NOT_SUBCLASS, attributesClass, baseClass);
+        errmsg = String.format(NOT_SUBCLASS, attributesClass.getCanonicalName(),
+            baseClass.getCanonicalName());
 
         if (!baseClass.isAssignableFrom(attributesClass))
             throw new IllegalArgumentException(errmsg);
 
-        errmsg = String.format(NO_SUCH_CONSTRUCTOR, attributesClass,
+        errmsg = String.format(NO_SUCH_CONSTRUCTOR,
+            attributesClass.getCanonicalName(),
             attributesConstructor);
 
         final MethodHandle handle;
@@ -214,7 +218,7 @@ public final class FileAttributeViewFactoryBuilder<D extends MetadataDriver<M>,
         return this;
     }
 
-    public <V extends FileAttributeView> FileAttributeViewFactoryBuilder<D, M>
+    public <V extends FileAttributeView> AttributeFactoryBuilder<D, M>
     addViewImplementation(final String name, final Class<V> viewClass)
     {
         Objects.requireNonNull(name);
@@ -229,12 +233,14 @@ public final class FileAttributeViewFactoryBuilder<D extends MetadataDriver<M>,
         if (baseClass == null)
             throw new IllegalArgumentException(errmsg);
 
-        errmsg = String.format(NOT_SUBCLASS, viewClass, baseClass);
+        errmsg = String.format(NOT_SUBCLASS, viewClass.getCanonicalName(),
+            baseClass.getCanonicalName());
 
         if (!baseClass.isAssignableFrom(viewClass))
             throw new IllegalArgumentException(errmsg);
 
-        errmsg = String.format(NO_SUCH_CONSTRUCTOR, viewClass, viewConstructor);
+        errmsg = String.format(NO_SUCH_CONSTRUCTOR,
+            viewClass.getCanonicalName(), viewConstructor);
 
         final MethodHandle handle;
 
@@ -249,7 +255,7 @@ public final class FileAttributeViewFactoryBuilder<D extends MetadataDriver<M>,
         return this;
     }
 
-    public FileAttributeViewFactory<D, M> build()
+    public AttributeFactory<D, M> build()
     {
         if (driver == null)
             throw new IllegalArgumentException("no driver was provided");
@@ -257,7 +263,7 @@ public final class FileAttributeViewFactoryBuilder<D extends MetadataDriver<M>,
         checkForBasicView();
         checkForBasicAttributes();
 
-        return new FileAttributeViewFactory<>(this);
+        return new AttributeFactory<>(this);
     }
 
     private void checkForBasicView()

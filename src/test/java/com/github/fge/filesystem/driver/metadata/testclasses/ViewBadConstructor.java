@@ -16,20 +16,33 @@
  * - ASL 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
  */
 
-package com.github.fge.filesystem.driver.metadata.views;
+package com.github.fge.filesystem.driver.metadata.testclasses;
 
-import com.github.fge.filesystem.driver.metadata.AttributeFactory;
-import com.github.fge.filesystem.driver.metadata.MetadataDriver;
-
-import java.nio.file.Path;
+import java.io.IOException;
+import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
 
-public abstract class BasicFileAttributeViewBase<D extends MetadataDriver<M>, M>
-    extends FileAttributeViewBaseWithAttributes<D, M, BasicFileAttributes>
+public final class ViewBadConstructor
+    implements BasicFileAttributeView
 {
-    protected BasicFileAttributeViewBase(final Path path,
-        final AttributeFactory<D, M> factory)
+    @Override
+    public String name()
     {
-        super("basic", path, factory);
+        return null;
+    }
+
+    @Override
+    public BasicFileAttributes readAttributes()
+        throws IOException
+    {
+        return null;
+    }
+
+    @Override
+    public void setTimes(final FileTime lastModifiedTime,
+        final FileTime lastAccessTime, final FileTime createTime)
+        throws IOException
+    {
     }
 }

@@ -19,7 +19,7 @@
 package com.github.fge.filesystem.driver.metadata.views;
 
 import com.github.fge.filesystem.driver.metadata.AttributesProvider;
-import com.github.fge.filesystem.driver.metadata.FileAttributeViewFactory;
+import com.github.fge.filesystem.driver.metadata.AttributeFactory;
 import com.github.fge.filesystem.driver.metadata.MetadataDriver;
 
 import java.io.IOException;
@@ -35,7 +35,7 @@ public abstract class FileAttributeViewBaseWithAttributes<
     private A attributes = null;
 
     protected FileAttributeViewBaseWithAttributes(final String name,
-        final Path path, final FileAttributeViewFactory<D, M> factory)
+        final Path path, final AttributeFactory<D, M> factory)
     {
         super(name, path, factory);
     }

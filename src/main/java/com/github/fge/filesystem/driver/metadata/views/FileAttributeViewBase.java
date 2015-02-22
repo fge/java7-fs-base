@@ -18,7 +18,7 @@
 
 package com.github.fge.filesystem.driver.metadata.views;
 
-import com.github.fge.filesystem.driver.metadata.FileAttributeViewFactory;
+import com.github.fge.filesystem.driver.metadata.AttributeFactory;
 import com.github.fge.filesystem.driver.metadata.MetadataDriver;
 
 import java.nio.file.Path;
@@ -30,12 +30,12 @@ public abstract class FileAttributeViewBase<D extends MetadataDriver<M>, M>
 {
     protected final String name;
 
-    protected final FileAttributeViewFactory<D, M> factory;
+    protected final AttributeFactory<D, M> factory;
     protected final D driver;
     protected final Path path;
 
     protected FileAttributeViewBase(final String name, final Path path,
-        final FileAttributeViewFactory<D, M> factory)
+        final AttributeFactory<D, M> factory)
     {
         this.name = Objects.requireNonNull(name);
         this.path = path;

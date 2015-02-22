@@ -18,7 +18,7 @@
 
 package com.github.fge.filesystem.driver.metadata.views;
 
-import com.github.fge.filesystem.driver.metadata.FileAttributeViewFactory;
+import com.github.fge.filesystem.driver.metadata.AttributeFactory;
 import com.github.fge.filesystem.driver.metadata.MetadataDriver;
 
 import java.nio.file.Path;
@@ -28,7 +28,7 @@ public abstract class PosixFileAttributeViewBase<D extends MetadataDriver<M>, M>
     extends FileAttributeViewBaseWithAttributes<D, M, PosixFileAttributes>
 {
     protected PosixFileAttributeViewBase(final Path path,
-        final FileAttributeViewFactory<D, M> factory)
+        final AttributeFactory<D, M> factory)
     {
         super("posix", path, factory);
     }

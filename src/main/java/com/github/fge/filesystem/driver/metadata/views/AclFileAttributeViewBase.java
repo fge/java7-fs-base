@@ -18,7 +18,7 @@
 
 package com.github.fge.filesystem.driver.metadata.views;
 
-import com.github.fge.filesystem.driver.metadata.FileAttributeViewFactory;
+import com.github.fge.filesystem.driver.metadata.AttributeFactory;
 import com.github.fge.filesystem.driver.metadata.MetadataDriver;
 
 import java.nio.file.Path;
@@ -29,7 +29,7 @@ public abstract class AclFileAttributeViewBase<D extends MetadataDriver<M>, M>
     implements AclFileAttributeView
 {
     protected AclFileAttributeViewBase(final Path path,
-        final FileAttributeViewFactory<D, M> factory)
+        final AttributeFactory<D, M> factory)
     {
         super("acl", path, factory);
     }

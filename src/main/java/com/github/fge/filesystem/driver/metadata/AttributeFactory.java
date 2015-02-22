@@ -27,7 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public final class FileAttributeViewFactory<D extends MetadataDriver<M>, M>
+public final class AttributeFactory<D extends MetadataDriver<M>, M>
 {
     private static final String ATTRS_NOT_SUPPORTED
         = "attributes with name %s are not supported";
@@ -43,15 +43,13 @@ public final class FileAttributeViewFactory<D extends MetadataDriver<M>, M>
     private final Map<String, List<String>> viewAliases;
     private final Map<String, List<String>> attributesAliases;
 
-    public static <D2 extends MetadataDriver<M2>, M2>
-        FileAttributeViewFactoryBuilder<D2, M2> newBuilder(
+    public static <D2 extends MetadataDriver<M2>, M2> AttributeFactoryBuilder<D2, M2> newBuilder(
         final Class<M2> metadataClass)
     {
-        return new FileAttributeViewFactoryBuilder<>(metadataClass);
+        return new AttributeFactoryBuilder<>(metadataClass);
     }
 
-    FileAttributeViewFactory(
-        final FileAttributeViewFactoryBuilder<D, M> builder)
+    AttributeFactory(final AttributeFactoryBuilder<D, M> builder)
     {
         driver = builder.driver;
 
