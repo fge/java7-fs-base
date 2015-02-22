@@ -23,6 +23,8 @@ import com.github.fge.filesystem.driver.metadata.testclasses
 import com.github.fge.filesystem.driver.metadata.testclasses
     .AttrsConstructorBadAccess;
 import com.github.fge.filesystem.driver.metadata.testclasses.AttrsOk;
+import com.github.fge.filesystem.driver.metadata.testclasses.DosAttrs;
+import com.github.fge.filesystem.driver.metadata.testclasses.DosView;
 import com.github.fge.filesystem.driver.metadata.testclasses.ViewBadConstructor;
 import com.github.fge.filesystem.driver.metadata.testclasses
     .ViewConstructorBadAccess;
@@ -40,6 +42,7 @@ import java.nio.file.attribute.PosixFileAttributes;
 
 import static com.github.fge.filesystem.CustomAssertions.shouldHaveThrown;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 public final class AttributeFactoryBuilderTest
 {
@@ -247,5 +250,86 @@ public final class AttributeFactoryBuilderTest
         final MethodHandle handle = builder.viewHandles.get(baseClass);
 
         assertThat(handle.type()).isEqualTo(type);
+    }
+
+    @Test
+    public void buildNoDriverTest()
+    {
+        try {
+            builder.build();
+            shouldHaveThrown(IllegalArgumentException.class);
+        } catch (IllegalArgumentException e) {
+            assertThat(e).hasMessage(AttributeFactoryBuilder.NO_DRIVER);
+        }
+    }
+
+    @Test(dependsOnMethods = "buildNoDriverTest")
+    public void buildNoBasicViewTest()
+    {
+        try {
+            builder.withDriver(mock(DummyDriver.class)).build();
+            shouldHaveThrown(IllegalArgumentException.class);
+        } catch (IllegalArgumentException e) {
+            assertThat(e).hasMessage(AttributeFactoryBuilder.NO_BASIC_VIEW);
+        }
+    }
+
+    @Test(dependsOnMethods = "buildNoBasicViewTest")
+    public void buildNoBasicAttrsTest()
+    {
+        try {
+            builder.withDriver(mock(DummyDriver.class))
+                .addViewImplementation("basic", ViewOk.class)
+                .build();
+            shouldHaveThrown(IllegalArgumentException.class);
+        } catch (IllegalArgumentException e) {
+            assertThat(e).hasMessage(AttributeFactoryBuilder.NO_BASIC_ATTRS);
+        }
+    }
+
+    @Test
+    public void buildWithDerivedViewAndAttrsOkTest()
+    {
+        builder.withDriver(mock(DummyDriver.class))
+            .addViewImplementation("dos", DosView.class)
+            .addAttributesImplementation("dos", DosAttrs.class)
+            .build();
+    }
+
+    @Test
+    public void buildViewWithNoMatchingAttrs()
+    {
+        final String viewName = "dos";
+        final Class<? extends FileAttributeView> viewClass = DosView.class;
+        final String attrName = "basic";
+        final Class<? extends BasicFileAttributes> attributeClass
+            = AttrsOk.class;
+
+        try {
+            builder.withDriver(mock(DummyDriver.class))
+                .addAttributesImplementation(attrName, attributeClass)
+                .addViewImplementation(viewName, viewClass)
+                .build();
+            shouldHaveThrown(IllegalArgumentException.class);
+        } catch (IllegalArgumentException e) {
+            assertThat(e).hasMessage(String.format(
+                AttributeFactoryBuilder.VIEW_ATTR_MISMATCH, viewName
+            ));
+        }
+    }
+
+    @Test
+    public void buildViewWithMatchingAttrs()
+    {
+        final String viewName = "basic";
+        final Class<? extends FileAttributeView> viewClass = ViewOk.class;
+        final String attrName = "dos";
+        final Class<? extends BasicFileAttributes> attributesClass
+            = DosAttrs.class;
+
+        builder.withDriver(mock(DummyDriver.class))
+            .addAttributesImplementation(attrName, attributesClass)
+            .addViewImplementation(viewName, viewClass)
+            .build();
     }
 }

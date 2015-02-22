@@ -53,13 +53,13 @@ public final class AttributeFactory<D extends MetadataDriver<M>, M>
     {
         driver = builder.driver;
 
-        definedViews = new HashMap<>(builder.definedView);
+        definedViews = new HashMap<>(builder.definedViews);
         definedAttributes = new HashMap<>(builder.definedAttributes);
 
         viewHandles = new HashMap<>(builder.viewHandles);
         attributesHandles = new HashMap<>(builder.attributesHandles);
 
-        viewAliases = new HashMap<>(builder.viewAliases);
+        viewAliases = new HashMap<>(builder.viewsAliases);
         attributesAliases = new HashMap<>(builder.attributesAliases);
     }
 

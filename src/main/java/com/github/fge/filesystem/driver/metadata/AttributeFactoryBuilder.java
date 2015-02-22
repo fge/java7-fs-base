@@ -55,6 +55,17 @@ public final class AttributeFactoryBuilder<D extends MetadataDriver<M>, M>
     @VisibleForTesting
     static final String NO_SUCH_CONSTRUCTOR
         = "class %s has no constructor with signature %s";
+    @VisibleForTesting
+    static final String NO_DRIVER = "no metadata driver was provided";
+    @VisibleForTesting
+    static final String NO_BASIC_VIEW
+        = "no implementation of BasicFileAttributeView was provided";
+    @VisibleForTesting
+    static final String NO_BASIC_ATTRS
+        = "no implementation of BasicFileAttributes was provided";
+    @VisibleForTesting
+    static final String VIEW_ATTR_MISMATCH
+        = "no attributes implementation for view %s";
 
     private static final Map<String, Class<?>> BUILTIN_VIEWS;
     private static final Map<String, Class<?>> BUILTIN_ATTRIBUTES;
@@ -149,7 +160,7 @@ public final class AttributeFactoryBuilder<D extends MetadataDriver<M>, M>
     final MethodType viewConstructor;
     final MethodType attributesConstructor;
 
-    final Map<String, Class<?>> definedView
+    final Map<String, Class<?>> definedViews
         = new HashMap<>(BUILTIN_VIEWS);
     final Map<String, Class<?>> definedAttributes
         = new HashMap<>(BUILTIN_ATTRIBUTES);
@@ -157,7 +168,7 @@ public final class AttributeFactoryBuilder<D extends MetadataDriver<M>, M>
     final Map<Class<?>, MethodHandle> viewHandles = new HashMap<>();
     final Map<Class<?>, MethodHandle> attributesHandles = new HashMap<>();
 
-    final Map<String, List<String>> viewAliases
+    final Map<String, List<String>> viewsAliases
         = new HashMap<>(VIEWS_ALIASES);
     final Map<String, List<String>> attributesAliases
         = new HashMap<>(ATTRIBUTES_ALIASES);
@@ -224,7 +235,7 @@ public final class AttributeFactoryBuilder<D extends MetadataDriver<M>, M>
         Objects.requireNonNull(name);
         Objects.requireNonNull(viewClass);
 
-        final Class<?> baseClass = definedView.get(name);
+        final Class<?> baseClass = definedViews.get(name);
 
         String errmsg;
 
@@ -258,10 +269,11 @@ public final class AttributeFactoryBuilder<D extends MetadataDriver<M>, M>
     public AttributeFactory<D, M> build()
     {
         if (driver == null)
-            throw new IllegalArgumentException("no driver was provided");
+            throw new IllegalArgumentException(NO_DRIVER);
 
         checkForBasicView();
         checkForBasicAttributes();
+        checkAttributesViewMatches();
 
         return new AttributeFactory<>(this);
     }
@@ -277,8 +289,7 @@ public final class AttributeFactoryBuilder<D extends MetadataDriver<M>, M>
             if (wanted.isAssignableFrom(c))
                 return;
 
-        throw new IllegalArgumentException("an implementation must be provided"
-            + " for the basic file attribute view");
+        throw new IllegalArgumentException(NO_BASIC_VIEW);
     }
 
     private void checkForBasicAttributes()
@@ -292,7 +303,57 @@ public final class AttributeFactoryBuilder<D extends MetadataDriver<M>, M>
             if (wanted.isAssignableFrom(c))
                 return;
 
-        throw new IllegalArgumentException("an implementation must be provided"
-            + " for basic file attributes");
+        throw new IllegalArgumentException(NO_BASIC_ATTRS);
+    }
+
+    private void checkAttributesViewMatches()
+    {
+        String viewName;
+        Class<?> viewClass;
+        Class<?> attributesClass;
+
+        for (final Map.Entry<String, Class<?>> entry: definedViews.entrySet()) {
+            viewName = entry.getKey();
+            attributesClass = definedAttributes.get(viewName);
+            if (attributesClass == null)
+                continue;
+            viewClass = entry.getValue();
+            if (!viewHandles.containsKey(viewClass))
+                continue;
+            if (findMatchingAttrs(viewName) == null)
+                throw new IllegalArgumentException(
+                    String.format(VIEW_ATTR_MISMATCH, viewName)
+                );
+        }
+    }
+
+    private MethodHandle findMatchingAttrs(final String viewName)
+    {
+        Class<?> wanted;
+
+        wanted = definedAttributes.get(viewName);
+        MethodHandle handle;
+
+        handle = attributesHandles.get(wanted);
+
+        if (handle != null)
+            return handle;
+
+        String name;
+        List<String> aliases;
+
+        for (final Map.Entry<String, List<String>> entry:
+            attributesAliases.entrySet()) {
+            name = entry.getKey();
+            aliases = entry.getValue();
+            if (!aliases.contains(viewName))
+                continue;
+            wanted = definedAttributes.get(name);
+            handle = attributesHandles.get(wanted);
+            if (handle != null)
+                return handle;
+        }
+
+        return null;
     }
 }
