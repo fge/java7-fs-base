@@ -31,6 +31,9 @@ public abstract class FileAttributeViewBaseWithAttributes<
     extends FileAttributeViewBase<D, M>
     implements AttributesProvider<A>
 {
+    private final Object lock = new Object();
+    private A attributes = null;
+
     protected FileAttributeViewBaseWithAttributes(final String name,
         final Path path, final FileAttributeViewFactory<D, M> factory)
     {
@@ -41,7 +44,12 @@ public abstract class FileAttributeViewBaseWithAttributes<
     public final A readAttributes()
         throws IOException
     {
-        final M metadata = driver.getMetadata(path);
-        return factory.getAttributes(name, metadata);
+        synchronized (lock) {
+            if (attributes == null) {
+                final M metadata = driver.getMetadata(path);
+                attributes = factory.getAttributes(name, metadata);
+            }
+            return attributes;
+        }
     }
 }
