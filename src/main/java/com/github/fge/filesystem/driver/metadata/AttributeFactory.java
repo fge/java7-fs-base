@@ -18,6 +18,7 @@
 
 package com.github.fge.filesystem.driver.metadata;
 
+import com.github.fge.filesystem.driver.metadata.write.ViewWriter;
 import com.github.fge.filesystem.internal.VisibleForTesting;
 
 import javax.annotation.Nonnull;
@@ -42,6 +43,8 @@ public final class AttributeFactory<D extends MetadataDriver<M>, M>
     @VisibleForTesting
     static final String ATTRS_NOT_SUPPORTED
         = "attributes with name %s are not supported";
+    @VisibleForTesting
+    static final String NO_SUCH_VIEW  = "no view with name %s";
 
     private final D driver;
 
@@ -50,6 +53,9 @@ public final class AttributeFactory<D extends MetadataDriver<M>, M>
 
     private final Map<Class<?>, MethodHandle> viewHandles;
     private final Map<Class<?>, MethodHandle> attributesHandles;
+
+    private final Map<Class<?>, MethodHandle> readerHandles;
+    private final Map<Class<?>, MethodHandle> writerHandles;
 
     private final Map<String, List<String>> viewAliases;
     private final Map<String, List<String>> attributesAliases;
@@ -69,6 +75,9 @@ public final class AttributeFactory<D extends MetadataDriver<M>, M>
 
         viewHandles = new HashMap<>(builder.viewHandles);
         attributesHandles = new HashMap<>(builder.attributesHandles);
+
+        readerHandles = new HashMap<>(builder.readerHandles);
+        writerHandles = new HashMap<>(builder.writerHandles);
 
         viewAliases = new HashMap<>(builder.viewsAliases);
         attributesAliases = new HashMap<>(builder.attributesAliases);
@@ -168,5 +177,26 @@ public final class AttributeFactory<D extends MetadataDriver<M>, M>
                 return entry.getValue();
 
         return null;
+    }
+
+    public ViewWriter<?> getWriter(final Path path, final String viewName)
+    {
+        @SuppressWarnings("unchecked")
+        final Class<? extends FileAttributeView> viewClass
+            = (Class<? extends FileAttributeView>) definedViews.get(viewName);
+
+        if (viewClass == null)
+            throw new UnsupportedOperationException(
+                String.format(NO_SUCH_VIEW, viewName)
+            );
+
+        final FileAttributeView view = getView(path, viewClass);
+        final MethodHandle handle = writerHandles.get(viewClass);
+
+        try {
+            return (ViewWriter<?>) handle.invoke(view);
+        } catch (Throwable throwable) {
+            throw new RuntimeException(throwable);
+        }
     }
 }

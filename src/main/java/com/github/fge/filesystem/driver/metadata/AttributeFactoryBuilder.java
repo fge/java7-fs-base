@@ -18,6 +18,18 @@
 
 package com.github.fge.filesystem.driver.metadata;
 
+import com.github.fge.filesystem.driver.metadata.read.AclViewReader;
+import com.github.fge.filesystem.driver.metadata.read.BasicViewReader;
+import com.github.fge.filesystem.driver.metadata.read.DosViewReader;
+import com.github.fge.filesystem.driver.metadata.read.FileOwnerViewReader;
+import com.github.fge.filesystem.driver.metadata.read.PosixViewReader;
+import com.github.fge.filesystem.driver.metadata.read.UserDefinedViewReader;
+import com.github.fge.filesystem.driver.metadata.write.AclViewWriter;
+import com.github.fge.filesystem.driver.metadata.write.BasicViewWriter;
+import com.github.fge.filesystem.driver.metadata.write.DosViewWriter;
+import com.github.fge.filesystem.driver.metadata.write.FileOwnerViewWriter;
+import com.github.fge.filesystem.driver.metadata.write.PosixViewWriter;
+import com.github.fge.filesystem.driver.metadata.write.UserDefinedViewWriter;
 import com.github.fge.filesystem.internal.VisibleForTesting;
 
 import java.lang.invoke.MethodHandle;
@@ -73,9 +85,6 @@ public final class AttributeFactoryBuilder<D extends MetadataDriver<M>, M>
     private static final Map<String, Class<?>> BUILTIN_VIEWS;
     private static final Map<String, Class<?>> BUILTIN_ATTRIBUTES;
 
-    private static final Map<String, List<String>> VIEWS_ALIASES;
-    private static final Map<String, List<String>> ATTRIBUTES_ALIASES;
-
     static {
         final Map<String, Class<?>> classMap = new HashMap<>();
 
@@ -124,41 +133,95 @@ public final class AttributeFactoryBuilder<D extends MetadataDriver<M>, M>
         attributesClass = PosixFileAttributes.class;
         classMap.put(name, attributesClass);
 
-        BUILTIN_ATTRIBUTES = Collections.unmodifiableMap(
-            new HashMap<>(classMap));
+        BUILTIN_ATTRIBUTES = Collections.unmodifiableMap(new HashMap<>(classMap));
+    }
 
-        final Map<String, List<String>> listMap = new HashMap<>();
+    private static final Map<String, List<String>> VIEWS_ALIASES;
+    private static final Map<String, List<String>> ATTRIBUTES_ALIASES;
 
+    static {
+        final Map<String, List<String>> map = new HashMap<>();
+
+        String name;
         List<String> aliases;
 
         name = "acl";
         aliases = Collections.singletonList("owner");
-        listMap.put(name, Collections.unmodifiableList(aliases));
+        map.put(name, Collections.unmodifiableList(aliases));
 
         name = "dos";
         aliases = Collections.singletonList("basic");
-        listMap.put(name, Collections.unmodifiableList(aliases));
+        map.put(name, Collections.unmodifiableList(aliases));
 
         name = "posix";
         aliases = Arrays.asList("owner", "basic");
-        listMap.put(name, Collections.unmodifiableList(aliases));
+        map.put(name, Collections.unmodifiableList(aliases));
 
-        VIEWS_ALIASES = Collections.unmodifiableMap(new HashMap<>(listMap));
+        VIEWS_ALIASES = Collections.unmodifiableMap(new HashMap<>(map));
 
-        listMap.clear();
+        map.clear();
 
         name = "dos";
         aliases = Collections.singletonList("basic");
-        listMap.put(name, Collections.unmodifiableList(aliases));
+        map.put(name, Collections.unmodifiableList(aliases));
 
         name = "posix";
         aliases = Collections.singletonList("basic");
-        listMap.put(name, Collections.unmodifiableList(aliases));
+        map.put(name, Collections.unmodifiableList(aliases));
 
         ATTRIBUTES_ALIASES = Collections.unmodifiableMap(
-            new HashMap<>(listMap));
+            new HashMap<>(map));
     }
 
+    private static final Map<Class<?>, MethodHandle> BUILTIN_READERS;
+    private static final Map<Class<?>, MethodHandle> BUILTIN_WRITERS;
+
+    static {
+        final Map<Class<?>, MethodHandle> readerMap = new HashMap<>();
+        final Map<Class<?>, MethodHandle> writerMap = new HashMap<>();
+
+        Class<? extends FileAttributeView> view;
+        MethodHandle reader, writer;
+
+        view = AclFileAttributeView.class;
+        reader = getReaderWriterHandle(AclViewReader.class, view);
+        writer = getReaderWriterHandle(AclViewWriter.class, view);
+        readerMap.put(view, reader);
+        writerMap.put(view, writer);
+
+        view = BasicFileAttributeView.class;
+        reader = getReaderWriterHandle(BasicViewReader.class, view);
+        writer = getReaderWriterHandle(BasicViewWriter.class, view);
+        readerMap.put(view, reader);
+        writerMap.put(view, writer);
+
+        view = DosFileAttributeView.class;
+        reader = getReaderWriterHandle(DosViewReader.class, view);
+        writer = getReaderWriterHandle(DosViewWriter.class, view);
+        readerMap.put(view, reader);
+        writerMap.put(view, writer);
+
+        view = FileOwnerAttributeView.class;
+        reader = getReaderWriterHandle(FileOwnerViewReader.class, view);
+        writer = getReaderWriterHandle(FileOwnerViewWriter.class, view);
+        readerMap.put(view, reader);
+        writerMap.put(view, writer);
+
+        view = PosixFileAttributeView.class;
+        reader = getReaderWriterHandle(PosixViewReader.class, view);
+        writer = getReaderWriterHandle(PosixViewWriter.class, view);
+        readerMap.put(view, reader);
+        writerMap.put(view, writer);
+
+        view = UserDefinedFileAttributeView.class;
+        reader = getReaderWriterHandle(UserDefinedViewReader.class, view);
+        writer = getReaderWriterHandle(UserDefinedViewWriter.class, view);
+        readerMap.put(view, reader);
+        writerMap.put(view, writer);
+
+        BUILTIN_READERS = Collections.unmodifiableMap(readerMap);
+        BUILTIN_WRITERS = Collections.unmodifiableMap(writerMap);
+    }
 
     final MethodType viewConstructor;
     final MethodType attributesConstructor;
@@ -167,6 +230,11 @@ public final class AttributeFactoryBuilder<D extends MetadataDriver<M>, M>
         = new HashMap<>(BUILTIN_VIEWS);
     final Map<String, Class<?>> definedAttributes
         = new HashMap<>(BUILTIN_ATTRIBUTES);
+
+    final Map<Class<?>, MethodHandle> readerHandles
+        = new HashMap<>(BUILTIN_READERS);
+    final Map<Class<?>, MethodHandle> writerHandles
+        = new HashMap<>(BUILTIN_WRITERS);
 
     final Map<Class<?>, MethodHandle> viewHandles = new HashMap<>();
     final Map<Class<?>, MethodHandle> attributesHandles = new HashMap<>();
@@ -382,6 +450,18 @@ public final class AttributeFactoryBuilder<D extends MetadataDriver<M>, M>
                 throw new IllegalArgumentException(String.format(
                     ATTR_VIEW_NOIMPL, attrName
                 ));
+        }
+    }
+
+    private static MethodHandle getReaderWriterHandle(
+        final Class<?> readerWriterClass, final Class<?> viewClass)
+    {
+        final MethodType type = MethodType.methodType(void.class, viewClass);
+
+        try {
+            return LOOKUP.findConstructor(readerWriterClass, type);
+        } catch (NoSuchMethodException | IllegalAccessException e) {
+            throw new ExceptionInInitializerError(e);
         }
     }
 }

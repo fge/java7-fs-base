@@ -22,6 +22,10 @@ import com.github.fge.filesystem.driver.metadata.testclasses.BasicAttrs;
 import com.github.fge.filesystem.driver.metadata.testclasses.BasicView;
 import com.github.fge.filesystem.driver.metadata.testclasses.DosAttrs;
 import com.github.fge.filesystem.driver.metadata.testclasses.DosView;
+import com.github.fge.filesystem.driver.metadata.testclasses.FileOwnerView;
+import com.github.fge.filesystem.driver.metadata.write.BasicViewWriter;
+import com.github.fge.filesystem.driver.metadata.write.FileOwnerViewWriter;
+import com.github.fge.filesystem.driver.metadata.write.ViewWriter;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -222,6 +226,56 @@ public final class AttributeFactoryTest
         } catch (UnsupportedOperationException e) {
             assertThat(e).hasMessage(String.format(
                 AttributeFactory.ATTRS_NOT_SUPPORTED, name
+            ));
+        }
+    }
+
+    @Test
+    public void getWriterTest()
+    {
+        factory = builder.withDriver(driver)
+            .addViewImplementation("basic", BasicView.class)
+            .addAttributesImplementation("basic", BasicAttrs.class)
+            .addViewImplementation("owner", FileOwnerView.class)
+            .build();
+
+        final ViewWriter<?> writer
+            = factory.getWriter(mock(Path.class), "owner");
+
+        assertThat(writer).isInstanceOf(FileOwnerViewWriter.class);
+    }
+
+    @Test
+    public void getWriterSubclassTest()
+    {
+        factory = builder.withDriver(driver)
+            .addViewImplementation("dos", DosView.class)
+            .addAttributesImplementation("dos", DosAttrs.class)
+            .build();
+
+        final ViewWriter<?> writer
+            = factory.getWriter(mock(Path.class), "basic");
+
+        assertThat(writer).isInstanceOf(BasicViewWriter.class);
+    }
+
+    @Test(dependsOnMethods = "getWriterTest")
+    public void getWriterNoSuchViewTest()
+    {
+        factory = builder.withDriver(driver)
+            .addViewImplementation("basic", BasicView.class)
+            .addAttributesImplementation("basic", BasicAttrs.class)
+            .addViewImplementation("owner", FileOwnerView.class)
+            .build();
+
+        final String name = "foo";
+
+        try {
+            factory.getWriter(mock(Path.class), name);
+            shouldHaveThrown(UnsupportedOperationException.class);
+        } catch (UnsupportedOperationException e) {
+            assertThat(e).hasMessage(String.format(
+                AttributeFactory.NO_SUCH_VIEW, name
             ));
         }
     }
