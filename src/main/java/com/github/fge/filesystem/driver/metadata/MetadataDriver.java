@@ -18,9 +18,11 @@
 
 package com.github.fge.filesystem.driver.metadata;
 
+import java.io.IOException;
 import java.nio.file.Path;
 
 public interface MetadataDriver<M>
 {
-    M getMetadata(Path path);
+    M getMetadata(Path path)
+        throws IOException;
 }

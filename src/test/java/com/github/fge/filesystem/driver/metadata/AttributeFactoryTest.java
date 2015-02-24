@@ -25,12 +25,18 @@ import com.github.fge.filesystem.driver.metadata.testclasses.DosView;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.attribute.AclFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributeView;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.PosixFileAttributes;
 
+import static com.github.fge.filesystem.CustomAssertions.shouldHaveThrown;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public final class AttributeFactoryTest
 {
@@ -52,17 +58,14 @@ public final class AttributeFactoryTest
     }
 
     @Test
-    public void viewInitByClass()
+    public void viewInitByClassTest()
     {
         factory = builder.withDriver(driver)
             .addViewImplementation("basic", BasicView.class)
             .addAttributesImplementation("basic", BasicAttrs.class)
             .build();
 
-        final Object metadata = new Object();
         final Path path = mock(Path.class);
-
-        when(driver.getMetadata(path)).thenReturn(metadata);
 
         final BasicFileAttributeView view
             = factory.getView(path, BasicFileAttributeView.class);
@@ -71,21 +74,155 @@ public final class AttributeFactoryTest
     }
 
     @Test
-    public void viewInitBySuperclass()
+    public void viewInitBySuperclassTest()
     {
         factory = builder.withDriver(driver)
             .addViewImplementation("dos", DosView.class)
             .addAttributesImplementation("dos", DosAttrs.class)
             .build();
 
-        final Object metadata = new Object();
         final Path path = mock(Path.class);
-
-        when(driver.getMetadata(path)).thenReturn(metadata);
 
         final BasicFileAttributeView view
             = factory.getView(path, BasicFileAttributeView.class);
 
         assertThat(view).isInstanceOf(DosView.class);
+    }
+
+    @Test
+    public void viewInitNoSupportTest()
+    {
+        factory = builder.withDriver(driver)
+            .addViewImplementation("basic", BasicView.class)
+            .addAttributesImplementation("basic", BasicAttrs.class)
+            .build();
+
+        final Path path = mock(Path.class);
+        final Class<AclFileAttributeView> viewClass
+            = AclFileAttributeView.class;
+
+        try {
+            factory.getView(path, viewClass);
+            shouldHaveThrown(UnsupportedOperationException.class);
+        } catch (UnsupportedOperationException e) {
+            assertThat(e).hasMessage(String.format(
+                AttributeFactory.VIEW_CLASS_NOT_SUPPORTED,
+                viewClass.getCanonicalName()
+            ));
+        }
+    }
+
+    @Test
+    public void attrsInitByClassTest()
+        throws IOException
+    {
+        factory = builder.withDriver(driver)
+            .addViewImplementation("basic", BasicView.class)
+            .addAttributesImplementation("basic", BasicAttrs.class)
+            .build();
+
+        final Path path = mock(Path.class);
+
+        final BasicFileAttributes attrs
+            = factory.readAttributes(path, BasicFileAttributes.class);
+
+        assertThat(attrs).isInstanceOf(BasicAttrs.class);
+    }
+
+    @Test
+    public void attrsInitBySuperclassTest()
+        throws IOException
+    {
+        factory = builder.withDriver(driver)
+            .addViewImplementation("dos", DosView.class)
+            .addAttributesImplementation("dos", DosAttrs.class)
+            .build();
+
+        final Path path = mock(Path.class);
+
+        final BasicFileAttributes attrs
+            = factory.readAttributes(path, BasicFileAttributes.class);
+
+        assertThat(attrs).isInstanceOf(DosAttrs.class);
+    }
+
+    @Test(dependsOnMethods = "attrsInitByClassTest")
+    public void attrsInitIOExceptionTest()
+        throws IOException
+    {
+        factory = builder.withDriver(driver)
+            .addViewImplementation("basic", BasicView.class)
+            .addAttributesImplementation("basic", BasicAttrs.class)
+            .build();
+
+        final IOException exception = new IOException();
+
+        doThrow(exception).when(driver).getMetadata(any(Path.class));
+
+        try {
+            factory.readAttributes(mock(Path.class), BasicFileAttributes.class);
+            shouldHaveThrown(IOException.class);
+        } catch (IOException e) {
+            assertThat(e).isSameAs(exception);
+        }
+    }
+
+    @Test(dependsOnMethods = "attrsInitByClassTest")
+    public void attrsInitNoSupportTest()
+        throws IOException
+    {
+        factory = builder.withDriver(driver)
+            .addViewImplementation("basic", BasicView.class)
+            .addAttributesImplementation("basic", BasicAttrs.class)
+            .build();
+
+        final Class<? extends BasicFileAttributes> attributesClass
+            = PosixFileAttributes.class;
+
+        try {
+            factory.readAttributes(mock(Path.class), attributesClass);
+            shouldHaveThrown(UnsupportedOperationException.class);
+        } catch (UnsupportedOperationException e) {
+            assertThat(e).hasMessage(String.format(
+                AttributeFactory.ATTRS_CLASS_NOT_SUPPORTED,
+                attributesClass.getCanonicalName()
+            ));
+        }
+    }
+
+    @Test(dependsOnMethods = "attrsInitByClassTest")
+    public void attrsInitByNameTest()
+        throws IOException
+    {
+        factory = builder.withDriver(driver)
+            .addViewImplementation("basic", BasicView.class)
+            .addAttributesImplementation("basic", BasicAttrs.class)
+            .build();
+
+        final BasicFileAttributes attrs
+            = factory.readAttributes(mock(Path.class), "basic");
+
+        assertThat(attrs).isInstanceOf(BasicAttrs.class);
+    }
+
+    @Test(dependsOnMethods = "attrsInitByNameTest")
+    public void attrsInitByNameNoSupportTest()
+        throws IOException
+    {
+        factory = builder.withDriver(driver)
+            .addViewImplementation("basic", BasicView.class)
+            .addAttributesImplementation("basic", BasicAttrs.class)
+            .build();
+
+        final String name = "owner";
+
+        try {
+            factory.readAttributes(mock(Path.class), name);
+            shouldHaveThrown(UnsupportedOperationException.class);
+        } catch (UnsupportedOperationException e) {
+            assertThat(e).hasMessage(String.format(
+                AttributeFactory.ATTRS_NOT_SUPPORTED, name
+            ));
+        }
     }
 }

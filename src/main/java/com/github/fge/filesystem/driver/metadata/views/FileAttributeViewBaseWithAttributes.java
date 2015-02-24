@@ -45,10 +45,8 @@ public abstract class FileAttributeViewBaseWithAttributes<
         throws IOException
     {
         synchronized (lock) {
-            if (attributes == null) {
-                final M metadata = driver.getMetadata(path);
-                attributes = factory.getAttributes(name, metadata);
-            }
+            if (attributes == null)
+                attributes = factory.readAttributes(path, name);
             return attributes;
         }
     }

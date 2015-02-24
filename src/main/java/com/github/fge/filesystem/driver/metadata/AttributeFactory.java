@@ -33,8 +33,12 @@ import java.util.Map;
 
 public final class AttributeFactory<D extends MetadataDriver<M>, M>
 {
+    @VisibleForTesting
     static final String VIEW_CLASS_NOT_SUPPORTED
         = "view with class %s is not supported";
+    @VisibleForTesting
+    static final String ATTRS_CLASS_NOT_SUPPORTED
+        = "attributes with class %s are not supported";
     @VisibleForTesting
     static final String ATTRS_NOT_SUPPORTED
         = "attributes with name %s are not supported";
@@ -76,25 +80,58 @@ public final class AttributeFactory<D extends MetadataDriver<M>, M>
         return driver;
     }
 
-    public <A extends BasicFileAttributes> A getAttributes(final String name,
-        final M metadata)
-        throws IOException
+    public <V extends FileAttributeView> V getView(final Path path,
+        final Class<V> viewClass)
     {
-        final Class<?> baseClass = definedAttributes.get(name);
-        final String errmsg = String.format(ATTRS_NOT_SUPPORTED, name);
-
-        if (baseClass == null)
-            throw new UnsupportedOperationException(errmsg);
-
-        final MethodHandle handle = findAttributesHandle(baseClass);
+        final MethodHandle handle = findViewHandle(viewClass);
 
         if (handle == null)
-            throw new UnsupportedOperationException(errmsg);
+            throw new UnsupportedOperationException(String.format(
+                VIEW_CLASS_NOT_SUPPORTED, viewClass.getCanonicalName()
+            ));
+
+        try {
+            //noinspection unchecked
+            return (V) handle.invoke(path, this);
+        } catch (Error | RuntimeException e) {
+            throw e;
+        } catch (Throwable throwable) {
+            // TODO!
+            throw new RuntimeException(throwable);
+        }
+    }
+
+    public <A extends BasicFileAttributes> A readAttributes(final Path path,
+        final String name)
+        throws IOException
+    {
+        final Class<?> attributesClass = definedAttributes.get(name);
+
+        if (attributesClass == null)
+            throw new UnsupportedOperationException(String.format(
+                ATTRS_NOT_SUPPORTED, name
+            ));
+
+        //noinspection unchecked
+        return readAttributes(path, (Class<A>) attributesClass);
+    }
+
+    public <A extends BasicFileAttributes> A readAttributes(final Path path,
+        final Class<A> attributesClass)
+        throws IOException
+    {
+        final M metadata = driver.getMetadata(path);
+        final MethodHandle handle = findAttributesHandle(attributesClass);
+
+        if (handle == null)
+            throw new UnsupportedOperationException(String.format(
+                ATTRS_CLASS_NOT_SUPPORTED, attributesClass.getCanonicalName()
+            ));
 
         try {
             //noinspection unchecked
             return (A) handle.invoke(metadata);
-        } catch (IOException e) {
+        } catch (Error | RuntimeException e) {
             throw e;
         } catch (Throwable throwable) {
             throw new RuntimeException(throwable);
@@ -115,24 +152,6 @@ public final class AttributeFactory<D extends MetadataDriver<M>, M>
                 return entry.getValue();
 
         return null;
-    }
-
-    public <V extends FileAttributeView> V getView(final Path path,
-        final Class<V> viewClass)
-    {
-        final MethodHandle handle = findViewHandle(viewClass);
-
-        if (handle == null)
-            throw new UnsupportedOperationException(String.format(
-                VIEW_CLASS_NOT_SUPPORTED, viewClass.getCanonicalName()
-            ));
-
-        try {
-            return (V) handle.invoke(path, this);
-        } catch (Throwable throwable) {
-            // TODO!
-            throw new RuntimeException(throwable);
-        }
     }
 
     @Nullable
