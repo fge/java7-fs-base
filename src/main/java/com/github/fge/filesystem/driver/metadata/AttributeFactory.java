@@ -18,18 +18,25 @@
 
 package com.github.fge.filesystem.driver.metadata;
 
+import com.github.fge.filesystem.internal.VisibleForTesting;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.lang.invoke.MethodHandle;
+import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileAttributeView;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public final class AttributeFactory<D extends MetadataDriver<M>, M>
 {
-    private static final String ATTRS_NOT_SUPPORTED
+    static final String VIEW_CLASS_NOT_SUPPORTED
+        = "view with class %s is not supported";
+    @VisibleForTesting
+    static final String ATTRS_NOT_SUPPORTED
         = "attributes with name %s are not supported";
 
     private final D driver;
@@ -86,7 +93,7 @@ public final class AttributeFactory<D extends MetadataDriver<M>, M>
 
         try {
             //noinspection unchecked
-            return (A) handle.invokeExact(metadata);
+            return (A) handle.invoke(metadata);
         } catch (IOException e) {
             throw e;
         } catch (Throwable throwable) {
@@ -105,6 +112,40 @@ public final class AttributeFactory<D extends MetadataDriver<M>, M>
         for (final Map.Entry<Class<?>, MethodHandle> entry:
             attributesHandles.entrySet())
             if (baseClass.isAssignableFrom(entry.getKey()))
+                return entry.getValue();
+
+        return null;
+    }
+
+    public <V extends FileAttributeView> V getView(final Path path,
+        final Class<V> viewClass)
+    {
+        final MethodHandle handle = findViewHandle(viewClass);
+
+        if (handle == null)
+            throw new UnsupportedOperationException(String.format(
+                VIEW_CLASS_NOT_SUPPORTED, viewClass.getCanonicalName()
+            ));
+
+        try {
+            return (V) handle.invoke(path, this);
+        } catch (Throwable throwable) {
+            // TODO!
+            throw new RuntimeException(throwable);
+        }
+    }
+
+    @Nullable
+    private MethodHandle findViewHandle(final Class<?> viewClass)
+    {
+        final MethodHandle handle = viewHandles.get(viewClass);
+
+        if (handle != null)
+            return handle;
+
+        for (final Map.Entry<Class<?>, MethodHandle> entry:
+            viewHandles.entrySet())
+            if (viewClass.isAssignableFrom(entry.getKey()))
                 return entry.getValue();
 
         return null;

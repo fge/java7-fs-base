@@ -18,38 +18,67 @@
 
 package com.github.fge.filesystem.driver.metadata.testclasses;
 
-import com.github.fge.filesystem.driver.metadata.AttributeFactory;
-
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 
-public final class ViewOk
-    implements BasicFileAttributeView
+public final class BasicAttrs
+    implements BasicFileAttributes
 {
-    public ViewOk(final Path path, final AttributeFactory<?, ?> factory)
+    public BasicAttrs(final Object object)
     {
     }
 
     @Override
-    public String name()
+    public FileTime lastModifiedTime()
     {
         return null;
     }
 
     @Override
-    public BasicFileAttributes readAttributes()
-        throws IOException
+    public FileTime lastAccessTime()
     {
         return null;
     }
 
     @Override
-    public void setTimes(final FileTime lastModifiedTime,
-        final FileTime lastAccessTime, final FileTime createTime)
-        throws IOException
+    public FileTime creationTime()
     {
+        return null;
+    }
+
+    @Override
+    public boolean isRegularFile()
+    {
+        return false;
+    }
+
+    @Override
+    public boolean isDirectory()
+    {
+        return false;
+    }
+
+    @Override
+    public boolean isSymbolicLink()
+    {
+        return false;
+    }
+
+    @Override
+    public boolean isOther()
+    {
+        return false;
+    }
+
+    @Override
+    public long size()
+    {
+        return 0L;
+    }
+
+    @Override
+    public Object fileKey()
+    {
+        return null;
     }
 }

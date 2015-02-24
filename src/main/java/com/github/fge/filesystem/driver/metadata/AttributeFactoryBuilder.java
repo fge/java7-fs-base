@@ -64,8 +64,11 @@ public final class AttributeFactoryBuilder<D extends MetadataDriver<M>, M>
     static final String NO_BASIC_ATTRS
         = "no implementation of BasicFileAttributes was provided";
     @VisibleForTesting
-    static final String VIEW_ATTR_MISMATCH
+    static final String VIEW_ATTR_NOIMPL
         = "no attributes implementation for view %s";
+    @VisibleForTesting
+    static final String ATTR_VIEW_NOIMPL
+        = "no view implementation for attributes %s";
 
     private static final Map<String, Class<?>> BUILTIN_VIEWS;
     private static final Map<String, Class<?>> BUILTIN_ATTRIBUTES;
@@ -273,7 +276,8 @@ public final class AttributeFactoryBuilder<D extends MetadataDriver<M>, M>
 
         checkForBasicView();
         checkForBasicAttributes();
-        checkAttributesViewMatches();
+        checkAttributesImplementations();
+        checkViewImplementations();
 
         return new AttributeFactory<>(this);
     }
@@ -306,7 +310,7 @@ public final class AttributeFactoryBuilder<D extends MetadataDriver<M>, M>
         throw new IllegalArgumentException(NO_BASIC_ATTRS);
     }
 
-    private void checkAttributesViewMatches()
+    private void checkAttributesImplementations()
     {
         String viewName;
         Class<?> viewClass;
@@ -322,7 +326,7 @@ public final class AttributeFactoryBuilder<D extends MetadataDriver<M>, M>
                 continue;
             if (findMatchingAttrs(viewName) == null)
                 throw new IllegalArgumentException(
-                    String.format(VIEW_ATTR_MISMATCH, viewName)
+                    String.format(VIEW_ATTR_NOIMPL, viewName)
                 );
         }
     }
@@ -355,5 +359,29 @@ public final class AttributeFactoryBuilder<D extends MetadataDriver<M>, M>
         }
 
         return null;
+    }
+
+    private void checkViewImplementations()
+    {
+        String attrName;
+        Class<?> attributesClass;
+        Class<?> viewClass;
+
+        MethodHandle handle;
+
+        for (final Map.Entry<String, Class<?>> entry:
+            definedAttributes.entrySet()) {
+            attributesClass = entry.getValue();
+            handle = attributesHandles.get(attributesClass);
+            if (handle == null)
+                continue;
+            attrName = entry.getKey();
+            // TODO: at the moment this is required
+            viewClass = definedViews.get(attrName);
+            if (!viewHandles.containsKey(viewClass))
+                throw new IllegalArgumentException(String.format(
+                    ATTR_VIEW_NOIMPL, attrName
+                ));
+        }
     }
 }

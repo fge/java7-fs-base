@@ -22,13 +22,14 @@ import com.github.fge.filesystem.driver.metadata.testclasses
     .AttrsBadConstructor;
 import com.github.fge.filesystem.driver.metadata.testclasses
     .AttrsConstructorBadAccess;
-import com.github.fge.filesystem.driver.metadata.testclasses.AttrsOk;
+import com.github.fge.filesystem.driver.metadata.testclasses.BasicAttrs;
 import com.github.fge.filesystem.driver.metadata.testclasses.DosAttrs;
 import com.github.fge.filesystem.driver.metadata.testclasses.DosView;
+import com.github.fge.filesystem.driver.metadata.testclasses.FileOwnerView;
 import com.github.fge.filesystem.driver.metadata.testclasses.ViewBadConstructor;
 import com.github.fge.filesystem.driver.metadata.testclasses
     .ViewConstructorBadAccess;
-import com.github.fge.filesystem.driver.metadata.testclasses.ViewOk;
+import com.github.fge.filesystem.driver.metadata.testclasses.BasicView;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -144,7 +145,7 @@ public final class AttributeFactoryBuilderTest
         final Class<BasicFileAttributes> baseClass = BasicFileAttributes.class;
 
         final Class<? extends BasicFileAttributes> attributeClass
-            = AttrsOk.class;
+            = BasicAttrs.class;
 
         builder.addAttributesImplementation(name, attributeClass);
 
@@ -238,7 +239,7 @@ public final class AttributeFactoryBuilderTest
     {
         final String name = "basic";
         final Class<?> baseClass = BasicFileAttributeView.class;
-        final Class<? extends FileAttributeView> viewClass = ViewOk.class;
+        final Class<? extends FileAttributeView> viewClass = BasicView.class;
 
         builder.addViewImplementation(name, viewClass);
 
@@ -279,7 +280,7 @@ public final class AttributeFactoryBuilderTest
     {
         try {
             builder.withDriver(mock(DummyDriver.class))
-                .addViewImplementation("basic", ViewOk.class)
+                .addViewImplementation("basic", BasicView.class)
                 .build();
             shouldHaveThrown(IllegalArgumentException.class);
         } catch (IllegalArgumentException e) {
@@ -297,13 +298,13 @@ public final class AttributeFactoryBuilderTest
     }
 
     @Test
-    public void buildViewWithNoMatchingAttrs()
+    public void buildViewNoMatchingAttrs()
     {
         final String viewName = "dos";
         final Class<? extends FileAttributeView> viewClass = DosView.class;
         final String attrName = "basic";
         final Class<? extends BasicFileAttributes> attributeClass
-            = AttrsOk.class;
+            = BasicAttrs.class;
 
         try {
             builder.withDriver(mock(DummyDriver.class))
@@ -313,23 +314,40 @@ public final class AttributeFactoryBuilderTest
             shouldHaveThrown(IllegalArgumentException.class);
         } catch (IllegalArgumentException e) {
             assertThat(e).hasMessage(String.format(
-                AttributeFactoryBuilder.VIEW_ATTR_MISMATCH, viewName
+                AttributeFactoryBuilder.VIEW_ATTR_NOIMPL, viewName
             ));
         }
     }
 
     @Test
-    public void buildViewWithMatchingAttrs()
+    public void buildAttrsNoMatchingView()
     {
         final String viewName = "basic";
-        final Class<? extends FileAttributeView> viewClass = ViewOk.class;
+        final Class<? extends FileAttributeView> viewClass = BasicView.class;
         final String attrName = "dos";
         final Class<? extends BasicFileAttributes> attributesClass
             = DosAttrs.class;
 
+        try {
+            builder.withDriver(mock(DummyDriver.class))
+                .addAttributesImplementation(attrName, attributesClass)
+                .addViewImplementation(viewName, viewClass)
+                .build();
+            shouldHaveThrown(IllegalArgumentException.class);
+        } catch (IllegalArgumentException e) {
+            assertThat(e).hasMessage(String.format(
+                AttributeFactoryBuilder.ATTR_VIEW_NOIMPL, attrName
+            ));
+        }
+    }
+
+    @Test
+    public void buildViewWithoutAttrs()
+    {
         builder.withDriver(mock(DummyDriver.class))
-            .addAttributesImplementation(attrName, attributesClass)
-            .addViewImplementation(viewName, viewClass)
+            .addViewImplementation("basic", BasicView.class)
+            .addAttributesImplementation("basic", BasicAttrs.class)
+            .addViewImplementation("owner", FileOwnerView.class)
             .build();
     }
 }
