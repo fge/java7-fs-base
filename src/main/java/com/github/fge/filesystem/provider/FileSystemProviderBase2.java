@@ -19,6 +19,7 @@
 package com.github.fge.filesystem.provider;
 
 import com.github.fge.filesystem.driver.metadata.AttributeFactory;
+import com.github.fge.filesystem.driver.metadata.read.ViewReader;
 import com.github.fge.filesystem.driver.metadata.write.ViewWriter;
 
 import java.io.IOException;
@@ -27,12 +28,18 @@ import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttributeView;
 import java.nio.file.spi.FileSystemProvider;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 public abstract class FileSystemProviderBase2
     extends FileSystemProvider
 {
+    protected static final Pattern COMMA = Pattern.compile(",");
+    protected static final String ALL_ATTRS = "*";
+
     protected final AttributeFactory<?, ?> attributeFactory;
 
     protected FileSystemProviderBase2(
@@ -66,8 +73,28 @@ public abstract class FileSystemProviderBase2
         final String attributes, final LinkOption... options)
         throws IOException
     {
-        // TODO
-        return null;
+        final String viewName, attrNames;
+        final int colonIndex = attributes.indexOf(':');
+
+        if (colonIndex == -1) {
+            viewName = "basic";
+            attrNames = attributes;
+        } else {
+            viewName = attributes.substring(0, colonIndex);
+            attrNames = attributes.substring(colonIndex + 1);
+        }
+
+        final ViewReader<?> reader = attributeFactory.getReader(path, viewName);
+
+        if (ALL_ATTRS.equals(attributes))
+            return reader.getAllAttributes();
+
+        final Map<String, Object> map = new HashMap<>();
+
+        for (final String attrName: COMMA.split(attrNames))
+            map.put(attrName, reader.getAttributeByName(attrName));
+
+        return Collections.unmodifiableMap(map);
     }
 
     @Override
@@ -75,15 +102,13 @@ public abstract class FileSystemProviderBase2
         final Class<A> type, final LinkOption... options)
         throws IOException
     {
-        // TODO
-        return null;
+        return attributeFactory.readAttributes(path, type);
     }
 
     @Override
     public <V extends FileAttributeView> V getFileAttributeView(final Path path,
         final Class<V> type, final LinkOption... options)
     {
-        // TODO
-        return null;
+        return attributeFactory.getView(path, type);
     }
 }

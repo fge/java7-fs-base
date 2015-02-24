@@ -18,6 +18,7 @@
 
 package com.github.fge.filesystem.driver.metadata;
 
+import com.github.fge.filesystem.driver.metadata.read.ViewReader;
 import com.github.fge.filesystem.driver.metadata.write.ViewWriter;
 import com.github.fge.filesystem.internal.VisibleForTesting;
 
@@ -147,6 +148,48 @@ public final class AttributeFactory<D extends MetadataDriver<M>, M>
         }
     }
 
+    public ViewWriter<?> getWriter(final Path path, final String viewName)
+    {
+        @SuppressWarnings("unchecked")
+        final Class<? extends FileAttributeView> viewClass
+            = (Class<? extends FileAttributeView>) definedViews.get(viewName);
+
+        if (viewClass == null)
+            throw new UnsupportedOperationException(
+                String.format(NO_SUCH_VIEW, viewName)
+            );
+
+        final FileAttributeView view = getView(path, viewClass);
+        final MethodHandle handle = writerHandles.get(viewClass);
+
+        try {
+            return (ViewWriter<?>) handle.invoke(view);
+        } catch (Throwable throwable) {
+            throw new RuntimeException(throwable);
+        }
+    }
+
+    public ViewReader<?> getReader(final Path path, final String viewName)
+    {
+        @SuppressWarnings("unchecked")
+        final Class<? extends FileAttributeView> viewClass
+            = (Class<? extends FileAttributeView>) definedViews.get(viewName);
+
+        if (viewClass == null)
+            throw new UnsupportedOperationException(
+                String.format(NO_SUCH_VIEW, viewName)
+            );
+
+        final FileAttributeView view = getView(path, viewClass);
+        final MethodHandle handle = readerHandles.get(viewClass);
+
+        try {
+            return (ViewReader<?>) handle.invoke(view);
+        } catch (Throwable throwable) {
+            throw new RuntimeException(throwable);
+        }
+    }
+
     @Nullable
     private MethodHandle findAttributesHandle(final Class<?> baseClass)
     {
@@ -177,26 +220,5 @@ public final class AttributeFactory<D extends MetadataDriver<M>, M>
                 return entry.getValue();
 
         return null;
-    }
-
-    public ViewWriter<?> getWriter(final Path path, final String viewName)
-    {
-        @SuppressWarnings("unchecked")
-        final Class<? extends FileAttributeView> viewClass
-            = (Class<? extends FileAttributeView>) definedViews.get(viewName);
-
-        if (viewClass == null)
-            throw new UnsupportedOperationException(
-                String.format(NO_SUCH_VIEW, viewName)
-            );
-
-        final FileAttributeView view = getView(path, viewClass);
-        final MethodHandle handle = writerHandles.get(viewClass);
-
-        try {
-            return (ViewWriter<?>) handle.invoke(view);
-        } catch (Throwable throwable) {
-            throw new RuntimeException(throwable);
-        }
     }
 }

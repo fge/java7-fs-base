@@ -18,6 +18,9 @@
 
 package com.github.fge.filesystem.driver.metadata;
 
+import com.github.fge.filesystem.driver.metadata.read.BasicViewReader;
+import com.github.fge.filesystem.driver.metadata.read.FileOwnerViewReader;
+import com.github.fge.filesystem.driver.metadata.read.ViewReader;
 import com.github.fge.filesystem.driver.metadata.testclasses.BasicAttrs;
 import com.github.fge.filesystem.driver.metadata.testclasses.BasicView;
 import com.github.fge.filesystem.driver.metadata.testclasses.DosAttrs;
@@ -272,6 +275,56 @@ public final class AttributeFactoryTest
 
         try {
             factory.getWriter(mock(Path.class), name);
+            shouldHaveThrown(UnsupportedOperationException.class);
+        } catch (UnsupportedOperationException e) {
+            assertThat(e).hasMessage(String.format(
+                AttributeFactory.NO_SUCH_VIEW, name
+            ));
+        }
+    }
+
+    @Test
+    public void getReaderTest()
+    {
+        factory = builder.withDriver(driver)
+            .addViewImplementation("basic", BasicView.class)
+            .addAttributesImplementation("basic", BasicAttrs.class)
+            .addViewImplementation("owner", FileOwnerView.class)
+            .build();
+
+        final ViewReader<?> reader
+            = factory.getReader(mock(Path.class), "owner");
+
+        assertThat(reader).isInstanceOf(FileOwnerViewReader.class);
+    }
+
+    @Test
+    public void getReaderSubclassTest()
+    {
+        factory = builder.withDriver(driver)
+            .addViewImplementation("dos", DosView.class)
+            .addAttributesImplementation("dos", DosAttrs.class)
+            .build();
+
+        final ViewReader<?> reader
+            = factory.getReader(mock(Path.class), "basic");
+
+        assertThat(reader).isInstanceOf(BasicViewReader.class);
+    }
+
+    @Test(dependsOnMethods = "getWriterTest")
+    public void getReaderNoSuchViewTest()
+    {
+        factory = builder.withDriver(driver)
+            .addViewImplementation("basic", BasicView.class)
+            .addAttributesImplementation("basic", BasicAttrs.class)
+            .addViewImplementation("owner", FileOwnerView.class)
+            .build();
+
+        final String name = "foo";
+
+        try {
+            factory.getReader(mock(Path.class), name);
             shouldHaveThrown(UnsupportedOperationException.class);
         } catch (UnsupportedOperationException e) {
             assertThat(e).hasMessage(String.format(
