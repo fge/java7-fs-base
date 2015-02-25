@@ -41,6 +41,9 @@ public final class OptionsFactory
         = "unsupported write option %s";
     @VisibleForTesting
     static final String IS_READ_OPTION = "%s is a read option";
+    @VisibleForTesting
+    static final String COPY_OPTION_NOT_SUPPORTED
+        = "unsupported copy option %s";
 
     private final Set<OpenOption> defaultReadOptions;
     private final Set<OpenOption> supportedReadOptions;
@@ -137,5 +140,14 @@ public final class OptionsFactory
 
         if (!isWriteOption)
             throw new UnsupportedOperationException(errmsg);
+    }
+
+    public void checkCopyOptions(final Set<CopyOption> options)
+    {
+        for (final CopyOption option: options)
+            if (!supportedCopyOptions.contains(option))
+                throw new UnsupportedOperationException(String.format(
+                    COPY_OPTION_NOT_SUPPORTED, option
+                ));
     }
 }

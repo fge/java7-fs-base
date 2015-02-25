@@ -21,6 +21,7 @@ package com.github.fge.filesystem.options;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.nio.file.CopyOption;
 import java.nio.file.OpenOption;
 import java.util.Collections;
 import java.util.Set;
@@ -239,5 +240,24 @@ public final class OptionsFactoryTest
             = factory.toWriteOptions(Collections.singleton(option));
 
         assertThat(options).containsOnly(WRITE, option);
+    }
+
+    @Test
+    public void checkCopyOptionsTest()
+    {
+        factory = builder.build();
+
+        final CopyOption option = mock(CopyOption.class);
+
+        final Set<CopyOption> options = Collections.singleton(option);
+
+        try {
+            factory.checkCopyOptions(options);
+            shouldHaveThrown(UnsupportedOperationException.class);
+        } catch (UnsupportedOperationException e) {
+            assertThat(e).hasMessage(String.format(
+                OptionsFactory.COPY_OPTION_NOT_SUPPORTED, option
+            ));
+        }
     }
 }
