@@ -23,11 +23,17 @@ import com.github.fge.filesystem.internal.VisibleForTesting;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.nio.file.CopyOption;
 import java.nio.file.OpenOption;
-import java.nio.file.StandardCopyOption;
-import java.nio.file.StandardOpenOption;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardOpenOption.CREATE_NEW;
+import static java.nio.file.StandardOpenOption.READ;
+import static java.nio.file.StandardOpenOption.SPARSE;
+import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
+import static java.nio.file.StandardOpenOption.WRITE;
 
 @ParametersAreNonnullByDefault
 public final class OptionsFactoryBuilder
@@ -50,24 +56,24 @@ public final class OptionsFactoryBuilder
     static {
         final Set<OpenOption> set = new HashSet<>();
 
-        set.add(StandardOpenOption.CREATE);
-        set.add(StandardOpenOption.TRUNCATE_EXISTING);
+        set.add(CREATE);
+        set.add(TRUNCATE_EXISTING);
 
         DEFAULT_WRITE_OPTIONS = new HashSet<>(set);
 
         set.clear();
 
         set.addAll(DEFAULT_WRITE_OPTIONS);
-        set.add(StandardOpenOption.CREATE_NEW);
+        set.add(CREATE_NEW);
         // Required; javadoc says to ignore it if not relevant for this fs
-        set.add(StandardOpenOption.SPARSE);
-        set.add(StandardOpenOption.WRITE);
+        set.add(SPARSE);
+        set.add(WRITE);
 
         DEFAULT_SUPPORTED_WRITE_OPTIONS = new HashSet<>(set);
 
         set.clear();
 
-        set.add(StandardOpenOption.READ);
+        set.add(READ);
 
         DEFAULT_READ_OPTIONS = new HashSet<>(set);
 
@@ -79,7 +85,7 @@ public final class OptionsFactoryBuilder
 
         DEFAULT_SUPPORTED_COPY_OPTIONS = new HashSet<>();
 
-        DEFAULT_SUPPORTED_COPY_OPTIONS.add(StandardCopyOption.REPLACE_EXISTING);
+        DEFAULT_SUPPORTED_COPY_OPTIONS.add(REPLACE_EXISTING);
     }
 
     @VisibleForTesting
@@ -170,5 +176,10 @@ public final class OptionsFactoryBuilder
         supportedCopyOptions.add(option);
 
         return this;
+    }
+
+    public OptionsFactory build()
+    {
+        return new OptionsFactory(this);
     }
 }
