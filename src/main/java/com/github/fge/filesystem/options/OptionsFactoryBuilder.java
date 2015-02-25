@@ -20,12 +20,16 @@ package com.github.fge.filesystem.options;
 
 import com.github.fge.filesystem.internal.VisibleForTesting;
 
+import javax.annotation.ParametersAreNonnullByDefault;
+import java.nio.file.CopyOption;
 import java.nio.file.OpenOption;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+@ParametersAreNonnullByDefault
 public final class OptionsFactoryBuilder
 {
     // Read options to include when none are specified (IN ADDITION to READ)
@@ -39,6 +43,9 @@ public final class OptionsFactoryBuilder
 
     // Default supported write options (IN ADDITION to WRITE)
     private static final Set<OpenOption> DEFAULT_SUPPORTED_WRITE_OPTIONS;
+
+    // Default supported copy options
+    private static final Set<CopyOption> DEFAULT_SUPPORTED_COPY_OPTIONS;
 
     static {
         final Set<OpenOption> set = new HashSet<>();
@@ -69,6 +76,10 @@ public final class OptionsFactoryBuilder
         set.addAll(DEFAULT_READ_OPTIONS);
 
         DEFAULT_SUPPORTED_READ_OPTIONS = new HashSet<>(set);
+
+        DEFAULT_SUPPORTED_COPY_OPTIONS = new HashSet<>();
+
+        DEFAULT_SUPPORTED_COPY_OPTIONS.add(StandardCopyOption.REPLACE_EXISTING);
     }
 
     @VisibleForTesting
@@ -87,6 +98,9 @@ public final class OptionsFactoryBuilder
         = new HashSet<>(DEFAULT_WRITE_OPTIONS);
     final Set<OpenOption> supportedWriteOptions
         = new HashSet<>(DEFAULT_SUPPORTED_WRITE_OPTIONS);
+
+    final Set<CopyOption> supportedCopyOptions
+        = new HashSet<>(DEFAULT_SUPPORTED_COPY_OPTIONS);
 
     OptionsFactoryBuilder()
     {
@@ -124,6 +138,36 @@ public final class OptionsFactoryBuilder
 
         if (byDefault)
             defaultWriteOptions.add(option);
+
+        return this;
+    }
+
+    public OptionsFactoryBuilder addReadWriteOption(final OpenOption option,
+        final boolean byDefault)
+    {
+        Objects.requireNonNull(option);
+
+        if (!supportedReadOptions.add(option))
+            throw new IllegalArgumentException(String.format(
+                IS_READ_OPTION, option
+            ));
+        if (!supportedWriteOptions.add(option))
+            throw new IllegalArgumentException(String.format(
+                IS_WRITE_OPTION, option
+            ));
+
+        if (byDefault) {
+            defaultReadOptions.add(option);
+            defaultWriteOptions.add(option);
+        }
+        return this;
+    }
+
+    public OptionsFactoryBuilder addCopyOption(final CopyOption option)
+    {
+        Objects.requireNonNull(option);
+
+        supportedCopyOptions.add(option);
 
         return this;
     }

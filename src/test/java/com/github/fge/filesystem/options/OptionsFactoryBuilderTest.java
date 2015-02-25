@@ -21,6 +21,7 @@ package com.github.fge.filesystem.options;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.nio.file.CopyOption;
 import java.nio.file.OpenOption;
 import java.nio.file.StandardOpenOption;
 
@@ -61,7 +62,7 @@ public final class OptionsFactoryBuilderTest
     }
 
     @Test
-    public void addReadOptionFailRegisteredAsWriteOption()
+    public void addReadOptionFailRegisteredAsWriteOptionTest()
     {
         final StandardOpenOption option = StandardOpenOption.WRITE;
 
@@ -98,7 +99,7 @@ public final class OptionsFactoryBuilderTest
     }
 
     @Test
-    public void addWriteOptionFailRegisteredAsReadOption()
+    public void addWriteOptionFailRegisteredAsReadOptionTest()
     {
         final OpenOption option = StandardOpenOption.READ;
 
@@ -110,5 +111,73 @@ public final class OptionsFactoryBuilderTest
                 OptionsFactoryBuilder.IS_READ_OPTION, option
             ));
         }
+    }
+
+    @Test
+    public void addReadWriteOptionTest()
+    {
+        final OpenOption option = mock(OpenOption.class);
+
+        builder.addReadWriteOption(option, false);
+
+        assertThat(builder.supportedReadOptions).contains(option);
+        assertThat(builder.supportedWriteOptions).contains(option);
+
+        assertThat(builder.defaultReadOptions).doesNotContain(option);
+        assertThat(builder.defaultWriteOptions).doesNotContain(option);
+    }
+
+    @Test
+    public void addReadWriteOptionDefaultTest()
+    {
+        final OpenOption option = mock(OpenOption.class);
+
+        builder.addReadWriteOption(option, true);
+
+        assertThat(builder.supportedReadOptions).contains(option);
+        assertThat(builder.supportedWriteOptions).contains(option);
+
+        assertThat(builder.defaultReadOptions).contains(option);
+        assertThat(builder.defaultWriteOptions).contains(option);
+    }
+
+    @Test
+    public void addReadWriteOptionAlreadyRegisteredReadOptionTest()
+    {
+        final OpenOption option = StandardOpenOption.READ;
+
+        try {
+            builder.addReadWriteOption(option, false);
+            shouldHaveThrown(IllegalArgumentException.class);
+        } catch (IllegalArgumentException e) {
+            assertThat(e).hasMessage(String.format(
+                OptionsFactoryBuilder.IS_READ_OPTION, option
+            ));
+        }
+    }
+
+    @Test
+    public void addReadWriteOptionAlreadyRegisteredWriteOptionTest()
+    {
+        final OpenOption option = StandardOpenOption.WRITE;
+
+        try {
+            builder.addReadWriteOption(option, false);
+            shouldHaveThrown(IllegalArgumentException.class);
+        } catch (IllegalArgumentException e) {
+            assertThat(e).hasMessage(String.format(
+                OptionsFactoryBuilder.IS_WRITE_OPTION, option
+            ));
+        }
+    }
+
+    @Test
+    public void addCopyOptionTest()
+    {
+        final CopyOption option = mock(CopyOption.class);
+
+        builder.addCopyOption(option);
+
+        assertThat(builder.supportedCopyOptions).contains(option);
     }
 }
