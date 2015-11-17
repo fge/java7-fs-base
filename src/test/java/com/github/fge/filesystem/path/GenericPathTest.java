@@ -120,6 +120,18 @@ public final class GenericPathTest
         assertPath(path.getFileName()).isNotNull();
     }
 
+    /* The typical behavior of a Unix path is to return a path with an
+     * empty root and no names when element 0 is requested from a path
+     * with an empty root and no names.
+     */
+    @Test
+    public void getEmptyFileNameReturnsEmptyFirstName() {
+        final PathElements elements = new PathElements("", new String[] {});
+        final Path path = new GenericPath(fs, factory, elements);
+
+        path.getName(0).toString().equals("");
+    }
+
     /*
      * This test this part of the Path's .relativize() method:
      *
