@@ -195,23 +195,53 @@ public final class GenericPath
         if (!fs.equals(other.getFileSystem()))
             return false;
 
+        final String separator = getFileSystem().getSeparator();
+
         final PathElements otherElements = ((GenericPath) other).elements;
 
-        //noinspection VariableNotUsedInsideIf
-        if (otherElements.root != null)
-            return false;
+        /* If the path of comparison starts with a separator, then we can
+         * do a simple String.endsWith() to come to the correct value.
+         */
+        if (other.toString().startsWith(separator)) {
+            return toString().equals(other.toString());
+        }
 
-        final String[] names = elements.names;
+        final String[] otherNames = otherElements.rootAndNames();
+        final String[] rootAndNames = elements.rootAndNames();
+
+        // We make a copy of the array because we are modifying its values
+        final String[] names = Arrays.copyOf(rootAndNames, rootAndNames.length);
+
+        if (names.length == 1 && names[0].equals(separator)) {
+            // Do nothing - just preserve our single separator as root
+
+        /* Remove separator from the start of the first element, so that
+         * everything will match seamlessly. */
+        } else if (names.length > 0 && names[0].startsWith(separator)) {
+            names[0] = names[0].substring(separator.length());
+        }
+
         final int length = names.length;
-        final String[] otherNames = otherElements.names;
         final int otherLength = otherNames.length;
 
+        // If searching for an ending larger than our elements, it's false
         if (length < otherLength)
             return false;
 
-        for (int i = 0; i < otherLength; i++)
-            if (!names[length - i].equals(otherNames[otherLength - i]))
+        // If both element's length is the same, just do an equals test
+        if (length == otherLength)
+            return Arrays.equals(names, otherNames);
+
+        // Otherwise, we need to move through the last elements one by one
+        for (int i = 1; i <= otherLength; i++) {
+            final int nameIdx = length - i;
+            final String name = names[nameIdx];
+            final int otherNameIdx = otherLength - i;
+            final String otherName = otherNames[otherNameIdx];
+
+            if (!name.equals(otherName))
                 return false;
+        }
 
         return true;
     }
@@ -240,7 +270,7 @@ public final class GenericPath
         final GenericPath otherPath = (GenericPath) other;
 
         final PathElements newNames
-            = factory.resolve(elements, otherPath.elements);
+                = factory.resolve(elements, otherPath.elements);
 
         /*
          * See PathElementsFactory's .resolve()

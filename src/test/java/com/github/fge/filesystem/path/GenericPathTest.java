@@ -19,9 +19,9 @@
 package com.github.fge.filesystem.path;
 
 import com.github.fge.filesystem.CustomSoftAssertions;
-import com.github.fge.filesystem.provider.FileSystemFactoryProvider;
 import com.github.fge.filesystem.driver.FileSystemDriver;
 import com.github.fge.filesystem.fs.GenericFileSystem;
+import com.github.fge.filesystem.provider.FileSystemFactoryProvider;
 import com.github.fge.filesystem.provider.FileSystemRepository;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
@@ -61,26 +61,28 @@ public final class GenericPathTest
         repository = mock(FileSystemRepository.class);
         when(repository.getFactoryProvider()).thenReturn(factoryProvider);
         driver = mock(FileSystemDriver.class);
-        factory = mock(PathElementsFactory.class);
+        factory = factoryProvider.getPathElementsFactory();
         fs = new GenericFileSystem(uri, repository, driver, provider);
     }
 
     @Test
     public void isAbsoluteDelegatesToPathElementsFactory()
     {
+        final PathElementsFactory mockFactory = mock(PathElementsFactory.class);
+
         final PathElements elements1 = new PathElements("/", NO_NAMES);
         final PathElements elements2 = PathElements.EMPTY;
 
-        when(factory.isAbsolute(elements1)).thenReturn(false);
-        when(factory.isAbsolute(elements2)).thenReturn(true);
+        when(mockFactory.isAbsolute(elements1)).thenReturn(false);
+        when(mockFactory.isAbsolute(elements2)).thenReturn(true);
 
         Path path;
 
-        path = new GenericPath(fs, factory, elements1);
+        path = new GenericPath(fs, mockFactory, elements1);
 
         assertThat(path.isAbsolute()).isFalse();
 
-        path = new GenericPath(fs, factory, elements2);
+        path = new GenericPath(fs, mockFactory, elements2);
 
         assertThat(path.isAbsolute()).isTrue();
     }
@@ -132,6 +134,91 @@ public final class GenericPathTest
 
         Assert.assertEquals(path.getName(0).toString(), "",
                 "First name element on empty path didn't equal an empty String");
+    }
+
+    @Test
+    public void pathToStringWithRootDirectoryAsName() {
+        final PathElements elements
+                = new PathElements("", new String[] { "/" });
+        final Path path = new GenericPath(fs, factory, elements);
+        Assert.assertEquals(path.toString(), "/");
+    }
+
+    @Test
+    public void pathToStringWithRootDirectoryAndSingleName() {
+        final PathElements elements
+                = new PathElements("/", new String[] { "tmp" });
+        final Path path = new GenericPath(fs, factory, elements);
+        Assert.assertEquals(path.toString(), "/tmp");
+    }
+
+    @Test
+    public void pathToStringFromDirectoryRoot() {
+        final PathElements elements
+                = new PathElements("/tmp", PathElements.NO_NAMES);
+        final Path path = new GenericPath(fs, factory, elements);
+        Assert.assertEquals(path.toString(), "/tmp");
+    }
+
+    @Test
+    public void pathToStringFromDirectoryRootWithSubdir() {
+        final PathElements elements
+                = new PathElements("/tmp", new String[] { "foo.txt" });
+        final Path path = new GenericPath(fs, factory, elements);
+        Assert.assertEquals(path.toString(), "/tmp/foo.txt");
+    }
+
+    @Test
+    public void pathToStringFromDirectoryRootWithNoSubdir() {
+        final PathElements elements
+                = new PathElements("/tmp/foo.txt", PathElements.NO_NAMES);
+        FileSystemFactoryProvider provider = repository.getFactoryProvider();
+        final Path path = new GenericPath(fs, provider.getPathElementsFactory(),
+                elements);
+        Assert.assertEquals(path.toString(), "/tmp/foo.txt");
+    }
+
+    @Test
+    public void endsWithMatchesLastName() {
+        final PathElements elements
+                = new PathElements("/tmp/", new String[] { "foo.txt" });
+        final Path path = new GenericPath(fs, factory, elements);
+        Assert.assertTrue(path.endsWith("foo.txt"));
+        Assert.assertTrue(path.endsWith("/tmp/foo.txt"));
+    }
+
+    @Test
+    public void endsWithMatchesLastDirectoryAndName() {
+        final PathElements elements = new PathElements("/tmp",
+                new String[] { "bar", "foo.txt" });
+        final Path path = new GenericPath(fs, factory, elements);
+        Assert.assertTrue(path.endsWith("bar/foo.txt"));
+        Assert.assertTrue(path.endsWith("/tmp/bar/foo.txt"));
+    }
+
+    @Test
+    public void endsWithMatchesRoot() {
+        final PathElements elements
+                = new PathElements("/tmp", PathElements.NO_NAMES);
+        final Path path = new GenericPath(fs, factory, elements);
+        Assert.assertTrue(path.endsWith("tmp"));
+        Assert.assertTrue(path.endsWith("/tmp"));
+    }
+
+    @Test
+    public void endsWithRootDoesntMatchEmpty() {
+        final PathElements elements
+                = new PathElements("/", PathElements.NO_NAMES);
+        final Path path = new GenericPath(fs, factory, elements);
+        Assert.assertFalse(path.endsWith(""));
+    }
+
+    @Test
+    public void endsWithEmptyPathsMatch() {
+        final PathElements elements
+                = new PathElements("", PathElements.NO_NAMES);
+        final Path path = new GenericPath(fs, factory, elements);
+        Assert.assertTrue(path.endsWith(""));
     }
 
     /*

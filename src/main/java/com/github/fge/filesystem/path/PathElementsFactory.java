@@ -435,7 +435,8 @@ public abstract class PathElementsFactory
     {
         final StringBuilder sb = new StringBuilder();
 
-        final boolean hasRoot = elements.root != null;
+        final String root = elements.root;
+        final boolean hasRoot = root != null;
         final String[] names = elements.names;
         final int len = names.length;
 
@@ -445,10 +446,18 @@ public abstract class PathElementsFactory
         if (len == 0)
             return sb.toString();
 
-        if (hasRoot)
+        if (hasRoot) {
             sb.append(rootSeparator);
+        }
 
-        sb.append(names[0]);
+        final String firstName = names[0];
+
+        if (hasRoot && !firstName.startsWith(separator) &&
+                       !root.endsWith(separator)) {
+            sb.append(separator);
+        }
+
+        sb.append(firstName);
 
         for (int i = 1; i < len; i++)
             sb.append(separator).append(names[i]);
