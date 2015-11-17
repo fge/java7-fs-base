@@ -23,6 +23,7 @@ import com.github.fge.filesystem.provider.FileSystemFactoryProvider;
 import com.github.fge.filesystem.driver.FileSystemDriver;
 import com.github.fge.filesystem.fs.GenericFileSystem;
 import com.github.fge.filesystem.provider.FileSystemRepository;
+import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -129,7 +130,8 @@ public final class GenericPathTest
         final PathElements elements = new PathElements("", new String[] {});
         final Path path = new GenericPath(fs, factory, elements);
 
-        path.getName(0).toString().equals("");
+        Assert.assertEquals(path.getName(0).toString(), "",
+                "First name element on empty path didn't equal an empty String");
     }
 
     /*
