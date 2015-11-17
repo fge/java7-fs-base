@@ -23,6 +23,7 @@ import com.github.fge.filesystem.provider.FileSystemFactoryProvider;
 import com.github.fge.filesystem.driver.FileSystemDriver;
 import com.github.fge.filesystem.fs.GenericFileSystem;
 import com.github.fge.filesystem.provider.FileSystemRepository;
+import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -118,6 +119,19 @@ public final class GenericPathTest
         final Path path = new GenericPath(fs, factory, elements);
 
         assertPath(path.getFileName()).isNotNull();
+    }
+
+    /* The typical behavior of a Unix path is to return a path with an
+     * empty root and no names when element 0 is requested from a path
+     * with an empty root and no names.
+     */
+    @Test
+    public void getEmptyFileNameReturnsEmptyFirstName() {
+        final PathElements elements = new PathElements("", new String[] {});
+        final Path path = new GenericPath(fs, factory, elements);
+
+        Assert.assertEquals(path.getName(0).toString(), "",
+                "First name element on empty path didn't equal an empty String");
     }
 
     /*

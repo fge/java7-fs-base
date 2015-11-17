@@ -129,6 +129,10 @@ public final class GenericPath
     @Override
     public Path getName(final int index)
     {
+        if (elements.root != null && elements.root.isEmpty() && elements.names.length == 0) {
+            return new GenericPath(fs, factory, PathElements.EMPTY);
+        }
+
         final String name;
 
         //noinspection ProhibitedExceptionCaught
