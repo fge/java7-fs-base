@@ -23,7 +23,6 @@ import com.github.fge.filesystem.driver.FileSystemDriver;
 import com.github.fge.filesystem.fs.GenericFileSystem;
 import com.github.fge.filesystem.provider.FileSystemFactoryProvider;
 import com.github.fge.filesystem.provider.FileSystemRepository;
-import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -132,8 +131,7 @@ public final class GenericPathTest
         final PathElements elements = new PathElements("", new String[] {});
         final Path path = new GenericPath(fs, factory, elements);
 
-        Assert.assertEquals(path.getName(0).toString(), "",
-                "First name element on empty path didn't equal an empty String");
+        assertThat(path.getName(0).toString()).isEqualTo("");
     }
 
     @Test
@@ -141,7 +139,7 @@ public final class GenericPathTest
         final PathElements elements
                 = new PathElements("", new String[] { "/" });
         final Path path = new GenericPath(fs, factory, elements);
-        Assert.assertEquals(path.toString(), "/");
+        assertThat(path.toString()).isEqualTo("/");
     }
 
     @Test
@@ -149,7 +147,7 @@ public final class GenericPathTest
         final PathElements elements
                 = new PathElements("/", new String[] { "tmp" });
         final Path path = new GenericPath(fs, factory, elements);
-        Assert.assertEquals(path.toString(), "/tmp");
+        assertThat(path.toString()).isEqualTo("/tmp");
     }
 
     @Test
@@ -157,7 +155,7 @@ public final class GenericPathTest
         final PathElements elements
                 = new PathElements("/tmp", PathElements.NO_NAMES);
         final Path path = new GenericPath(fs, factory, elements);
-        Assert.assertEquals(path.toString(), "/tmp");
+        assertThat(path.toString()).isEqualTo("/tmp");
     }
 
     @Test
@@ -165,7 +163,7 @@ public final class GenericPathTest
         final PathElements elements
                 = new PathElements("/tmp", new String[] { "foo.txt" });
         final Path path = new GenericPath(fs, factory, elements);
-        Assert.assertEquals(path.toString(), "/tmp/foo.txt");
+        assertThat(path.toString()).isEqualTo("/tmp/foo.txt");
     }
 
     @Test
@@ -175,7 +173,7 @@ public final class GenericPathTest
         FileSystemFactoryProvider provider = repository.getFactoryProvider();
         final Path path = new GenericPath(fs, provider.getPathElementsFactory(),
                 elements);
-        Assert.assertEquals(path.toString(), "/tmp/foo.txt");
+        assertThat(path.toString()).isEqualTo("/tmp/foo.txt");
     }
 
     @Test
@@ -183,8 +181,8 @@ public final class GenericPathTest
         final PathElements elements
                 = new PathElements("/tmp/", new String[] { "foo.txt" });
         final Path path = new GenericPath(fs, factory, elements);
-        Assert.assertTrue(path.endsWith("foo.txt"));
-        Assert.assertTrue(path.endsWith("/tmp/foo.txt"));
+        assertThat(path.endsWith("foo.txt")).isTrue();
+        assertThat(path.endsWith("/tmp/foo.txt")).isTrue();
     }
 
     @Test
@@ -192,8 +190,8 @@ public final class GenericPathTest
         final PathElements elements = new PathElements("/tmp",
                 new String[] { "bar", "foo.txt" });
         final Path path = new GenericPath(fs, factory, elements);
-        Assert.assertTrue(path.endsWith("bar/foo.txt"));
-        Assert.assertTrue(path.endsWith("/tmp/bar/foo.txt"));
+        assertThat(path.endsWith("bar/foo.txt")).isTrue();
+        assertThat(path.endsWith("/tmp/bar/foo.txt")).isTrue();
     }
 
     @Test
@@ -201,8 +199,8 @@ public final class GenericPathTest
         final PathElements elements
                 = new PathElements("/tmp", PathElements.NO_NAMES);
         final Path path = new GenericPath(fs, factory, elements);
-        Assert.assertTrue(path.endsWith("tmp"));
-        Assert.assertTrue(path.endsWith("/tmp"));
+        assertThat(path.endsWith("tmp")).isTrue();
+        assertThat(path.endsWith("/tmp")).isTrue();
     }
 
     @Test
@@ -210,7 +208,7 @@ public final class GenericPathTest
         final PathElements elements
                 = new PathElements("/", PathElements.NO_NAMES);
         final Path path = new GenericPath(fs, factory, elements);
-        Assert.assertFalse(path.endsWith(""));
+        assertThat(path.endsWith("")).isFalse();
     }
 
     @Test
@@ -218,7 +216,7 @@ public final class GenericPathTest
         final PathElements elements
                 = new PathElements("", PathElements.NO_NAMES);
         final Path path = new GenericPath(fs, factory, elements);
-        Assert.assertTrue(path.endsWith(""));
+        assertThat(path.endsWith("")).isTrue();
     }
 
     /*
