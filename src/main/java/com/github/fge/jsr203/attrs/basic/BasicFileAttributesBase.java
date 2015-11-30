@@ -1,30 +1,30 @@
 package com.github.fge.jsr203.attrs.basic;
 
-import com.github.fge.jsr203.attrs.AttributeConstants;
-
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 
 public interface BasicFileAttributesBase
     extends BasicFileAttributes
 {
+    FileTime EPOCH = FileTime.fromMillis(0L);
+
     @Override
     default FileTime lastModifiedTime()
     {
-        return AttributeConstants.EPOCH;
+        return EPOCH;
     }
 
     @Override
     default FileTime lastAccessTime()
     {
-        return AttributeConstants.EPOCH;
+        return EPOCH;
     }
 
 
     @Override
     default FileTime creationTime()
     {
-        return AttributeConstants.EPOCH;
+        return EPOCH;
     }
 
     @Override
