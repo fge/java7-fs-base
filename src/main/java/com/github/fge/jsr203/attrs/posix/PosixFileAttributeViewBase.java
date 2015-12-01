@@ -1,5 +1,6 @@
 package com.github.fge.jsr203.attrs.posix;
 
+import com.github.fge.jsr203.attrs.StandardAttributeViewNames;
 import com.github.fge.jsr203.attrs.basic.BasicFileAttributeViewBase;
 import com.github.fge.jsr203.attrs.owner.FileOwnerAttributeViewBase;
 
@@ -10,6 +11,26 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.UserPrincipal;
 import java.util.Set;
 
+/**
+ * Extension of {@link PosixFileAttributeView} with default implementations
+ *
+ * <p>The default implementations are as follows:</p>
+ *
+ * <ul>
+ *     <li>{@link #name()} returns {@link StandardAttributeViewNames#POSIX};
+ *     </li>
+ *     <li>{@link #getOwner()} is implemented as:
+ *     <pre>
+ *         return readAttributes().owner();
+ *     </pre>
+ *     that is, it fetches the attributes first and calls the matching method;
+ *     </li>
+ *     <li>all methods setting attributes throw an {@link
+ *     UnsupportedOperationException}; this includes all methods from both
+ *     {@link BasicFileAttributeViewBase} and {@link FileOwnerAttributeViewBase}
+ *     which this interface inherits.</li>
+ * </ul>
+ */
 @FunctionalInterface
 public interface PosixFileAttributeViewBase
     extends PosixFileAttributeView, BasicFileAttributeViewBase,
@@ -25,7 +46,7 @@ public interface PosixFileAttributeViewBase
     @Override
     default String name()
     {
-        return "posix";
+        return StandardAttributeViewNames.POSIX;
     }
 
     @Override

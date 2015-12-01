@@ -1,9 +1,23 @@
 package com.github.fge.jsr203.attrs.basic;
 
+import com.github.fge.jsr203.attrs.StandardAttributeViewNames;
+
 import java.io.IOException;
 import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.FileTime;
 
+/**
+ * Extension of {@link BasicFileAttributeView} with default implementations
+ *
+ * <p>The default implementations are as follows:</p>
+ *
+ * <ul>
+ *     <li>{@link #name()} returns {@link StandardAttributeViewNames#BASIC};
+ *     </li>
+ *     <li>all methods setting attributes throw an {@link
+ *     UnsupportedOperationException}.</li>
+ * </ul>
+ */
 @FunctionalInterface
 public interface BasicFileAttributeViewBase
     extends BasicFileAttributeView
@@ -11,7 +25,7 @@ public interface BasicFileAttributeViewBase
     @Override
     default String name()
     {
-        return "basic";
+        return StandardAttributeViewNames.BASIC;
     }
 
     @Override
