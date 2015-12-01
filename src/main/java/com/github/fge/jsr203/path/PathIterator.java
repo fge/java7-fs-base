@@ -7,12 +7,12 @@ import java.util.NoSuchElementException;
 final class PathIterator
     implements Iterator<Path>
 {
-    private final PathBase path;
+    private final Path path;
     private final int nameCount;
     @SuppressWarnings("RedundantFieldInitialization")
     private int index = 0;
 
-    PathIterator(final PathBase path)
+    PathIterator(final Path path)
     {
         this.path = path;
         nameCount = path.getNameCount();
