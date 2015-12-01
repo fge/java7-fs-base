@@ -11,6 +11,8 @@ import java.nio.file.ProviderMismatchException;
  * will make use of {@link AbstractPath} for implementing paths. And this class
  * expects that other methods accepting paths as arguments have the same
  * filesystem. This exception is thrown if this is not the case.</p>
+ *
+ * @see AbstractPath
  */
 public final class FileSystemMismatchException
     extends IllegalArgumentException

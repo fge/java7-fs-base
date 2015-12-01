@@ -17,13 +17,24 @@ import java.nio.file.spi.FileSystemProvider;
  * current path. This is unlike the basic constraints of JSR 203 which only
  * require that the <em>{@link FileSystemProvider provider}</em> be the same.
  * </p>
+ *
+ * <p>Finally, it assumes by default that a path is {@link Path#isAbsolute()
+ * absolute} if and only if it has a {@link Path#getRoot() root}, and vice
+ * versa; this behaviour is overridable but in most cases you won't override it.
+ * </p>
  */
 public abstract class AbstractPath
     implements PathBase
 {
+    @Override
+    public boolean isAbsolute()
+    {
+        return getRoot() != null;
+    }
+
     @SuppressWarnings("ObjectEquality")
     @Override
-    public boolean startsWith(final Path other)
+    public final boolean startsWith(final Path other)
     {
         if (getFileSystem() != other.getFileSystem())
             throw new FileSystemMismatchException();
@@ -35,7 +46,7 @@ public abstract class AbstractPath
 
     @SuppressWarnings("ObjectEquality")
     @Override
-    public boolean endsWith(final Path other)
+    public final boolean endsWith(final Path other)
     {
         if (getFileSystem() != other.getFileSystem())
             throw new FileSystemMismatchException();
@@ -47,7 +58,7 @@ public abstract class AbstractPath
 
     @SuppressWarnings("ObjectEquality")
     @Override
-    public Path resolve(final Path other)
+    public final Path resolve(final Path other)
     {
         if (getFileSystem() != other.getFileSystem())
             throw new FileSystemMismatchException();
@@ -59,7 +70,7 @@ public abstract class AbstractPath
 
     @SuppressWarnings("ObjectEquality")
     @Override
-    public Path relativize(final Path other)
+    public final Path relativize(final Path other)
     {
         if (getFileSystem() != other.getFileSystem())
             throw new FileSystemMismatchException();
