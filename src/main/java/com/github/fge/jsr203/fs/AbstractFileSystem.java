@@ -10,6 +10,7 @@ import java.nio.file.WatchService;
 import java.nio.file.attribute.UserPrincipalLookupService;
 import java.nio.file.spi.FileSystemProvider;
 import java.util.Collections;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Basic {@link FileSystem} implementation
@@ -24,6 +25,8 @@ import java.util.Collections;
 public abstract class AbstractFileSystem
     extends FileSystem
 {
+    private final AtomicBoolean closed = new AtomicBoolean(false);
+
     protected final AbstractFileStore fileStore;
     protected final AbstractFileSystemProvider provider;
 
@@ -38,6 +41,23 @@ public abstract class AbstractFileSystem
     public final FileSystemProvider provider()
     {
         return provider;
+    }
+
+    @Override
+    public final void close()
+        throws IOException
+    {
+        if (!closed.getAndSet(true))
+            doClose();
+    }
+
+    protected abstract void doClose()
+        throws IOException;
+
+    @Override
+    public final boolean isOpen()
+    {
+        return !closed.get();
     }
 
     @Override
