@@ -5,5 +5,4 @@ import java.nio.file.spi.FileSystemProvider;
 public abstract class AbstractFileSystemProvider
     extends FileSystemProvider
 {
-
 }
