@@ -1,7 +1,9 @@
 package com.github.fge.jsr203.path;
 
 import com.github.fge.jsr203.FileSystemMismatchException;
+import com.github.fge.jsr203.fs.AbstractFileSystem;
 
+import java.nio.file.FileSystem;
 import java.nio.file.Path;
 import java.nio.file.spi.FileSystemProvider;
 
@@ -26,6 +28,19 @@ import java.nio.file.spi.FileSystemProvider;
 public abstract class AbstractPath
     implements PathBase
 {
+    protected final AbstractFileSystem fs;
+
+    protected AbstractPath(final AbstractFileSystem fs)
+    {
+        this.fs = fs;
+    }
+
+    @Override
+    public final FileSystem getFileSystem()
+    {
+        return fs;
+    }
+
     @Override
     public boolean isAbsolute()
     {
