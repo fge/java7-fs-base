@@ -18,7 +18,12 @@ public abstract class FileAttributeHandler<V extends FileAttributeView>
     static final String NULL_READER = "reader cannot be null";
     @VisibleForTesting
     static final String DUPLICATE_READER
-        = "there is already a reader for attribute name %s";
+        = "there is already a reader for attribute name '%s'";
+    @VisibleForTesting
+    static final String NULL_WRITER = "writer cannot be null";
+    @VisibleForTesting
+    static final String DUPLICATE_WRITER
+        = "there is already a writer for attribute name '%s'";
 
     protected final V view;
 
@@ -76,5 +81,11 @@ public abstract class FileAttributeHandler<V extends FileAttributeView>
     protected final void addWriter(final String name,
         final AttributeWriter writer)
     {
+        Objects.requireNonNull(name, NULL_ATTR_NAME);
+        Objects.requireNonNull(writer, NULL_WRITER);
+
+        if (writers.put(name, writer) != null)
+            throw new IllegalStateException(String.format(DUPLICATE_WRITER,
+                name));
     }
 }

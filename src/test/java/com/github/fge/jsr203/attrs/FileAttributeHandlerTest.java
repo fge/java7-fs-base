@@ -1,6 +1,7 @@
 package com.github.fge.jsr203.attrs;
 
 import com.github.fge.jsr203.AttributeReader;
+import com.github.fge.jsr203.AttributeWriter;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -9,6 +10,7 @@ import java.nio.file.attribute.FileAttributeView;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.shouldHaveThrown;
+import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.only;
 import static org.mockito.Mockito.verify;
@@ -43,7 +45,7 @@ public final class FileAttributeHandlerTest
     }
 
     @Test
-    public void illegalReadeRegisterTest()
+    public void illegalReaderRegisterTest()
     {
         final AttributeReader reader = mock(AttributeReader.class);
 
@@ -74,7 +76,7 @@ public final class FileAttributeHandlerTest
     }
 
     @Test
-    public void registeredReaderTest()
+    public void readAttributeTest()
         throws IOException
     {
         final Object expected = mock(Object.class);
@@ -87,5 +89,50 @@ public final class FileAttributeHandlerTest
 
         assertThat(actual).isSameAs(expected);
         verify(reader, only()).read();
+    }
+
+    @Test
+    public void illegalWriterRegisterTest()
+    {
+        final AttributeWriter writer = mock(AttributeWriter.class);
+
+        try {
+            handler.addWriter(null, writer);
+            shouldHaveThrown(NullPointerException.class);
+        } catch (NullPointerException e) {
+            assertThat(e).hasMessage(FileAttributeHandler.NULL_ATTR_NAME);
+        }
+
+        try {
+            handler.addWriter(NAME, null);
+            shouldHaveThrown(NullPointerException.class);
+        } catch (NullPointerException e) {
+            assertThat(e).hasMessage(FileAttributeHandler.NULL_WRITER);
+        }
+
+        handler.addWriter(NAME, writer);
+
+        try {
+            handler.addWriter(NAME, writer);
+            shouldHaveThrown(IllegalStateException.class);
+        } catch (IllegalStateException e) {
+            final String msg
+                = String.format(FileAttributeHandler.DUPLICATE_WRITER, NAME);
+            assertThat(e).hasMessage(msg);
+        }
+    }
+
+    @Test
+    public void writeAttributeTest()
+        throws IOException
+    {
+        final Object value = mock(Object.class);
+        final AttributeWriter writer = mock(AttributeWriter.class);
+
+        handler.addWriter(NAME, writer);
+
+        handler.writeAttribute(NAME, value);
+
+        verify(writer, only()).write(same(value));
     }
 }
