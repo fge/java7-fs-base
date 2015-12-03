@@ -1,31 +1,22 @@
 package com.github.fge.jsr203.attrs.factory;
 
 import com.github.fge.jsr203.attrs.AttributesProvider;
-import com.github.fge.jsr203.attrs.basic.BasicFileAttributeViewBase;
 import com.github.fge.jsr203.attrs.constants.StandardAttributeViewNames;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.attribute.AclFileAttributeView;
-import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.nio.file.attribute.DosFileAttributeView;
-import java.nio.file.attribute.FileAttributeView;
-import java.nio.file.attribute.FileOwnerAttributeView;
-import java.nio.file.attribute.PosixFileAttributeView;
-import java.nio.file.attribute.UserDefinedFileAttributeView;
+import java.nio.file.attribute.DosFileAttributes;
+import java.nio.file.attribute.PosixFileAttributes;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.shouldHaveThrown;
-import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -37,213 +28,145 @@ public final class AbstractAttributesFactoryTest
     @BeforeMethod
     public void initFactory()
     {
-        factory = new TestAttributeFactory();
+        factory = new TestAttributesFactory();
     }
 
     @Test
-    public void addClassMapTest()
+    public void registerAttributesByNameTest()
     {
+        final Class<MyAttributes> attributesClass = MyAttributes.class;
         final String viewName = "foo";
-        final Class<? extends FileAttributeView> viewClass
-            = FileAttributeView.class;
 
-        factory.addClassByName(viewName, viewClass);
+        factory.registerAttributesByName(viewName, attributesClass);
+
+        assertThat(factory.getViewNameForAttributesClass(attributesClass))
+            .isEqualTo(viewName);
+    }
+
+    @Test(dependsOnMethods = "registerAttributesByNameTest")
+    public void doubleRegisterAttributesByNameTest()
+    {
+        final Class<MyAttributes> attributesClass = MyAttributes.class;
+        final String viewName = "foo";
+
+        factory.registerAttributesByName(viewName, attributesClass);
 
         try {
-            factory.addClassByName(viewName, viewClass);
+            factory.registerAttributesByName(viewName, attributesClass);
             shouldHaveThrown(IllegalArgumentException.class);
         } catch (IllegalArgumentException e) {
             assertThat(e).hasMessage(String.format(
-                AbstractAttributesFactory.CLASS_ALREADY_MAPPED, viewName
+                AbstractAttributesFactory.ATTRS_ALREADY_REGISTERED,
+                attributesClass.getSimpleName(), viewName
             ));
         }
     }
 
     @DataProvider
-    public Iterator<Object[]> basicClassMapData()
+    public Iterator<Object[]> nameMapData()
     {
         final List<Object[]> list = new ArrayList<>();
 
+        Class<? extends BasicFileAttributes> attributesClass;
         String viewName;
-        Class<? extends FileAttributeView> viewClass;
 
+        attributesClass = BasicFileAttributes.class;
         viewName = StandardAttributeViewNames.BASIC;
-        viewClass = BasicFileAttributeView.class;
-        list.add(new Object[] { viewName, viewClass });
+        list.add(new Object[] { attributesClass, viewName });
 
-        viewName = StandardAttributeViewNames.OWNER;
-        viewClass = FileOwnerAttributeView.class;
-        list.add(new Object[] { viewName, viewClass });
-
-        viewName = StandardAttributeViewNames.ACL;
-        viewClass = AclFileAttributeView.class;
-        list.add(new Object[] { viewName, viewClass });
-
+        attributesClass = PosixFileAttributes.class;
         viewName = StandardAttributeViewNames.POSIX;
-        viewClass = PosixFileAttributeView.class;
-        list.add(new Object[] { viewName, viewClass });
+        list.add(new Object[] { attributesClass, viewName });
 
-        viewName = StandardAttributeViewNames.USER;
-        viewClass = UserDefinedFileAttributeView.class;
-        list.add(new Object[] { viewName, viewClass });
-
+        attributesClass = DosFileAttributes.class;
         viewName = StandardAttributeViewNames.DOS;
-        viewClass = DosFileAttributeView.class;
-        list.add(new Object[] { viewName, viewClass });
+        list.add(new Object[] { attributesClass, viewName });
 
         Collections.shuffle(list);
         return list.iterator();
     }
 
-    @Test(
-        dataProvider = "basicClassMapData",
-        dependsOnMethods = "addClassMapTest"
-    )
-    public void basicClassMapTest(final String viewName,
-        final Class<? extends FileAttributeView> viewClass)
+    @Test(dataProvider = "nameMapData")
+    public void defaultNameMapDataTest(
+        final Class<? extends BasicFileAttributes> attributesClass,
+        final String viewName)
     {
-        assertThat(factory.getViewClassByName(viewName)).isSameAs(viewClass);
+        assertThat(factory.getViewNameForAttributesClass(attributesClass))
+            .isEqualTo(viewName);
     }
 
     @Test
-    public void addImplementationTest()
+    public void registerProviderNoDefinedClassTest()
     {
-        @SuppressWarnings("unchecked")
-        final Function<Path, BasicFileAttributeView> provider
-            = mock(Function.class);
+        final Class<MyAttributes> attributesClass = MyAttributes.class;
+        final AttributesProvider<MyAttributeView, MyAttributes> provider
+            = MyAttributeView::readAttributes;
 
         try {
-            factory.addImplementation(FileAttributeView.class, provider);
+            factory.registerProvider(attributesClass, provider);
             shouldHaveThrown(IllegalArgumentException.class);
         } catch (IllegalArgumentException e) {
             assertThat(e).hasMessage(String.format(
-                AbstractAttributesFactory.VIEW_NOT_REGISTERED,
-                FileAttributeView.class.getSimpleName()
+                AbstractAttributesFactory.ATTRS_NOT_REGISTERED,
+                attributesClass.getSimpleName()
             ));
         }
+    }
 
-        factory.addImplementation(BasicFileAttributeView.class, provider);
+    @Test(dependsOnMethods = "registerProviderNoDefinedClassTest")
+    public void registerProviderTest()
+    {
+        final String viewName = "foo";
+        final Class<MyAttributes> attributesClass = MyAttributes.class;
+        final AttributesProvider<MyAttributeView, MyAttributes> provider
+            = MyAttributeView::readAttributes;
+
+        factory.registerAttributesByName(viewName, attributesClass);
+        factory.registerProvider(attributesClass, provider);
+
+        assertThat(factory.getProviderForClass(attributesClass))
+            .isSameAs(provider);
+    }
+
+    @Test(dependsOnMethods = "registerProviderTest")
+    public void registerProviderTwiceTest()
+    {
+        final String viewName = "foo";
+        final Class<MyAttributes> attributesClass = MyAttributes.class;
+        final AttributesProvider<MyAttributeView, MyAttributes> provider
+            = MyAttributeView::readAttributes;
+
+        factory.registerAttributesByName(viewName, attributesClass);
+        factory.registerProvider(attributesClass, provider);
 
         try {
-            factory.addImplementation(BasicFileAttributeView.class, provider);
+            factory.registerProvider(attributesClass, provider);
             shouldHaveThrown(IllegalArgumentException.class);
         } catch (IllegalArgumentException e) {
             assertThat(e).hasMessage(String.format(
                 AbstractAttributesFactory.PROVIDER_ALREADY_REGISTERED,
-                BasicFileAttributeView.class.getSimpleName()
-            ));
-        }
-    }
-
-    @Test(dependsOnMethods = "addImplementationTest")
-    public void getViewTest()
-    {
-        final Class<BasicFileAttributeView> viewClass
-            = BasicFileAttributeView.class;
-
-        @SuppressWarnings("unchecked")
-        final Function<Path, BasicFileAttributeView> provider
-            = mock(Function.class);
-
-        final Path path = mock(Path.class);
-        final BasicFileAttributeViewBase expected
-            = mock(BasicFileAttributeViewBase.class);
-
-        when(provider.apply(path)).thenReturn(expected);
-
-        factory.addImplementation(viewClass, provider);
-
-        final BasicFileAttributeView actual = factory.getView(viewClass, path);
-
-        assertThat(actual).isSameAs(expected);
-    }
-
-    @Test
-    public void getViewFailureTest()
-    {
-        final Class<BasicFileAttributeView> viewClass
-            = BasicFileAttributeView.class;
-        final Path path = mock(Path.class);
-
-        try {
-            factory.getView(viewClass, path);
-            shouldHaveThrown(UnsupportedOperationException.class);
-        } catch (UnsupportedOperationException e) {
-            assertThat(e).hasMessage(String.format(
-                AbstractAttributesFactory.NO_PROVIDER, viewClass.getSimpleName()
-            ));
-        }
-    }
-
-    @Test(dependsOnMethods = "addClassMapTest")
-    public void registerAttributesTest()
-        throws IOException
-    {
-        final Class<MyAttributeView> viewClass = MyAttributeView.class;
-        final Class<MyAttributes> attributesClass = MyAttributes.class;
-        @SuppressWarnings("unchecked")
-        final AttributesProvider<MyAttributeView, MyAttributes>
-            attributesProvider = mock(AttributesProvider.class);
-
-        try {
-            factory.registerAttributes(viewClass, attributesClass,
-                attributesProvider);
-            shouldHaveThrown(IllegalArgumentException.class);
-        } catch (IllegalArgumentException e) {
-            assertThat(e).hasMessage(String.format(
-                AbstractAttributesFactory.VIEW_NOT_REGISTERED,
-                viewClass.getSimpleName()
-            ));
-        }
-
-        final String viewName = "foo";
-
-        factory.addClassByName(viewName, viewClass);
-
-        factory.registerAttributes(viewClass, attributesClass, attributesProvider);
-
-        assertThat(factory.getViewClassForAttributeClass(attributesClass))
-            .isSameAs(viewClass);
-        assertThat(factory.getAttributesProviderForViewClass(viewClass))
-            .isSameAs(attributesProvider);
-
-        try {
-            factory.registerAttributes(viewClass, attributesClass, attributesProvider);
-            shouldHaveThrown(IllegalArgumentException.class);
-        } catch (IllegalArgumentException e) {
-            assertThat(e).hasMessage(String.format(
-                AbstractAttributesFactory.ATTRIBUTES_ALREADY_REGISTERED,
                 attributesClass.getSimpleName()
             ));
         }
+    }
 
-        @SuppressWarnings("unchecked")
-        final Function<Path, MyAttributeView> viewProvider
-            = mock(Function.class);
-        factory.addImplementation(MyAttributeView.class, viewProvider);
+    @Test(dependsOnMethods = "registerProviderTest")
+    public void providerUsageTest()
+        throws IOException
+    {
+        final String viewName = "foo";
+        final Class<MyAttributes> attributesClass = MyAttributes.class;
+        final AttributesProvider<MyAttributeView, MyAttributes> provider
+            = MyAttributeView::readAttributes;
+
+        factory.registerAttributesByName(viewName, attributesClass);
+        factory.registerProvider(attributesClass, provider);
 
         final MyAttributeView view = mock(MyAttributeView.class);
         final MyAttributes expected = mock(MyAttributes.class);
-        final Path path = mock(Path.class);
-        when(viewProvider.apply(same(path))).thenReturn(view);
-        when(attributesProvider.getAttributes(same(view))).thenReturn(expected);
+        when(view.readAttributes()).thenReturn(expected);
 
-        final MyAttributes actual = factory.getAttributes(MyAttributes.class,
-            path);
-
+        final MyAttributes actual = factory.getAttributesFromView(view);
         assertThat(actual).isSameAs(expected);
-    }
-
-    @DataProvider
-    public Iterator<Object[]> attributesMapData()
-    {
-        final List<Object[]> list = new ArrayList<>();
-
-        Class<? extends FileAttributeView> viewClass;
-        Class<? extends BasicFileAttributes> attributesClass;
-        AttributesProvider<?, ?> provider;
-
-        Collections.shuffle(list);
-        return list.iterator();
     }
 }

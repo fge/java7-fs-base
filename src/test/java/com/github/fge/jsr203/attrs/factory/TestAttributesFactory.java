@@ -1,6 +1,6 @@
 package com.github.fge.jsr203.attrs.factory;
 
-public final class TestAttributeFactory
+public final class TestAttributesFactory
     extends AbstractAttributesFactory
 {
 }
