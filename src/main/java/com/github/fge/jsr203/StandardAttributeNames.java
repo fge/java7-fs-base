@@ -1,9 +1,12 @@
 package com.github.fge.jsr203;
 
 import java.nio.file.attribute.AclFileAttributeView;
+import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.DosFileAttributeView;
 import java.nio.file.attribute.DosFileAttributes;
 import java.nio.file.attribute.FileOwnerAttributeView;
+import java.nio.file.attribute.FileTime;
 import java.nio.file.attribute.PosixFileAttributeView;
 import java.nio.file.attribute.PosixFileAttributes;
 import java.nio.file.attribute.UserPrincipal;
@@ -43,6 +46,7 @@ public final class StandardAttributeNames
      * {@link DosFileAttributes} and {@link PosixFileAttributes}.</p>
      *
      * @see BasicFileAttributes#lastModifiedTime()
+     * @see BasicFileAttributeView#setTimes(FileTime, FileTime, FileTime)
      */
     public static final String LAST_MODIFIED_TIME = "lastModifiedTime";
 
@@ -53,6 +57,7 @@ public final class StandardAttributeNames
      * {@link DosFileAttributes} and {@link PosixFileAttributes}.</p>
      *
      * @see BasicFileAttributes#lastAccessTime()
+     * @see BasicFileAttributeView#setTimes(FileTime, FileTime, FileTime)
      */
     public static final String LAST_ACCESS_TIME = "lastAccessTime";
 
@@ -63,6 +68,7 @@ public final class StandardAttributeNames
      * {@link DosFileAttributes} and {@link PosixFileAttributes}.</p>
      *
      * @see BasicFileAttributes#creationTime()
+     * @see BasicFileAttributeView#setTimes(FileTime, FileTime, FileTime)
      */
     public static final String CREATION_TIME = "creationTime";
 
@@ -119,10 +125,43 @@ public final class StandardAttributeNames
 
     /**
      * Get the file key for a path
+     *
      * <p>Available from {@link BasicFileAttributes} and, by extension, from
      * {@link DosFileAttributes} and {@link PosixFileAttributes}.</p>
      *
      * @see BasicFileAttributes#fileKey()
      */
     public static final String FILE_KEY = "fileKey";
+
+    /**
+     * DOS read only attribute
+     *
+     * @see DosFileAttributes#isReadOnly()
+     * @see DosFileAttributeView#setReadOnly(boolean)
+     */
+    public static final String READONLY = "readonly";
+
+    /**
+     * DOS hidden attribute
+     *
+     * @see DosFileAttributes#isHidden()
+     * @see DosFileAttributeView#setHidden(boolean)
+     */
+    public static final String HIDDEN = "hidden";
+
+    /**
+     * DOS system attribute
+     *
+     * @see DosFileAttributes#isSystem()
+     * @see DosFileAttributeView#setSystem(boolean)
+     */
+    public static final String SYSTEM = "system";
+
+    /**
+     * DOS archive attribute
+     *
+     * @see DosFileAttributes#isArchive()
+     * @see DosFileAttributeView#setArchive(boolean)
+     */
+    public static final String ARCHIVE = "archive";
 }

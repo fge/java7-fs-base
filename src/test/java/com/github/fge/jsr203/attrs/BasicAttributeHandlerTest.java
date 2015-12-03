@@ -27,7 +27,7 @@ public class BasicAttributeHandlerTest
     @SuppressWarnings("InstanceVariableMayNotBeInitialized")
     private BasicFileAttributeView view;
     @SuppressWarnings("InstanceVariableMayNotBeInitialized")
-    private FileAttributeHandlerWithAttributes<?, ?> handler;
+    private FileAttributeHandler<?> handler;
 
     @BeforeMethod
     public void initHandler()
@@ -36,14 +36,7 @@ public class BasicAttributeHandlerTest
         attributes = mock(BasicFileAttributes.class);
         view = mock(BasicFileAttributeView.class);
         when(view.readAttributes()).thenReturn(attributes);
-        handler = new BasicAttributeHandler(view);
-    }
-
-    @Test
-    public void readAttributesTest()
-        throws IOException
-    {
-        assertThat(handler.getAttributes()).isSameAs(attributes);
+        handler = new BasicAttributeHandler<>(view);
     }
 
     @Test

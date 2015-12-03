@@ -4,15 +4,13 @@ import com.github.fge.jsr203.StandardAttributeNames;
 
 import java.nio.file.attribute.AclFileAttributeView;
 
-public final class AclAttributeHandler
-    extends FileAttributeHandler<AclFileAttributeView>
+public class AclAttributeHandler<V extends AclFileAttributeView>
+    extends FileOwnerAttributeHandler<V>
 {
-    public AclAttributeHandler(final AclFileAttributeView view)
+    public AclAttributeHandler(final V view)
     {
         super(view);
-        addReader(StandardAttributeNames.OWNER, view::getOwner);
         addReader(StandardAttributeNames.ACL, view::getAcl);
-        addWriter(StandardAttributeNames.OWNER, view::setOwner);
         addWriter(StandardAttributeNames.ACL, view::setAcl);
     }
 }

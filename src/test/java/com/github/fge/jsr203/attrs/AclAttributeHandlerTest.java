@@ -7,7 +7,6 @@ import org.testng.annotations.Test;
 import java.io.IOException;
 import java.nio.file.attribute.AclEntry;
 import java.nio.file.attribute.AclFileAttributeView;
-import java.nio.file.attribute.UserPrincipal;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -28,22 +27,7 @@ public class AclAttributeHandlerTest
     public void initHandler()
     {
         view = mock(AclFileAttributeView.class);
-        handler = new AclAttributeHandler(view);
-    }
-
-    @Test
-    public void readOwnerTest()
-        throws IOException
-    {
-        final UserPrincipal expected = mock(UserPrincipal.class);
-        when(view.getOwner()).thenReturn(expected);
-
-        final Object actual
-            = handler.readAttribute(StandardAttributeNames.OWNER);
-
-        assertThat(actual).isSameAs(expected);
-
-        verify(view, only()).getOwner();
+        handler = new AclAttributeHandler<>(view);
     }
 
     @Test
@@ -57,17 +41,6 @@ public class AclAttributeHandlerTest
         final Object actual = handler.readAttribute(StandardAttributeNames.ACL);
 
         assertThat(actual).isSameAs(expected);
-    }
-
-    @Test
-    public void writeOwnerTest()
-        throws IOException
-    {
-        final UserPrincipal principal = mock(UserPrincipal.class);
-
-        handler.writeAttribute(StandardAttributeNames.OWNER, principal);
-
-        verify(view, only()).setOwner(same(principal));
     }
 
     @Test

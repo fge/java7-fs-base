@@ -2,48 +2,39 @@ package com.github.fge.jsr203.attrs;
 
 import com.github.fge.jsr203.StandardAttributeNames;
 
-import java.io.IOException;
 import java.nio.file.attribute.BasicFileAttributeView;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 
-public final class BasicAttributeHandler
-    extends FileAttributeHandlerWithAttributes<BasicFileAttributeView, BasicFileAttributes>
+public class BasicAttributeHandler<V extends BasicFileAttributeView>
+    extends FileAttributeHandler<V>
 {
-    public BasicAttributeHandler(final BasicFileAttributeView view)
+    public BasicAttributeHandler(final V view)
     {
         super(view);
 
         addReader(StandardAttributeNames.LAST_MODIFIED_TIME,
-            () -> getAttributes().lastModifiedTime());
+            () -> view.readAttributes().lastModifiedTime());
         addReader(StandardAttributeNames.LAST_ACCESS_TIME,
-            () -> getAttributes().lastAccessTime());
+            () -> view.readAttributes().lastAccessTime());
         addReader(StandardAttributeNames.CREATION_TIME,
-            () -> getAttributes().creationTime());
+            () -> view.readAttributes().creationTime());
         addReader(StandardAttributeNames.SIZE,
-            () -> getAttributes().size());
+            () -> view.readAttributes().size());
         addReader(StandardAttributeNames.IS_REGULAR_FILE,
-            () -> getAttributes().isRegularFile());
+            () -> view.readAttributes().isRegularFile());
         addReader(StandardAttributeNames.IS_DIRECTORY,
-            () -> getAttributes().isDirectory());
+            () -> view.readAttributes().isDirectory());
         addReader(StandardAttributeNames.IS_SYMBOLIC_LINK,
-            () -> getAttributes().isSymbolicLink());
+            () -> view.readAttributes().isSymbolicLink());
         addReader(StandardAttributeNames.IS_OTHER,
-            () -> getAttributes().isOther());
+            () -> view.readAttributes().isOther());
         addReader(StandardAttributeNames.FILE_KEY,
-            () -> getAttributes().fileKey());
+            () -> view.readAttributes().fileKey());
         addWriter(StandardAttributeNames.LAST_MODIFIED_TIME,
             (FileTime value) -> view.setTimes(value, null, null));
         addWriter(StandardAttributeNames.LAST_ACCESS_TIME,
             (FileTime value) -> view.setTimes(null, value, null));
         addWriter(StandardAttributeNames.CREATION_TIME,
             (FileTime value) -> view.setTimes(null, null, value));
-    }
-
-    @Override
-    public BasicFileAttributes getAttributes()
-        throws IOException
-    {
-        return view.readAttributes();
     }
 }

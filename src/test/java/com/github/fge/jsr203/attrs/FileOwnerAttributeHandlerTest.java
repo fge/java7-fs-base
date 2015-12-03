@@ -26,7 +26,7 @@ public final class FileOwnerAttributeHandlerTest
     public void initHandler()
     {
         view = mock(FileOwnerAttributeView.class);
-        handler = new FileOwnerAttributeHandler(view);
+        handler = new FileOwnerAttributeHandler<>(view);
     }
 
     @Test

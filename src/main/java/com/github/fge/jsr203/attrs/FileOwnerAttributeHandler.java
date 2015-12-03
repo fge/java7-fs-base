@@ -4,10 +4,10 @@ import com.github.fge.jsr203.StandardAttributeNames;
 
 import java.nio.file.attribute.FileOwnerAttributeView;
 
-public final class FileOwnerAttributeHandler
-    extends FileAttributeHandler<FileOwnerAttributeView>
+public class FileOwnerAttributeHandler<V extends FileOwnerAttributeView>
+    extends FileAttributeHandler<V>
 {
-    public FileOwnerAttributeHandler(final FileOwnerAttributeView view)
+    public FileOwnerAttributeHandler(final V view)
     {
         super(view);
         addReader(StandardAttributeNames.OWNER, view::getOwner);
