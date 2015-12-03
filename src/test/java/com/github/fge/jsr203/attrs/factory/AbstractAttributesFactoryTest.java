@@ -7,9 +7,11 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.attribute.AclFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributeView;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.DosFileAttributeView;
 import java.nio.file.attribute.FileAttributeView;
 import java.nio.file.attribute.FileOwnerAttributeView;
@@ -23,6 +25,7 @@ import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.shouldHaveThrown;
+import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -174,15 +177,17 @@ public final class AbstractAttributesFactoryTest
 
     @Test(dependsOnMethods = "addClassMapTest")
     public void registerAttributesTest()
+        throws IOException
     {
         final Class<MyAttributeView> viewClass = MyAttributeView.class;
         final Class<MyAttributes> attributesClass = MyAttributes.class;
-        final AttributesProvider<MyAttributeView, MyAttributes> provider
-            = MyAttributeView::readAttributes;
+        @SuppressWarnings("unchecked")
+        final AttributesProvider<MyAttributeView, MyAttributes>
+            attributesProvider = mock(AttributesProvider.class);
 
         try {
             factory.registerAttributes(viewClass, attributesClass,
-                provider);
+                attributesProvider);
             shouldHaveThrown(IllegalArgumentException.class);
         } catch (IllegalArgumentException e) {
             assertThat(e).hasMessage(String.format(
@@ -195,15 +200,15 @@ public final class AbstractAttributesFactoryTest
 
         factory.addClassByName(viewName, viewClass);
 
-        factory.registerAttributes(viewClass, attributesClass, provider);
+        factory.registerAttributes(viewClass, attributesClass, attributesProvider);
 
         assertThat(factory.getViewClassForAttributeClass(attributesClass))
             .isSameAs(viewClass);
         assertThat(factory.getAttributesProviderForViewClass(viewClass))
-            .isSameAs(provider);
+            .isSameAs(attributesProvider);
 
         try {
-            factory.registerAttributes(viewClass, attributesClass, provider);
+            factory.registerAttributes(viewClass, attributesClass, attributesProvider);
             shouldHaveThrown(IllegalArgumentException.class);
         } catch (IllegalArgumentException e) {
             assertThat(e).hasMessage(String.format(
@@ -211,5 +216,34 @@ public final class AbstractAttributesFactoryTest
                 attributesClass.getSimpleName()
             ));
         }
+
+        @SuppressWarnings("unchecked")
+        final Function<Path, MyAttributeView> viewProvider
+            = mock(Function.class);
+        factory.addImplementation(MyAttributeView.class, viewProvider);
+
+        final MyAttributeView view = mock(MyAttributeView.class);
+        final MyAttributes expected = mock(MyAttributes.class);
+        final Path path = mock(Path.class);
+        when(viewProvider.apply(same(path))).thenReturn(view);
+        when(attributesProvider.getAttributes(same(view))).thenReturn(expected);
+
+        final MyAttributes actual = factory.getAttributes(MyAttributes.class,
+            path);
+
+        assertThat(actual).isSameAs(expected);
+    }
+
+    @DataProvider
+    public Iterator<Object[]> attributesMapData()
+    {
+        final List<Object[]> list = new ArrayList<>();
+
+        Class<? extends FileAttributeView> viewClass;
+        Class<? extends BasicFileAttributes> attributesClass;
+        AttributesProvider<?, ?> provider;
+
+        Collections.shuffle(list);
+        return list.iterator();
     }
 }
