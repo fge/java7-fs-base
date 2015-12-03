@@ -28,7 +28,7 @@ public abstract class FileAttributeHandler<V extends FileAttributeView>
     protected final V view;
 
     private final Map<String, AttributeReader> readers = new HashMap<>();
-    private final Map<String, AttributeWriter> writers = new HashMap<>();
+    private final Map<String, AttributeWriter<?>> writers = new HashMap<>();
 
     protected FileAttributeHandler(final V view)
     {

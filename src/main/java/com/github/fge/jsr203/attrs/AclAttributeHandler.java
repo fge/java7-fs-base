@@ -11,9 +11,8 @@ public final class AclAttributeHandler
     {
         super(view);
         addReader(StandardAttributeNames.OWNER, view::getOwner);
-        addWriter(StandardAttributeNames.OWNER, view::setOwner);
-
         addReader(StandardAttributeNames.ACL, view::getAcl);
+        addWriter(StandardAttributeNames.OWNER, view::setOwner);
         addWriter(StandardAttributeNames.ACL, view::setAcl);
     }
 }

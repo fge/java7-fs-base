@@ -21,7 +21,7 @@ import java.util.Set;
  *     </li>
  *     <li>{@link #getOwner()} is implemented as:
  *     <pre>
- *         return readAttributes().owner();
+ *         return getAttributes().owner();
  *     </pre>
  *     that is, it fetches the attributes first and calls the matching method;
  *     </li>
