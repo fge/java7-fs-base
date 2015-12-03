@@ -1,5 +1,6 @@
 package com.github.fge.jsr203.attrs.factory;
 
+import com.github.fge.jsr203.attrs.AttributesProvider;
 import com.github.fge.jsr203.attrs.basic.BasicFileAttributeViewBase;
 import com.github.fge.jsr203.attrs.constants.StandardAttributeViewNames;
 import org.testng.annotations.BeforeMethod;
@@ -167,6 +168,47 @@ public final class AbstractAttributesFactoryTest
         } catch (UnsupportedOperationException e) {
             assertThat(e).hasMessage(String.format(
                 AbstractAttributesFactory.NO_PROVIDER, viewClass.getSimpleName()
+            ));
+        }
+    }
+
+    @Test(dependsOnMethods = "addClassMapTest")
+    public void registerAttributesTest()
+    {
+        final Class<MyAttributeView> viewClass = MyAttributeView.class;
+        final Class<MyAttributes> attributesClass = MyAttributes.class;
+        final AttributesProvider<MyAttributeView, MyAttributes> provider
+            = MyAttributeView::readAttributes;
+
+        try {
+            factory.registerAttributes(viewClass, attributesClass,
+                provider);
+            shouldHaveThrown(IllegalArgumentException.class);
+        } catch (IllegalArgumentException e) {
+            assertThat(e).hasMessage(String.format(
+                AbstractAttributesFactory.VIEW_NOT_REGISTERED,
+                viewClass.getSimpleName()
+            ));
+        }
+
+        final String viewName = "foo";
+
+        factory.addClassByName(viewName, viewClass);
+
+        factory.registerAttributes(viewClass, attributesClass, provider);
+
+        assertThat(factory.getViewClassForAttributeClass(attributesClass))
+            .isSameAs(viewClass);
+        assertThat(factory.getAttributesProviderForViewClass(viewClass))
+            .isSameAs(provider);
+
+        try {
+            factory.registerAttributes(viewClass, attributesClass, provider);
+            shouldHaveThrown(IllegalArgumentException.class);
+        } catch (IllegalArgumentException e) {
+            assertThat(e).hasMessage(String.format(
+                AbstractAttributesFactory.ATTRIBUTES_ALREADY_REGISTERED,
+                attributesClass.getSimpleName()
             ));
         }
     }

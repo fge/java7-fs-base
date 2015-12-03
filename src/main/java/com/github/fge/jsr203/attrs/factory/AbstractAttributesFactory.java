@@ -1,5 +1,6 @@
 package com.github.fge.jsr203.attrs.factory;
 
+import com.github.fge.jsr203.attrs.AttributesProvider;
 import com.github.fge.jsr203.attrs.constants.StandardAttributeViewNames;
 import com.github.fge.jsr203.internal.VisibleForTesting;
 
@@ -35,8 +36,17 @@ public abstract class AbstractAttributesFactory
     @VisibleForTesting
     static final String NO_PROVIDER = "no provider for view class %s";
 
-    private final Map<String, Class<? extends FileAttributeView>> classMap
+    @VisibleForTesting
+    static final String ATTRIBUTES_ALREADY_REGISTERED
+        = "attributes class %s is already registerd";
+
+    private final Map<String, Class<? extends FileAttributeView>> viewMap
         = new HashMap<>();
+    private final Map<Class<? extends BasicFileAttributes>, Class<? extends FileAttributeView>> attributeMap
+        = new HashMap<>();
+    private final Map<Class<? extends FileAttributeView>, AttributesProvider<? extends FileAttributeView, ? extends BasicFileAttributes>>
+        attributesProviders = new HashMap<>();
+
     private final Map<Class<? extends FileAttributeView>, Function<Path, ? extends FileAttributeView>>
         providers = new HashMap<>();
 
@@ -62,7 +72,7 @@ public abstract class AbstractAttributesFactory
         Objects.requireNonNull(name);
         Objects.requireNonNull(viewClass);
 
-        if (classMap.put(name, viewClass) != null)
+        if (viewMap.put(name, viewClass) != null)
             throw new IllegalArgumentException(String.format(
                 CLASS_ALREADY_MAPPED, name));
     }
@@ -71,7 +81,7 @@ public abstract class AbstractAttributesFactory
         final Class<V> viewClass, final Function<Path, ? extends V> provider
     )
     {
-        if (!classMap.containsValue(viewClass))
+        if (!viewMap.containsValue(viewClass))
             throw new IllegalArgumentException(String.format(
                 VIEW_NOT_REGISTERED, viewClass.getSimpleName()));
 
@@ -81,15 +91,50 @@ public abstract class AbstractAttributesFactory
             ));
     }
 
-    @Override
-    public Class<? extends FileAttributeView> getViewClassByName(
-        final String name)
+    protected final <V extends FileAttributeView, A extends BasicFileAttributes>
+        void registerAttributes(final Class<V> viewClass,
+        final Class<A> attributesClass,
+        final AttributesProvider<V, A> provider)
     {
-        return classMap.get(name);
+        Objects.requireNonNull(viewClass);
+        Objects.requireNonNull(attributesClass);
+        Objects.requireNonNull(provider);
+
+        if (!viewMap.containsValue(viewClass))
+            throw new IllegalArgumentException(String.format(
+                VIEW_NOT_REGISTERED, viewClass.getSimpleName()));
+
+        if (attributeMap.put(attributesClass, viewClass) != null)
+            throw new IllegalArgumentException(String.format(
+                ATTRIBUTES_ALREADY_REGISTERED, attributesClass.getSimpleName()
+            ));
+
+        attributesProviders.put(viewClass, provider);
+    }
+
+    @VisibleForTesting
+    Class<? extends FileAttributeView> getViewClassForAttributeClass(
+        final Class<? extends BasicFileAttributes> attributesClass)
+    {
+        return attributeMap.get(attributesClass);
+    }
+
+    @VisibleForTesting
+    <V extends FileAttributeView> AttributesProvider<?, ?>
+        getAttributesProviderForViewClass(final Class<V> viewClass)
+    {
+        return attributesProviders.get(viewClass);
     }
 
     @Override
-    public <V extends FileAttributeView> V getView(final Class<V> viewClass,
+    public final Class<? extends FileAttributeView> getViewClassByName(
+        final String name)
+    {
+        return viewMap.get(name);
+    }
+
+    @Override
+    public final <V extends FileAttributeView> V getView(final Class<V> viewClass,
         final Path path)
     {
         @SuppressWarnings("unchecked")
@@ -104,11 +149,16 @@ public abstract class AbstractAttributesFactory
     }
 
     @Override
-    public <A extends BasicFileAttributes> A getAttributes(
+    public final <A extends BasicFileAttributes> A getAttributes(
         final Class<A> attributesClass, final Path path)
         throws IOException
     {
-        // TODO
-        return null;
+        final Class<? extends FileAttributeView> viewClass
+            = attributeMap.get(attributesClass);
+        final FileAttributeView view = getView(viewClass, path);
+        @SuppressWarnings("unchecked")
+        final AttributesProvider<FileAttributeView, A> provider
+            = (AttributesProvider<FileAttributeView, A>) attributesProviders.get(viewClass);
+        return provider.getAttributes(view);
     }
 }
