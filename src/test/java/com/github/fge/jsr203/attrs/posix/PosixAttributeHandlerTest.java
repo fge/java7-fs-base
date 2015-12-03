@@ -1,6 +1,7 @@
-package com.github.fge.jsr203.attrs;
+package com.github.fge.jsr203.attrs.posix;
 
-import com.github.fge.jsr203.attrs.posix.PosixAttributeHandler;
+import com.github.fge.jsr203.attrs.FixedNamesAttributeHandler;
+import com.github.fge.jsr203.attrs.StandardAttributeNames;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
