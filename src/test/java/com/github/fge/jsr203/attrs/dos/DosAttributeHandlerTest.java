@@ -1,7 +1,7 @@
 package com.github.fge.jsr203.attrs.dos;
 
 import com.github.fge.jsr203.attrs.FixedNamesAttributeHandler;
-import com.github.fge.jsr203.attrs.StandardAttributeNames;
+import com.github.fge.jsr203.attrs.constants.StandardAttributeNames;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 

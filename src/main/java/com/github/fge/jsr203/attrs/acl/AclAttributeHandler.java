@@ -1,7 +1,7 @@
 package com.github.fge.jsr203.attrs.acl;
 
 import com.github.fge.jsr203.attrs.owner.FileOwnerAttributeHandler;
-import com.github.fge.jsr203.attrs.StandardAttributeNames;
+import com.github.fge.jsr203.attrs.constants.StandardAttributeNames;
 
 import java.nio.file.attribute.AclFileAttributeView;
 

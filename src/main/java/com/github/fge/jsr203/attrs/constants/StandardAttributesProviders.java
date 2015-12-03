@@ -1,4 +1,6 @@
-package com.github.fge.jsr203.attrs;
+package com.github.fge.jsr203.attrs.constants;
+
+import com.github.fge.jsr203.attrs.AttributesProvider;
 
 import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributes;

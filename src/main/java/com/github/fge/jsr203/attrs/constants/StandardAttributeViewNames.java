@@ -1,4 +1,4 @@
-package com.github.fge.jsr203.attrs;
+package com.github.fge.jsr203.attrs.constants;
 
 /**
  * List of standard attribute view names defined by the JDK

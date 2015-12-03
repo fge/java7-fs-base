@@ -1,6 +1,6 @@
 package com.github.fge.jsr203.attrs.acl;
 
-import com.github.fge.jsr203.attrs.StandardAttributeViewNames;
+import com.github.fge.jsr203.attrs.constants.StandardAttributeViewNames;
 import com.github.fge.jsr203.attrs.owner.FileOwnerAttributeViewBase;
 
 import java.io.IOException;

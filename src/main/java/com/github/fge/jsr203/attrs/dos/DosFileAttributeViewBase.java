@@ -1,6 +1,6 @@
 package com.github.fge.jsr203.attrs.dos;
 
-import com.github.fge.jsr203.attrs.StandardAttributeViewNames;
+import com.github.fge.jsr203.attrs.constants.StandardAttributeViewNames;
 import com.github.fge.jsr203.attrs.basic.BasicFileAttributeViewBase;
 
 import java.io.IOException;

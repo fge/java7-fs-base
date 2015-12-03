@@ -1,6 +1,6 @@
 package com.github.fge.jsr203.attrs.posix;
 
-import com.github.fge.jsr203.attrs.StandardAttributeViewNames;
+import com.github.fge.jsr203.attrs.constants.StandardAttributeViewNames;
 import com.github.fge.jsr203.attrs.basic.BasicFileAttributeViewBase;
 import com.github.fge.jsr203.attrs.owner.FileOwnerAttributeViewBase;
 
