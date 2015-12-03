@@ -94,7 +94,7 @@ public final class FileAttributeHandlerTest
     @Test
     public void illegalWriterRegisterTest()
     {
-        final AttributeWriter writer = mock(AttributeWriter.class);
+        final AttributeWriter<?> writer = mock(AttributeWriter.class);
 
         try {
             handler.addWriter(null, writer);
@@ -122,6 +122,7 @@ public final class FileAttributeHandlerTest
         }
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test
     public void writeAttributeTest()
         throws IOException

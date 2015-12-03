@@ -45,6 +45,7 @@ public abstract class FileAttributeHandler<V extends FileAttributeView>
         return view;
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public final void writeAttribute(final String name, final Object value)
         throws IOException
     {
@@ -78,8 +79,8 @@ public abstract class FileAttributeHandler<V extends FileAttributeView>
                 name));
     }
 
-    protected final void addWriter(final String name,
-        final AttributeWriter writer)
+    protected final <T> void addWriter(final String name,
+        final AttributeWriter<T> writer)
     {
         Objects.requireNonNull(name, NULL_ATTR_NAME);
         Objects.requireNonNull(writer, NULL_WRITER);
