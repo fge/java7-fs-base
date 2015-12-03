@@ -1,4 +1,4 @@
-package com.github.fge.jsr203;
+package com.github.fge.jsr203.attrs;
 
 import java.io.IOException;
 

@@ -1,7 +1,5 @@
 package com.github.fge.jsr203.attrs;
 
-import com.github.fge.jsr203.AttributeReader;
-import com.github.fge.jsr203.AttributeWriter;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 

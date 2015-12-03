@@ -1,6 +1,5 @@
 package com.github.fge.jsr203.attrs;
 
-import com.github.fge.jsr203.StandardAttributeNames;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 

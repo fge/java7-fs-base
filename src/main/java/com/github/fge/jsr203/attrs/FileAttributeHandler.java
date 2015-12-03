@@ -1,7 +1,5 @@
 package com.github.fge.jsr203.attrs;
 
-import com.github.fge.jsr203.AttributeReader;
-import com.github.fge.jsr203.AttributeWriter;
 import com.github.fge.jsr203.internal.VisibleForTesting;
 
 import java.io.IOException;

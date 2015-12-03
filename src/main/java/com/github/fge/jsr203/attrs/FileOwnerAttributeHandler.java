@@ -1,7 +1,5 @@
 package com.github.fge.jsr203.attrs;
 
-import com.github.fge.jsr203.StandardAttributeNames;
-
 import java.nio.file.attribute.FileOwnerAttributeView;
 
 public class FileOwnerAttributeHandler<V extends FileOwnerAttributeView>
