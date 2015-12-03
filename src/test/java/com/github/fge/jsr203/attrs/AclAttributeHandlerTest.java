@@ -1,5 +1,6 @@
 package com.github.fge.jsr203.attrs;
 
+import com.github.fge.jsr203.attrs.acl.AclAttributeHandler;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -20,7 +21,7 @@ public class AclAttributeHandlerTest
     @SuppressWarnings("InstanceVariableMayNotBeInitialized")
     private AclFileAttributeView view;
     @SuppressWarnings("InstanceVariableMayNotBeInitialized")
-    private FileAttributeHandler<?> handler;
+    private FixedNamesAttributeHandler<?> handler;
 
     @BeforeMethod
     public void initHandler()

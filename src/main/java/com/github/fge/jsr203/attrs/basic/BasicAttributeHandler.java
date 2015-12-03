@@ -1,10 +1,13 @@
-package com.github.fge.jsr203.attrs;
+package com.github.fge.jsr203.attrs.basic;
+
+import com.github.fge.jsr203.attrs.FixedNamesAttributeHandler;
+import com.github.fge.jsr203.attrs.StandardAttributeNames;
 
 import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.FileTime;
 
 public class BasicAttributeHandler<V extends BasicFileAttributeView>
-    extends FileAttributeHandler<V>
+    extends FixedNamesAttributeHandler<V>
 {
     public BasicAttributeHandler(final V view)
     {

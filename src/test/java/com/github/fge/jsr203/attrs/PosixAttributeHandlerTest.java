@@ -1,5 +1,6 @@
 package com.github.fge.jsr203.attrs;
 
+import com.github.fge.jsr203.attrs.posix.PosixAttributeHandler;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -25,7 +26,7 @@ public class PosixAttributeHandlerTest
     @SuppressWarnings("InstanceVariableMayNotBeInitialized")
     private PosixFileAttributeView view;
     @SuppressWarnings("InstanceVariableMayNotBeInitialized")
-    private FileAttributeHandler<?> handler;
+    private FixedNamesAttributeHandler<?> handler;
 
     @BeforeMethod
     public void initHandler()

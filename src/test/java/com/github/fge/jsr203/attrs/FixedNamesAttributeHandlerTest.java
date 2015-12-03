@@ -15,14 +15,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings("ProhibitedExceptionCaught")
-public final class FileAttributeHandlerTest
+public final class FixedNamesAttributeHandlerTest
 {
     private static final String NAME = "foo";
 
     @SuppressWarnings("InstanceVariableMayNotBeInitialized")
     private FileAttributeView view;
     @SuppressWarnings("InstanceVariableMayNotBeInitialized")
-    private FileAttributeHandler<?> handler;
+    private FixedNamesAttributeHandler<?> handler;
 
     @BeforeMethod
     public void init()
@@ -30,7 +30,7 @@ public final class FileAttributeHandlerTest
         view = mock(FileAttributeView.class);
         when(view.name()).thenReturn(NAME);
 
-        handler = new TestFileAttributeHandler(view);
+        handler = new TestFixedNamesAttributeHandler(view);
     }
 
     @Test
@@ -51,14 +51,14 @@ public final class FileAttributeHandlerTest
             handler.addReader(null, reader);
             shouldHaveThrown(NullPointerException.class);
         } catch (NullPointerException e) {
-            assertThat(e).hasMessage(FileAttributeHandler.NULL_ATTR_NAME);
+            assertThat(e).hasMessage(FixedNamesAttributeHandler.NULL_ATTR_NAME);
         }
 
         try {
             handler.addReader(NAME, null);
             shouldHaveThrown(NullPointerException.class);
         } catch (NullPointerException e) {
-            assertThat(e).hasMessage(FileAttributeHandler.NULL_READER);
+            assertThat(e).hasMessage(FixedNamesAttributeHandler.NULL_READER);
         }
 
         handler.addReader(NAME, reader);
@@ -68,7 +68,7 @@ public final class FileAttributeHandlerTest
             shouldHaveThrown(IllegalStateException.class);
         } catch (IllegalStateException e) {
             final String msg
-                = String.format(FileAttributeHandler.DUPLICATE_READER, NAME);
+                = String.format(FixedNamesAttributeHandler.DUPLICATE_READER, NAME);
             assertThat(e).hasMessage(msg);
         }
     }
@@ -98,14 +98,14 @@ public final class FileAttributeHandlerTest
             handler.addWriter(null, writer);
             shouldHaveThrown(NullPointerException.class);
         } catch (NullPointerException e) {
-            assertThat(e).hasMessage(FileAttributeHandler.NULL_ATTR_NAME);
+            assertThat(e).hasMessage(FixedNamesAttributeHandler.NULL_ATTR_NAME);
         }
 
         try {
             handler.addWriter(NAME, null);
             shouldHaveThrown(NullPointerException.class);
         } catch (NullPointerException e) {
-            assertThat(e).hasMessage(FileAttributeHandler.NULL_WRITER);
+            assertThat(e).hasMessage(FixedNamesAttributeHandler.NULL_WRITER);
         }
 
         handler.addWriter(NAME, writer);
@@ -115,7 +115,7 @@ public final class FileAttributeHandlerTest
             shouldHaveThrown(IllegalStateException.class);
         } catch (IllegalStateException e) {
             final String msg
-                = String.format(FileAttributeHandler.DUPLICATE_WRITER, NAME);
+                = String.format(FixedNamesAttributeHandler.DUPLICATE_WRITER, NAME);
             assertThat(e).hasMessage(msg);
         }
     }

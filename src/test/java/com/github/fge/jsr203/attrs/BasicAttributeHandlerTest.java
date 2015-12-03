@@ -1,5 +1,6 @@
 package com.github.fge.jsr203.attrs;
 
+import com.github.fge.jsr203.attrs.basic.BasicAttributeHandler;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -26,7 +27,7 @@ public class BasicAttributeHandlerTest
     @SuppressWarnings("InstanceVariableMayNotBeInitialized")
     private BasicFileAttributeView view;
     @SuppressWarnings("InstanceVariableMayNotBeInitialized")
-    private FileAttributeHandler<?> handler;
+    private FixedNamesAttributeHandler<?> handler;
 
     @BeforeMethod
     public void initHandler()

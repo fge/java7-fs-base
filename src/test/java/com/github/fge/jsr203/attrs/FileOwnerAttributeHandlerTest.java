@@ -1,5 +1,6 @@
 package com.github.fge.jsr203.attrs;
 
+import com.github.fge.jsr203.attrs.owner.FileOwnerAttributeHandler;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -19,7 +20,7 @@ public final class FileOwnerAttributeHandlerTest
     @SuppressWarnings("InstanceVariableMayNotBeInitialized")
     private FileOwnerAttributeView view;
     @SuppressWarnings("InstanceVariableMayNotBeInitialized")
-    private FileAttributeHandler<?> handler;
+    private FixedNamesAttributeHandler<?> handler;
 
     @BeforeMethod
     public void initHandler()

@@ -1,9 +1,12 @@
-package com.github.fge.jsr203.attrs;
+package com.github.fge.jsr203.attrs.owner;
+
+import com.github.fge.jsr203.attrs.FixedNamesAttributeHandler;
+import com.github.fge.jsr203.attrs.StandardAttributeNames;
 
 import java.nio.file.attribute.FileOwnerAttributeView;
 
 public class FileOwnerAttributeHandler<V extends FileOwnerAttributeView>
-    extends FileAttributeHandler<V>
+    extends FixedNamesAttributeHandler<V>
 {
     public FileOwnerAttributeHandler(final V view)
     {

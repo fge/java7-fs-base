@@ -1,5 +1,6 @@
 package com.github.fge.jsr203.attrs;
 
+import com.github.fge.jsr203.attrs.dos.DosAttributeHandler;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -20,7 +21,7 @@ public class DosAttributeHandlerTest
     @SuppressWarnings("InstanceVariableMayNotBeInitialized")
     private DosFileAttributeView view;
     @SuppressWarnings("InstanceVariableMayNotBeInitialized")
-    private FileAttributeHandler<?> handler;
+    private FixedNamesAttributeHandler<?> handler;
 
     @BeforeMethod
     public void initHandler()

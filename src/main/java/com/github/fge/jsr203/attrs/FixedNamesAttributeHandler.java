@@ -8,7 +8,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public abstract class FileAttributeHandler<V extends FileAttributeView>
+public abstract class FixedNamesAttributeHandler<V extends FileAttributeView>
+    extends AttributeHandler<V>
 {
     @VisibleForTesting
     static final String NULL_ATTR_NAME = "attribute name cannot be null";
@@ -23,26 +24,15 @@ public abstract class FileAttributeHandler<V extends FileAttributeView>
     static final String DUPLICATE_WRITER
         = "there is already a writer for attribute name '%s'";
 
-    protected final V view;
-
     private final Map<String, AttributeReader> readers = new HashMap<>();
     private final Map<String, AttributeWriter<?>> writers = new HashMap<>();
 
-    protected FileAttributeHandler(final V view)
+    protected FixedNamesAttributeHandler(final V view)
     {
-        this.view = view;
+        super(view);
     }
 
-    public final String getViewName()
-    {
-        return view.name();
-    }
-
-    public final V getView()
-    {
-        return view;
-    }
-
+    @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public final void writeAttribute(final String name, final Object value)
         throws IOException
@@ -55,6 +45,7 @@ public abstract class FileAttributeHandler<V extends FileAttributeView>
         writer.write(value);
     }
 
+    @Override
     public final Object readAttribute(final String name)
         throws IOException
     {

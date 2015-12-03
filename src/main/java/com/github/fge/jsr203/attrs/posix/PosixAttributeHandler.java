@@ -1,4 +1,7 @@
-package com.github.fge.jsr203.attrs;
+package com.github.fge.jsr203.attrs.posix;
+
+import com.github.fge.jsr203.attrs.StandardAttributeNames;
+import com.github.fge.jsr203.attrs.basic.BasicAttributeHandler;
 
 import java.nio.file.attribute.PosixFileAttributeView;
 
