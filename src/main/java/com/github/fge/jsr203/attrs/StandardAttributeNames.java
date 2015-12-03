@@ -7,10 +7,12 @@ import java.nio.file.attribute.DosFileAttributeView;
 import java.nio.file.attribute.DosFileAttributes;
 import java.nio.file.attribute.FileOwnerAttributeView;
 import java.nio.file.attribute.FileTime;
+import java.nio.file.attribute.GroupPrincipal;
 import java.nio.file.attribute.PosixFileAttributeView;
 import java.nio.file.attribute.PosixFileAttributes;
 import java.nio.file.attribute.UserPrincipal;
 import java.util.List;
+import java.util.Set;
 
 public final class StandardAttributeNames
 {
@@ -19,25 +21,6 @@ public final class StandardAttributeNames
     {
         throw new Error("instantiation not permitted");
     }
-
-    /**
-     * Owner attribute
-     *
-     * <p>Available from {@link FileOwnerAttributeView} and, by extension,
-     * {@link AclFileAttributeView} and {@link PosixFileAttributeView}.</p>
-     *
-     * @see FileOwnerAttributeView#getOwner()
-     * @see FileOwnerAttributeView#setOwner(UserPrincipal)
-     */
-    public static final String OWNER = "owner";
-
-    /**
-     * ACL attribute
-     *
-     * @see AclFileAttributeView#getAcl()
-     * @see AclFileAttributeView#setAcl(List)
-     */
-    public static final String ACL = "acl";
 
     /**
      * Last modified time
@@ -132,6 +115,41 @@ public final class StandardAttributeNames
      * @see BasicFileAttributes#fileKey()
      */
     public static final String FILE_KEY = "fileKey";
+
+    /**
+     * Owner attribute
+     *
+     * <p>Available from {@link FileOwnerAttributeView} and, by extension,
+     * {@link AclFileAttributeView} and {@link PosixFileAttributeView}.</p>
+     *
+     * @see FileOwnerAttributeView#getOwner()
+     * @see FileOwnerAttributeView#setOwner(UserPrincipal)
+     */
+    public static final String OWNER = "owner";
+
+    /**
+     * Group attribute
+     *
+     * @see PosixFileAttributes#group()
+     * @see PosixFileAttributeView#setGroup(GroupPrincipal)
+     */
+    public static final String GROUP = "group";
+
+    /**
+     * POSIX permissions
+     *
+     * @see PosixFileAttributes#permissions()
+     * @see PosixFileAttributeView#setPermissions(Set)
+     */
+    public static final String PERMISSIONS = "permissions";
+
+    /**
+     * ACL attribute
+     *
+     * @see AclFileAttributeView#getAcl()
+     * @see AclFileAttributeView#setAcl(List)
+     */
+    public static final String ACL = "acl";
 
     /**
      * DOS read only attribute
