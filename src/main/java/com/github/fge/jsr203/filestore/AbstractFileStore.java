@@ -1,7 +1,10 @@
 package com.github.fge.jsr203.filestore;
 
+import com.github.fge.jsr203.fs.AbstractFileSystem;
+
 import java.io.IOException;
 import java.nio.file.FileStore;
+import java.nio.file.FileSystem;
 import java.nio.file.attribute.FileStoreAttributeView;
 
 /**
@@ -16,6 +19,13 @@ import java.nio.file.attribute.FileStoreAttributeView;
  *     UnsupportedOperationException};</li>
  *     <li>{@link #getFileStoreAttributeView(Class)} returns null.</li>
  * </ul>
+ *
+ * <p>Noteworthy is that the {@link #AbstractFileStore() default constructor}
+ * will provide a <em>read only</em> file store by default. This is quite
+ * important since the provided default filesystem base class ({@link
+ * AbstractFileSystem}) relies on this class's {@link #isReadOnly()} to tell
+ * whether the implemented file system is also read only (see {@link
+ * FileSystem#isReadOnly()}).</p>
  */
 public abstract class AbstractFileStore
     extends FileStore
