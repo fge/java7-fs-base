@@ -16,6 +16,7 @@ import java.nio.file.attribute.UserDefinedFileAttributeView;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 
 public abstract class AbstractAttributesFactory
     implements AttributesFactory
@@ -24,8 +25,20 @@ public abstract class AbstractAttributesFactory
     static final String CLASS_ALREADY_MAPPED
         = "a class already exists for view name '%s'";
 
+    @VisibleForTesting
+    static final String VIEW_NOT_REGISTERED = "view class %s is not registered";
+
+    @VisibleForTesting
+    static final String PROVIDER_ALREADY_REGISTERED
+        = "a provider already exists for view class %s";
+
+    @VisibleForTesting
+    static final String NO_PROVIDER = "no provider for view class %s";
+
     private final Map<String, Class<? extends FileAttributeView>> classMap
         = new HashMap<>();
+    private final Map<Class<? extends FileAttributeView>, Function<Path, ? extends FileAttributeView>>
+        providers = new HashMap<>();
 
     protected AbstractAttributesFactory()
     {
@@ -54,6 +67,20 @@ public abstract class AbstractAttributesFactory
                 CLASS_ALREADY_MAPPED, name));
     }
 
+    protected final <V extends FileAttributeView> void addImplementation(
+        final Class<V> viewClass, final Function<Path, ? extends V> provider
+    )
+    {
+        if (!classMap.containsValue(viewClass))
+            throw new IllegalArgumentException(String.format(
+                VIEW_NOT_REGISTERED, viewClass.getSimpleName()));
+
+        if (providers.put(viewClass, provider) != null)
+            throw new IllegalArgumentException(String.format(
+                PROVIDER_ALREADY_REGISTERED, viewClass.getSimpleName()
+            ));
+    }
+
     @Override
     public Class<? extends FileAttributeView> getViewClassByName(
         final String name)
@@ -65,8 +92,15 @@ public abstract class AbstractAttributesFactory
     public <V extends FileAttributeView> V getView(final Class<V> viewClass,
         final Path path)
     {
-        // TODO
-        return null;
+        @SuppressWarnings("unchecked")
+        final Function<Path, V> f
+            = (Function<Path, V>) providers.get(viewClass);
+
+        if (f == null)
+            throw new UnsupportedOperationException(String.format(NO_PROVIDER,
+                viewClass.getSimpleName()));
+
+        return f.apply(path);
     }
 
     @Override

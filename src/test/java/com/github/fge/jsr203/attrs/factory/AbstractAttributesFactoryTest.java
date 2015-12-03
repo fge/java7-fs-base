@@ -1,10 +1,12 @@
 package com.github.fge.jsr203.attrs.factory;
 
+import com.github.fge.jsr203.attrs.basic.BasicFileAttributeViewBase;
 import com.github.fge.jsr203.attrs.constants.StandardAttributeViewNames;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.nio.file.Path;
 import java.nio.file.attribute.AclFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.DosFileAttributeView;
@@ -16,9 +18,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.shouldHaveThrown;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public final class AbstractAttributesFactoryTest
 {
@@ -94,5 +99,75 @@ public final class AbstractAttributesFactoryTest
         final Class<? extends FileAttributeView> viewClass)
     {
         assertThat(factory.getViewClassByName(viewName)).isSameAs(viewClass);
+    }
+
+    @Test
+    public void addImplementationTest()
+    {
+        @SuppressWarnings("unchecked")
+        final Function<Path, BasicFileAttributeView> provider
+            = mock(Function.class);
+
+        try {
+            factory.addImplementation(FileAttributeView.class, provider);
+            shouldHaveThrown(IllegalArgumentException.class);
+        } catch (IllegalArgumentException e) {
+            assertThat(e).hasMessage(String.format(
+                AbstractAttributesFactory.VIEW_NOT_REGISTERED,
+                FileAttributeView.class.getSimpleName()
+            ));
+        }
+
+        factory.addImplementation(BasicFileAttributeView.class, provider);
+
+        try {
+            factory.addImplementation(BasicFileAttributeView.class, provider);
+            shouldHaveThrown(IllegalArgumentException.class);
+        } catch (IllegalArgumentException e) {
+            assertThat(e).hasMessage(String.format(
+                AbstractAttributesFactory.PROVIDER_ALREADY_REGISTERED,
+                BasicFileAttributeView.class.getSimpleName()
+            ));
+        }
+    }
+
+    @Test(dependsOnMethods = "addImplementationTest")
+    public void getViewTest()
+    {
+        final Class<BasicFileAttributeView> viewClass
+            = BasicFileAttributeView.class;
+
+        @SuppressWarnings("unchecked")
+        final Function<Path, BasicFileAttributeView> provider
+            = mock(Function.class);
+
+        final Path path = mock(Path.class);
+        final BasicFileAttributeViewBase expected
+            = mock(BasicFileAttributeViewBase.class);
+
+        when(provider.apply(path)).thenReturn(expected);
+
+        factory.addImplementation(viewClass, provider);
+
+        final BasicFileAttributeView actual = factory.getView(viewClass, path);
+
+        assertThat(actual).isSameAs(expected);
+    }
+
+    @Test
+    public void getViewFailureTest()
+    {
+        final Class<BasicFileAttributeView> viewClass
+            = BasicFileAttributeView.class;
+        final Path path = mock(Path.class);
+
+        try {
+            factory.getView(viewClass, path);
+            shouldHaveThrown(UnsupportedOperationException.class);
+        } catch (UnsupportedOperationException e) {
+            assertThat(e).hasMessage(String.format(
+                AbstractAttributesFactory.NO_PROVIDER, viewClass.getSimpleName()
+            ));
+        }
     }
 }
