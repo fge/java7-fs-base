@@ -20,13 +20,6 @@ public class TestFileStore
     }
 
     @Override
-    public boolean isReadOnly()
-    {
-        // TODO
-        return false;
-    }
-
-    @Override
     public boolean supportsFileAttributeView(
         final Class<? extends FileAttributeView> type)
     {

@@ -61,6 +61,12 @@ public abstract class AbstractFileSystem
     }
 
     @Override
+    public final boolean isReadOnly()
+    {
+        return fileStore.isReadOnly();
+    }
+
+    @Override
     public final Iterable<FileStore> getFileStores()
     {
         return Collections.singleton(fileStore);

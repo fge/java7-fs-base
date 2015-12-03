@@ -20,6 +20,31 @@ import java.nio.file.attribute.FileStoreAttributeView;
 public abstract class AbstractFileStore
     extends FileStore
 {
+    private final boolean readOnly;
+
+    protected AbstractFileStore(final boolean readOnly)
+    {
+        this.readOnly = readOnly;
+    }
+
+    protected AbstractFileStore()
+    {
+        this(true);
+    }
+
+    @Override
+    public final boolean isReadOnly()
+    {
+        return readOnly;
+    }
+
+    @Override
+    public long getTotalSpace()
+        throws IOException
+    {
+        return Long.MAX_VALUE;
+    }
+
     @Override
     public long getUnallocatedSpace()
         throws IOException
@@ -35,10 +60,10 @@ public abstract class AbstractFileStore
     }
 
     @Override
-    public long getTotalSpace()
-        throws IOException
+    public <V extends FileStoreAttributeView> V getFileStoreAttributeView(
+        final Class<V> type)
     {
-        return Long.MAX_VALUE;
+        return null;
     }
 
     @Override
@@ -46,12 +71,5 @@ public abstract class AbstractFileStore
         throws IOException
     {
         throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public <V extends FileStoreAttributeView> V getFileStoreAttributeView(
-        final Class<V> type)
-    {
-        return null;
     }
 }
