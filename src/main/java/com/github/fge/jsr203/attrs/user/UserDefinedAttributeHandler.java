@@ -13,7 +13,7 @@ public class UserDefinedAttributeHandler
     @VisibleForTesting
     static final String NO_SUCH_ATTRIBUTE = "no such attribute '%s'";
 
-    protected UserDefinedAttributeHandler(
+    public UserDefinedAttributeHandler(
         final UserDefinedFileAttributeView view)
     {
         super(view);
