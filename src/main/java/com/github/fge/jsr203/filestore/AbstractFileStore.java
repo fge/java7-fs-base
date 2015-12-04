@@ -1,11 +1,14 @@
 package com.github.fge.jsr203.filestore;
 
+import com.github.fge.jsr203.driver.FileSystemDriver;
 import com.github.fge.jsr203.fs.AbstractFileSystem;
 
 import java.io.IOException;
 import java.nio.file.FileStore;
 import java.nio.file.FileSystem;
+import java.nio.file.attribute.FileAttributeView;
 import java.nio.file.attribute.FileStoreAttributeView;
+import java.util.Objects;
 
 /**
  * Basic abstract implementation of a {@link FileStore}
@@ -20,7 +23,7 @@ import java.nio.file.attribute.FileStoreAttributeView;
  *     <li>{@link #getFileStoreAttributeView(Class)} returns null.</li>
  * </ul>
  *
- * <p>Noteworthy is that the {@link #AbstractFileStore() default constructor}
+ * <p>Noteworthy is that the {@link #AbstractFileStore(FileSystemDriver) default constructor}
  * will provide a <em>read only</em> file store by default. This is quite
  * important since the provided default filesystem base class ({@link
  * AbstractFileSystem}) relies on this class's {@link #isReadOnly()} to tell
@@ -30,16 +33,19 @@ import java.nio.file.attribute.FileStoreAttributeView;
 public abstract class AbstractFileStore
     extends FileStore
 {
+    private final FileSystemDriver driver;
     private final boolean readOnly;
 
-    protected AbstractFileStore(final boolean readOnly)
+    protected AbstractFileStore(final FileSystemDriver driver,
+        final boolean readOnly)
     {
+        this.driver = driver;
         this.readOnly = readOnly;
     }
 
-    protected AbstractFileStore()
+    protected AbstractFileStore(final FileSystemDriver driver)
     {
-        this(true);
+        this(driver, true);
     }
 
     @Override
@@ -56,6 +62,13 @@ public abstract class AbstractFileStore
     }
 
     @Override
+    public long getUsableSpace()
+        throws IOException
+    {
+        return Long.MAX_VALUE;
+    }
+
+    @Override
     public long getUnallocatedSpace()
         throws IOException
     {
@@ -63,10 +76,17 @@ public abstract class AbstractFileStore
     }
 
     @Override
-    public long getUsableSpace()
-        throws IOException
+    public final boolean supportsFileAttributeView(
+        final Class<? extends FileAttributeView> type)
     {
-        return Long.MAX_VALUE;
+        return driver.getViewFactory().supportsViewClass(type);
+    }
+
+    @Override
+    public final boolean supportsFileAttributeView(final String name)
+    {
+        Objects.requireNonNull(name);
+        return driver.getViewFactory().getViewClassByName(name) != null;
     }
 
     @Override

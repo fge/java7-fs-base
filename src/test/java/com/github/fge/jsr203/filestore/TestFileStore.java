@@ -1,10 +1,15 @@
 package com.github.fge.jsr203.filestore;
 
-import java.nio.file.attribute.FileAttributeView;
+import com.github.fge.jsr203.driver.FileSystemDriver;
 
 public class TestFileStore
     extends AbstractFileStore
 {
+    public TestFileStore(final FileSystemDriver driver)
+    {
+        super(driver);
+    }
+
     @Override
     public String name()
     {
@@ -17,20 +22,5 @@ public class TestFileStore
     {
         // TODO
         return null;
-    }
-
-    @Override
-    public boolean supportsFileAttributeView(
-        final Class<? extends FileAttributeView> type)
-    {
-        // TODO
-        return false;
-    }
-
-    @Override
-    public boolean supportsFileAttributeView(final String name)
-    {
-        // TODO
-        return false;
     }
 }

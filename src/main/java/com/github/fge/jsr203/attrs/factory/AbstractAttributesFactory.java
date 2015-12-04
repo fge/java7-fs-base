@@ -4,10 +4,12 @@ import com.github.fge.jsr203.attrs.AttributesProvider;
 import com.github.fge.jsr203.attrs.constants.StandardAttributeViewNames;
 import com.github.fge.jsr203.internal.VisibleForTesting;
 
+import java.io.IOException;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.DosFileAttributes;
 import java.nio.file.attribute.FileAttributeView;
 import java.nio.file.attribute.PosixFileAttributes;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -15,6 +17,13 @@ import java.util.Objects;
 public abstract class AbstractAttributesFactory
     implements AttributesFactory
 {
+    // TODO: should be elsewhere?
+    private static final Comparator<Class<?>> BESTFIT = (o1, o2) -> {
+        if (Objects.equals(o1, o2))
+            return 0;
+        return o1.isAssignableFrom(o2) ? -1 : 1;
+    };
+
     @VisibleForTesting
     static final String ATTRS_ALREADY_REGISTERED
         = "attribute class %s already registered with view name %s";
@@ -71,19 +80,33 @@ public abstract class AbstractAttributesFactory
     }
 
     @Override
-    public <A extends BasicFileAttributes> String getViewNameForAttributesClass(
-        final Class<A> attributesClass)
+    public <A extends BasicFileAttributes, V extends FileAttributeView> A
+    getAttributesFromView(final V view, final Class<A> attributesClass)
+        throws IOException
     {
-        Objects.requireNonNull(attributesClass);
-        return nameMap.get(attributesClass);
+        final Class<?> c = findBestCandidate(attributesClass);
+
+        @SuppressWarnings("unchecked")
+        final AttributesProvider<V, A> provider
+            = (AttributesProvider<V, A>) providerMap.get(c);
+
+        return provider.getAttributes(view);
     }
 
-    @Override
-    public <A extends BasicFileAttributes, V extends FileAttributeView> A
-    getAttributesFromView(final V view)
+    // TODO: should be tested
+    private Class<?> findBestCandidate(final Class<?> attributesClass)
     {
-        // TODO
-        return null;
+        return providerMap.keySet().stream()
+            .filter(attributesClass::isAssignableFrom)
+            .max(BESTFIT)
+            .orElseThrow(IllegalStateException::new);
+    }
+
+    @VisibleForTesting
+    String getViewNameForAttributesClass(
+        final Class<? extends BasicFileAttributes> attributesClass)
+    {
+        return nameMap.get(attributesClass);
     }
 
     @VisibleForTesting

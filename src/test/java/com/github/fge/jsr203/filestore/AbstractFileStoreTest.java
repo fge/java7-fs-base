@@ -1,59 +1,57 @@
 package com.github.fge.jsr203.filestore;
 
+import com.github.fge.jsr203.attrs.factory.AttributeViewFactory;
+import com.github.fge.jsr203.driver.FileSystemDriver;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.nio.file.FileStore;
-import java.nio.file.attribute.FileStoreAttributeView;
-import java.util.Random;
-import java.util.function.IntPredicate;
+import java.nio.file.attribute.PosixFileAttributes;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.shouldHaveThrown;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public final class AbstractFileStoreTest
 {
-    @SuppressWarnings("CodeBlock2Expr")
-    private static final IntPredicate VALID_CODEPOINT = value -> {
-        return Character.isValidCodePoint(value)
-            && Character.UnicodeBlock.of(value) != null;
-    };
-
-    private static final long ATTR_SIZE = 10L;
-
-    private String attrName;
+    @SuppressWarnings("InstanceVariableMayNotBeInitialized")
+    private FileSystemDriver driver;
+    @SuppressWarnings("InstanceVariableMayNotBeInitialized")
+    private FileStore fileStore;
 
     @BeforeMethod
     public void initAttrName()
     {
-        @SuppressWarnings("UnsecureRandomNumberGeneration")
-        final Random random = new Random(System.currentTimeMillis());
-
-        final StringBuilder sb = new StringBuilder();
-
-        random.ints().filter(VALID_CODEPOINT).limit(ATTR_SIZE)
-            .forEach(sb::appendCodePoint);
-
-        attrName = sb.toString();
+        driver = mock(FileSystemDriver.class);
+        fileStore = new TestFileStore(driver);
     }
 
     @Test
-    public void defaultsTest()
+    public void defaultSizesTest()
         throws IOException
     {
-        final FileStore fileStore = new TestFileStore();
-
         assertThat(fileStore.getTotalSpace()).isEqualTo(Long.MAX_VALUE);
         assertThat(fileStore.getUnallocatedSpace()).isEqualTo(Long.MAX_VALUE);
         assertThat(fileStore.getUsableSpace()).isEqualTo(Long.MAX_VALUE);
-        assertThat(fileStore.getFileStoreAttributeView(
-            FileStoreAttributeView.class)).isNull();
+    }
 
-        try {
-            fileStore.getAttribute(attrName);
-            shouldHaveThrown(UnsupportedOperationException.class);
-        } catch (UnsupportedOperationException ignored) {
-        }
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Test
+    public void fileAttributeTest()
+    {
+        final AttributeViewFactory viewFactory
+            = mock(AttributeViewFactory.class);
+
+        final String name = "foo";
+        final Class viewClass = PosixFileAttributes.class;
+
+        when(viewFactory.getViewClassByName(name))
+            .thenReturn(viewClass);
+        when(viewFactory.supportsViewClass(viewClass)).thenReturn(true);
+        when(driver.getViewFactory()).thenReturn(viewFactory);
+
+        assertThat(fileStore.supportsFileAttributeView(name)).isTrue();
+        assertThat(fileStore.supportsFileAttributeView(viewClass)).isTrue();
     }
 }

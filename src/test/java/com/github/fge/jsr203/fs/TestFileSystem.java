@@ -26,13 +26,6 @@ public class TestFileSystem
     }
 
     @Override
-    public boolean isReadOnly()
-    {
-        // TODO
-        return false;
-    }
-
-    @Override
     public String getSeparator()
     {
         // TODO

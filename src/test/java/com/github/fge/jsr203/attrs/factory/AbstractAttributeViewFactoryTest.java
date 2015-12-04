@@ -53,6 +53,8 @@ public final class AbstractAttributeViewFactoryTest
                 AbstractAttributeViewFactory.CLASS_ALREADY_MAPPED, viewName
             ));
         }
+
+        assertThat(factory.supportsViewClass(viewClass)).isTrue();
     }
 
     @DataProvider
@@ -99,6 +101,7 @@ public final class AbstractAttributeViewFactoryTest
         final Class<? extends FileAttributeView> viewClass)
     {
         assertThat(factory.getViewClassByName(viewName)).isSameAs(viewClass);
+        assertThat(factory.supportsViewClass(viewClass)).isTrue();
     }
 
     @Test

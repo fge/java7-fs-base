@@ -11,9 +11,11 @@ import java.nio.file.attribute.FileAttributeView;
 import java.nio.file.attribute.FileOwnerAttributeView;
 import java.nio.file.attribute.PosixFileAttributeView;
 import java.nio.file.attribute.UserDefinedFileAttributeView;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 
 public abstract class AbstractAttributeViewFactory
@@ -86,8 +88,8 @@ public abstract class AbstractAttributeViewFactory
     }
 
     @Override
-    public final <V extends FileAttributeView> V getView(final Class<V> viewClass,
-        final Path path)
+    public final <V extends FileAttributeView> V getView(
+        final Class<V> viewClass, final Path path)
     {
         @SuppressWarnings("unchecked")
         final Function<Path, V> f
@@ -98,5 +100,19 @@ public abstract class AbstractAttributeViewFactory
                 viewClass.getSimpleName()));
 
         return f.apply(path);
+    }
+
+    @Override
+    public boolean supportsViewClass(
+        final Class<? extends FileAttributeView> viewClass)
+    {
+        Objects.requireNonNull(viewClass);
+        return viewMap.containsValue(viewClass);
+    }
+
+    @Override
+    public Set<String> getViewNames()
+    {
+        return Collections.unmodifiableSet(viewMap.keySet());
     }
 }

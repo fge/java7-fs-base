@@ -166,7 +166,8 @@ public final class AbstractAttributesFactoryTest
         final MyAttributes expected = mock(MyAttributes.class);
         when(view.readAttributes()).thenReturn(expected);
 
-        final MyAttributes actual = factory.getAttributesFromView(view);
+        final MyAttributes actual
+            = factory.getAttributesFromView(view, MyAttributes.class);
         assertThat(actual).isSameAs(expected);
     }
 }
