@@ -18,6 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class DefaultAttributeHandlerFactoryTest
 {
+    @SuppressWarnings("InstanceVariableMayNotBeInitialized")
     private DefaultAttributeHandlerFactory factory;
 
     @BeforeMethod
