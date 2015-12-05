@@ -65,7 +65,7 @@ public class DiscreteNamedAttributeDispatcher<V extends FileAttributeView>
     }
 
     @Override
-    public final Object readAttributeByName(final String name)
+    public final Object readByName(final String name)
         throws IOException
     {
         Objects.requireNonNull(name);
@@ -80,7 +80,7 @@ public class DiscreteNamedAttributeDispatcher<V extends FileAttributeView>
     }
 
     @Override
-    public final void setAttributeByName(final String name, final Object value)
+    public final void writeByBame(final String name, final Object value)
         throws IOException
     {
         Objects.requireNonNull(name);

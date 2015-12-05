@@ -36,7 +36,7 @@ public class FileOwnerAttributeDispatcherTest
         when(view.getOwner()).thenReturn(expected);
 
         final Object actual
-            = dispatcher.readAttributeByName(StandardAttributeNames.OWNER);
+            = dispatcher.readByName(StandardAttributeNames.OWNER);
 
         assertThat(actual).isSameAs(expected);
     }
@@ -47,7 +47,7 @@ public class FileOwnerAttributeDispatcherTest
     {
         final UserPrincipal principal = mock(UserPrincipal.class);
 
-        dispatcher.setAttributeByName(StandardAttributeNames.OWNER,
+        dispatcher.writeByBame(StandardAttributeNames.OWNER,
             principal);
 
         verify(view, only()).setOwner(same(principal));

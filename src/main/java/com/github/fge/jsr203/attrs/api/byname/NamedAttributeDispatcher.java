@@ -5,10 +5,10 @@ import java.util.Map;
 
 public interface NamedAttributeDispatcher
 {
-    Object readAttributeByName(String name)
+    Object readByName(String name)
         throws IOException;
 
-    void setAttributeByName(String name, Object value)
+    void writeByBame(String name, Object value)
         throws IOException;
 
     Map<String, Object> readAllAttributes()

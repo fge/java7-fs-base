@@ -36,7 +36,7 @@ public class DiscreteNamedAttributeDispatcherTest
         throws IOException
     {
         try {
-            dispatcher.readAttributeByName(ATTRNAME1);
+            dispatcher.readByName(ATTRNAME1);
             shouldHaveThrown(UnsupportedOperationException.class);
         } catch (UnsupportedOperationException e) {
             assertThat(e).hasMessage(String.format(
@@ -56,7 +56,7 @@ public class DiscreteNamedAttributeDispatcherTest
 
         dispatcher.registerReader(ATTRNAME1, reader);
 
-        final Object actual = dispatcher.readAttributeByName(ATTRNAME1);
+        final Object actual = dispatcher.readByName(ATTRNAME1);
 
         assertThat(actual).isSameAs(expected);
     }
@@ -84,7 +84,7 @@ public class DiscreteNamedAttributeDispatcherTest
         throws IOException
     {
         try {
-            dispatcher.setAttributeByName(ATTRNAME1, new Object());
+            dispatcher.writeByBame(ATTRNAME1, new Object());
             shouldHaveThrown(UnsupportedOperationException.class);
         } catch (UnsupportedOperationException e) {
             assertThat(e).hasMessage(String.format(
@@ -105,7 +105,7 @@ public class DiscreteNamedAttributeDispatcherTest
 
         final Object value = new Object();
 
-        dispatcher.setAttributeByName(ATTRNAME1, value);
+        dispatcher.writeByBame(ATTRNAME1, value);
 
         verify(writer, only()).write(same(value));
     }
