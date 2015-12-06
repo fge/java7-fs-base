@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public class DiscreteNamedAttributeDispatcher<V extends FileAttributeView>
-    implements NamedAttributeDispatcher
+    extends NamedAttributeDispatcher<V>
 {
     @VisibleForTesting
     static final String READER_ALREADY_REGISTERED
@@ -33,11 +33,9 @@ public class DiscreteNamedAttributeDispatcher<V extends FileAttributeView>
     private final Map<String, NamedAttributeWriter<?>> writers
         = new HashMap<>();
 
-    protected final V view;
-
     public DiscreteNamedAttributeDispatcher(final V view)
     {
-        this.view = view;
+        super(view);
     }
 
     protected final void registerReader(final String name,

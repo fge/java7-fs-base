@@ -6,9 +6,7 @@ import com.github.fge.jsr203.fs.AbstractFileSystem;
 import java.io.IOException;
 import java.nio.file.FileStore;
 import java.nio.file.FileSystem;
-import java.nio.file.attribute.FileAttributeView;
 import java.nio.file.attribute.FileStoreAttributeView;
-import java.util.Objects;
 
 /**
  * Basic abstract implementation of a {@link FileStore}
@@ -73,20 +71,6 @@ public abstract class AbstractFileStore
         throws IOException
     {
         return Long.MAX_VALUE;
-    }
-
-    @Override
-    public final boolean supportsFileAttributeView(
-        final Class<? extends FileAttributeView> type)
-    {
-        return driver.getViewFactory().supportsViewClass(type);
-    }
-
-    @Override
-    public final boolean supportsFileAttributeView(final String name)
-    {
-        Objects.requireNonNull(name);
-        return driver.getViewFactory().getViewClassByName(name) != null;
     }
 
     @Override
