@@ -10,17 +10,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class UserDefinedAttributeDispatcher<V extends UserDefinedFileAttributeView>
-    implements NamedAttributeDispatcher
+    extends NamedAttributeDispatcher<V>
 {
     @VisibleForTesting
     static final String NO_SUCH_ATTRIBUTE
         = "view has no attribute with name '%s'";
 
-    protected final V view;
-
     public UserDefinedAttributeDispatcher(final V view)
     {
-        this.view = view;
+        super(view);
     }
 
     @Override

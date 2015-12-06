@@ -1,11 +1,8 @@
 package com.github.fge.jsr203.driver;
 
-import com.github.fge.jsr203.attrs.factory.AttributeViewFactory;
-import com.github.fge.jsr203.attrs.factory.AttributesFactory;
+import com.github.fge.jsr203.attrs.api.FileAttributeFactory;
 
 public interface FileSystemDriver
 {
-    AttributeViewFactory getViewFactory();
-
-    AttributesFactory getAttributesFactory();
+    FileAttributeFactory getFileAttributeFactory();
 }
