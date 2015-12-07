@@ -2,7 +2,6 @@ package com.github.fge.jsr203.provider;
 
 import com.github.fge.jsr203.attrs.api.FileAttributeFactory;
 import com.github.fge.jsr203.attrs.api.FileAttributeViewProvider;
-import com.github.fge.jsr203.attrs.api.FileAttributesProvider;
 import com.github.fge.jsr203.attrs.api.byname.NamedAttributeDispatcher;
 import com.github.fge.jsr203.attrs.constants.StandardAttributeNames;
 import com.github.fge.jsr203.attrs.constants.StandardAttributeViewNames;
@@ -59,11 +58,8 @@ public abstract class AbstractFileSystemProvider
         final FileAttributeFactory factory = getFileAttributeFactory(path);
         final Class<? extends FileAttributeView> viewClass
             = factory.getViewClassForName(viewName);
-        final FileAttributeViewProvider<? extends FileAttributeView> provider
-            = factory.getFileAttributeViewProvider(viewClass);
-        final FileAttributeView view = provider.getView(path, options);
-        final NamedAttributeDispatcher dispatcher
-            = factory.getDispatcherForView(view);
+        final NamedAttributeDispatcher<? extends FileAttributeView> dispatcher
+            = getDispatcher(viewClass, path, options);
         dispatcher.writeByBame(attrName, value);
     }
 
@@ -88,11 +84,8 @@ public abstract class AbstractFileSystemProvider
         final FileAttributeFactory factory = getFileAttributeFactory(path);
         final Class<? extends FileAttributeView> viewClass
             = factory.getViewClassForName(viewName);
-        final FileAttributeViewProvider<? extends FileAttributeView> provider
-            = factory.getFileAttributeViewProvider(viewClass);
-        final FileAttributeView view = provider.getView(path, options);
-        final NamedAttributeDispatcher dispatcher
-            = factory.getDispatcherForView(view);
+        final NamedAttributeDispatcher<? extends FileAttributeView> dispatcher
+            = getDispatcher(viewClass, path, options);
 
         if (StandardAttributeNames.ALL.equals(attrSpec))
             return dispatcher.readAllAttributes();
@@ -113,10 +106,7 @@ public abstract class AbstractFileSystemProvider
         throws IOException
     {
         final FileAttributeFactory factory = getFileAttributeFactory(path);
-        final FileAttributesProvider<A> provider
-            = factory.getAttributesProvider(type);
-
-        return provider.getAttributes(path, options);
+        return factory.getAttributesByClass(type, path, options);
     }
 
     @Override
@@ -124,14 +114,7 @@ public abstract class AbstractFileSystemProvider
         final Class<V> type, final LinkOption... options)
     {
         final FileAttributeFactory factory = getFileAttributeFactory(path);
-        final FileAttributeViewProvider<V> provider
-            = factory.getFileAttributeViewProvider(type);
-
-        try {
-            return provider.getView(path, options);
-        } catch (IOException e) {
-            return factory.getOnFailure(type, e);
-        }
+        return factory.getViewByClass(type, path, options);
     }
 
     private FileSystemDriver getDriverForPath(final Path path)
@@ -150,5 +133,17 @@ public abstract class AbstractFileSystemProvider
     {
         final FileSystemDriver driver = getDriverForPath(path);
         return driver.getFileAttributeFactory();
+    }
+
+    private <V extends FileAttributeView> NamedAttributeDispatcher<V>
+    getDispatcher(final Class<V> viewClass, final Path path,
+        final LinkOption... options)
+        throws IOException
+    {
+        final FileAttributeFactory factory = getFileAttributeFactory(path);
+        final FileAttributeViewProvider<V> provider
+            = factory.getFileAttributeViewProvider(viewClass);
+        final V view = provider.getView(path, options);
+        return factory.getDispatcherForView(view);
     }
 }
