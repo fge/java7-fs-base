@@ -33,7 +33,6 @@ import java.nio.file.attribute.FileOwnerAttributeView;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
 import static org.mockito.Mockito.mock;
-import static org.testng.Assert.assertTrue;
 
 public final class FileAttributesFactoryTest
 {
@@ -67,7 +66,7 @@ public final class FileAttributesFactoryTest
             }
         };
 
-        assertTrue(true);
+        assertThat(true).isTrue();
     }
 
     @Test
