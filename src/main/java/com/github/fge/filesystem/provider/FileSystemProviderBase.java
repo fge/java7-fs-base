@@ -210,7 +210,7 @@ public abstract class FileSystemProviderBase
             if (optionSet.contains(StandardOpenOption.CREATE_NEW))
                 throw new FileAlreadyExistsException(path.toString());
         } catch (NoSuchFileException e) {
-            if (!optionSet.contains(StandardOpenOption.CREATE))
+            if (!(optionSet.contains(StandardOpenOption.CREATE) || optionSet.contains(StandardOpenOption.CREATE_NEW)))
                 throw e;
         }
 

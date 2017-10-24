@@ -158,6 +158,33 @@ public final class PathElements
     }
 
     /**
+     * Return an array of strings starting with the root and then all of the
+     * names.
+     *
+     * @return null if there is no root and no names, otherwise as description
+     */
+    @Nonnull
+    String[] rootAndNames()
+    {
+        if (root != null && names.length == 0) {
+            return new String[] { root };
+        } else if (root == null && names.length > 0) {
+            return names;
+        } else if (root != null && names.length > 0) {
+            final String[] elements = new String[names.length + 1];
+            elements[0] = root;
+            int i = 1;
+            for (String name : names) {
+                elements[i++] = name;
+            }
+
+            return elements;
+        } else {
+            return new String[] { root == null ? "" : root };
+        }
+    }
+
+    /**
      * Returns an iterator over a set of elements of type T.
      *
      * @return an Iterator.

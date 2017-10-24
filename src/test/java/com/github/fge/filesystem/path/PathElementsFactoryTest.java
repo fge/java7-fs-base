@@ -30,7 +30,6 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
-import static org.testng.Assert.assertTrue;
 
 public final class PathElementsFactoryTest
 {
@@ -229,14 +228,14 @@ public final class PathElementsFactoryTest
             factory.relativize(elements1, elements2);
             fail("No exception thrown!");
         } catch (IllegalArgumentException ignored) {
-            assertTrue(true);
+            assertThat(true).isTrue();
         }
 
         try {
             factory.relativize(elements2, elements1);
             fail("No exception thrown!");
         } catch (IllegalArgumentException ignored) {
-            assertTrue(true);
+            assertThat(true).isTrue();
         }
     }
 
