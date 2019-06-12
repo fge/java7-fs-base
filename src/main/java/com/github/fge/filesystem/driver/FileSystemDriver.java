@@ -30,6 +30,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.channels.AsynchronousFileChannel;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.AccessMode;
 import java.nio.file.CopyOption;
@@ -48,6 +49,7 @@ import java.nio.file.attribute.UserPrincipalLookupService;
 import java.nio.file.spi.FileSystemProvider;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 
 /**
  * The core filesystem class
@@ -115,7 +117,7 @@ public interface FileSystemDriver
      * @see FileSystemProvider#newInputStream(Path, OpenOption...)
      */
     @Nonnull
-    InputStream newInputStream(Path path, Set<OpenOption> options)
+    InputStream newInputStream(Path path, Set<? extends OpenOption> options)
         throws IOException;
 
     /**
@@ -129,7 +131,7 @@ public interface FileSystemDriver
      * @see FileSystemProvider#newOutputStream(Path, OpenOption...)
      */
     @Nonnull
-    OutputStream newOutputStream(Path path, Set<OpenOption> options)
+    OutputStream newOutputStream(Path path, Set<? extends OpenOption> options)
         throws IOException;
 
     /**
@@ -348,5 +350,11 @@ public interface FileSystemDriver
 
     @Nonnull
     Object getPathMetadata(Path path)
+        throws IOException;
+
+    AsynchronousFileChannel newAsynchronousFileChannel(Path path,
+                                                              Set<? extends OpenOption> options,
+                                                              ExecutorService executor,
+                                                              FileAttribute<?>... attrs)
         throws IOException;
 }

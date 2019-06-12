@@ -18,16 +18,11 @@
 
 package com.github.fge.filesystem.provider;
 
-import com.github.fge.filesystem.driver.FileSystemDriver;
-import com.github.fge.filesystem.exceptions.IllegalOptionSetException;
-import com.github.fge.filesystem.exceptions.UnsupportedOptionException;
-import com.github.fge.filesystem.options.FileSystemOptionsFactory;
-
-import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
+import java.nio.channels.AsynchronousFileChannel;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.AccessMode;
@@ -51,6 +46,14 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+
+import javax.annotation.ParametersAreNonnullByDefault;
+
+import com.github.fge.filesystem.driver.FileSystemDriver;
+import com.github.fge.filesystem.exceptions.IllegalOptionSetException;
+import com.github.fge.filesystem.exceptions.UnsupportedOptionException;
+import com.github.fge.filesystem.options.FileSystemOptionsFactory;
 
 /**
  * Base {@link FileSystemProvider} implementation
@@ -204,14 +207,15 @@ public abstract class FileSystemProviderBase
         final Set<OpenOption> optionSet
             = optionsFactory.compileWriteOptions(options);
         final FileSystemDriver driver = repository.getDriver(path);
-
+//System.err.println("optionSet: CREATE_NEW: " + optionSet.contains(StandardOpenOption.CREATE_NEW) + ", CREATE: " + optionSet.contains(StandardOpenOption.CREATE));
         try {
             driver.checkAccess(path, AccessMode.WRITE);
             if (optionSet.contains(StandardOpenOption.CREATE_NEW))
                 throw new FileAlreadyExistsException(path.toString());
         } catch (NoSuchFileException e) {
-            if (!optionSet.contains(StandardOpenOption.CREATE))
-                throw e;
+            if (!optionSet.contains(StandardOpenOption.CREATE_NEW)) /* TODO see the spec {@link StandardOpenOption#CREATE_NEW} */
+                if (!optionSet.contains(StandardOpenOption.CREATE))
+                    throw e;
         }
 
         return driver.newOutputStream(path, optionSet);
@@ -291,8 +295,12 @@ public abstract class FileSystemProviderBase
         throws IOException
     {
         // TODO
-        if (attrs.length != 0)
-            throw new UnsupportedOperationException("TODO");
+        if (attrs.length != 0) {
+            //throw new UnsupportedOperationException("TODO");
+            for (FileAttribute<?> attr : attrs) {
+                System.err.println("FileSystemProviderBase::createDirectory: attr: " + attr);
+            }
+        }
 
         final FileSystemDriver driver = repository.getDriver(dir);
 
@@ -607,5 +615,16 @@ public abstract class FileSystemProviderBase
     {
         // See GenericFileSystem: only one file store per filesystem
         return path.getFileSystem().getFileStores().iterator().next();
+    }
+
+    @Override
+    public AsynchronousFileChannel newAsynchronousFileChannel(Path path,
+                                                              Set<? extends OpenOption> options,
+                                                              ExecutorService executor,
+                                                              FileAttribute<?>... attrs)
+        throws IOException
+    {
+        return repository.getDriver(path)
+            .newAsynchronousFileChannel(path, options, executor, attrs);
     }
 }

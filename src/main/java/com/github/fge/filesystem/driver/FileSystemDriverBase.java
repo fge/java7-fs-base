@@ -28,6 +28,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
+import java.nio.channels.AsynchronousFileChannel;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.FileStore;
 import java.nio.file.LinkOption;
@@ -43,6 +44,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 import java.util.regex.Pattern;
 
 /**
@@ -211,5 +213,15 @@ public abstract class FileSystemDriverBase
         } catch (IOException e) {
             throw new UncaughtIOException("Unhandled I/O exception", e);
         }
+    }
+
+    @Override
+    public AsynchronousFileChannel newAsynchronousFileChannel(Path path,
+                                                              Set<? extends OpenOption> options,
+                                                              ExecutorService executor,
+                                                              FileAttribute<?>... attrs)
+        throws IOException
+    {
+        throw new UnsupportedOperationException();
     }
 }

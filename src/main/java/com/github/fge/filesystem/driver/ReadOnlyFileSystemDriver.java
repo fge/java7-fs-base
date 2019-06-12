@@ -24,6 +24,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.channels.AsynchronousFileChannel;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.AccessMode;
 import java.nio.file.CopyOption;
@@ -44,6 +45,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 
 /**
  * A {@link FileSystemDriver} composition implementation over another driver
@@ -93,7 +95,7 @@ public final class ReadOnlyFileSystemDriver
     @Nonnull
     @Override
     public OutputStream newOutputStream(final Path path,
-        final Set<OpenOption> options)
+        final Set<? extends OpenOption> options)
         throws IOException
     {
         throw new ReadOnlyFileSystemException();
@@ -175,7 +177,7 @@ public final class ReadOnlyFileSystemDriver
     @Override
     @Nonnull
     public InputStream newInputStream(final Path path,
-        final Set<OpenOption> options)
+        final Set<? extends OpenOption> options)
         throws IOException
     {
         return delegate.newInputStream(path, options);
@@ -248,5 +250,15 @@ public final class ReadOnlyFileSystemDriver
         throws IOException
     {
         delegate.close();
+    }
+
+    @Override
+    public AsynchronousFileChannel newAsynchronousFileChannel(Path path,
+                                                              Set<? extends OpenOption> options,
+                                                              ExecutorService executor,
+                                                              FileAttribute<?>... attrs)
+        throws IOException
+    {
+        return delegate.newAsynchronousFileChannel(path, options, executor, attrs);
     }
 }
