@@ -1,6 +1,6 @@
 [![Release](https://jitpack.io/v/umjammer/java7-fs-base.svg)](https://jitpack.io/#umjammer/java7-fs-base)
 
-## Read me first
+## java7-fs-base
 
 This project is licensed under both LGPLv3 and ASL 2.0. See file LICENSE for
 more details.

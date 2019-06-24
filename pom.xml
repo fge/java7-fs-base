@@ -3,7 +3,7 @@
 
   <groupId>com.github.fge</groupId>
   <artifactId>java7-fs-base</artifactId>
-  <version>0.0.2v</version>
+  <version>0.0.3v</version>
 
   <build>
     <plugins>

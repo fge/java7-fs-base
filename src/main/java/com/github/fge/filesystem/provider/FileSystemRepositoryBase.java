@@ -174,7 +174,7 @@ public abstract class FileSystemRepositoryBase
     }
 
     // TODO: should be checked at the provider level, not here
-    private void checkURI(@Nullable final URI uri)
+    protected void checkURI(@Nullable final URI uri)
     {
         Objects.requireNonNull(uri);
         if (!uri.isAbsolute())
