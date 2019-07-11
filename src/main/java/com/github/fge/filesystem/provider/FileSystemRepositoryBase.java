@@ -185,4 +185,16 @@ public abstract class FileSystemRepositoryBase
         if (!scheme.equals(uri.getScheme()))
             throw new IllegalArgumentException("bad scheme");
     }
+
+    /** */
+    protected Map<String, String> getParamsMap(URI uri) {
+        Map<String, String> result = new HashMap<>();
+        String params = uri.getQuery().split("#")[0];
+        String[] pairs = params.split("\\?&");
+        for (String pair : pairs) {
+            String[] parts = pair.split("=");
+            result.put(parts[0], parts[1]);
+        }
+        return result;
+    }
 }
