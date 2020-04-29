@@ -3,7 +3,7 @@
 
   <groupId>com.github.fge</groupId>
   <artifactId>java7-fs-base</artifactId>
-  <version>0.0.4v</version>
+  <version>0.0.5v</version>
 
   <build>
     <plugins>
@@ -13,15 +13,29 @@
           <source>1.8</source>
           <target>1.8</target>
           <encoding>utf-8</encoding>
-          <compilerArgs>
-            <compilerArg>-XDignore.symbol.file</compilerArg>
-          </compilerArgs>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.22.2</version>
       </plugin>
     </plugins>
   </build>
 
+  <repositories>
+    <repository>
+      <id>jitpack.io</id>
+      <url>https://jitpack.io</url>
+    </repository>
+  </repositories>
+
   <dependencies>
+    <dependency>
+      <groupId>com.github.umjammer</groupId>
+      <artifactId>vavi-commons</artifactId>
+      <version>1.0.15</version>
+    </dependency>
 
     <dependency>
       <groupId>com.google.code.findbugs</groupId>
@@ -54,7 +68,7 @@
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
-      <version>1.10.8</version>
+      <version>2.23.4</version>
       <scope>test</scope>
     </dependency>
 

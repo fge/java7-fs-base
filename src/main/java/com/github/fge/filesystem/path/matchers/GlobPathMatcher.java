@@ -18,7 +18,11 @@
 
 package com.github.fge.filesystem.path.matchers;
 
-import sun.nio.fs.GlobHack;
+import java.lang.reflect.Method;
+import java.security.PrivilegedActionException;
+import java.util.Objects;
+
+import vavi.beans.BeanUtil;
 
 public final class GlobPathMatcher
     extends PathMatcherBase
@@ -27,7 +31,13 @@ public final class GlobPathMatcher
 
     public GlobPathMatcher(final String glob)
     {
-        matcher = new RegexPathMatcher(GlobHack.toPattern(glob));
+        try {
+            Class<?> clazz = Class.forName("sun.nio.fs.Globs");
+            Method method = BeanUtil.getPrivateMethod(clazz, "toUnixRegexPattern", new Class[] { String.class });
+            matcher = new RegexPathMatcher(String.class.cast(BeanUtil.invoke(method, null, Objects.requireNonNull(glob))));
+        } catch (PrivilegedActionException | ClassNotFoundException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     @Override
