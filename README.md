@@ -1,4 +1,4 @@
-[![Release](https://jitpack.io/v/umjammer/java7-fs-base.svg)](https://jitpack.io/#umjammer/java7-fs-base) [![Parent](https://img.shields.io/badge/Parent-vavi--apps--fuse-pink)](https://github.com/umjammer/vavi-apps-fuse)
+[![Release](https://jitpack.io/v/umjammer/java7-fs-base.svg)](https://jitpack.io/#umjammer/java7-fs-base) [![Java CI with Maven](https://github.com/umjammer/java7-fs-base/workflows/Java%20CI%20with%20Maven/badge.svg)](https://github.com/umjammer/java7-fs-base/actions) [![Parent](https://img.shields.io/badge/Parent-vavi--apps--fuse-pink)](https://github.com/umjammer/vavi-apps-fuse)
 
 ## java7-fs-base
 
