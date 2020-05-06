@@ -3,7 +3,7 @@
 
   <groupId>com.github.fge</groupId>
   <artifactId>java7-fs-base</artifactId>
-  <version>0.0.5v</version>
+  <version>0.0.6v</version>
 
   <build>
     <plugins>
@@ -19,6 +19,9 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>2.22.2</version>
+        <configuration>
+          <trimStackTrace>false</trimStackTrace>
+        </configuration>
       </plugin>
     </plugins>
   </build>

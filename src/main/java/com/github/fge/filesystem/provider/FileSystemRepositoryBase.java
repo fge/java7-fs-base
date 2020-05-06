@@ -189,11 +189,12 @@ public abstract class FileSystemRepositoryBase
     /** */
     protected Map<String, String> getParamsMap(URI uri) {
         Map<String, String> result = new HashMap<>();
-        String params = uri.getQuery().split("#")[0];
-        String[] pairs = params.split("\\?&");
-        for (String pair : pairs) {
-            String[] parts = pair.split("=");
-            result.put(parts[0], parts[1]);
+        if (uri.getQuery() != null) {
+            String[] pairs = uri.getQuery().split("[\\?&]");
+            for (String pair : pairs) {
+                String[] parts = pair.split("=");
+                result.put(parts[0], parts[1]);
+            }
         }
         return result;
     }
