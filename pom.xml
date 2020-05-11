@@ -5,6 +5,16 @@
   <artifactId>java7-fs-base</artifactId>
   <version>0.0.6v</version>
 
+  <name>java7-fs-base</name>
+  <url>https://github.com/umjammer/java7-fs-base</url>
+  <scm>
+    <url>https://github.com/umjammer/java7-fs-base</url>
+  </scm>
+  <issueManagement>
+    <url>https://github.com/umjammer/java7-fs-base/issues</url>
+  </issueManagement>
+  <description>Helper classes for FileSystem implementations</description>
+
   <build>
     <plugins>
       <plugin>
@@ -83,14 +93,4 @@
     </dependency>
 
   </dependencies>
-
-  <description>Helper classes for FileSystem implementations</description>
-  <name>java7-fs-base</name>
-  <url>https://github.com/fge/java7-fs-base</url>
-  <scm>
-    <url>https://github.com/fge/java7-fs-base</url>
-  </scm>
-  <issueManagement>
-    <url>https://github.com/fge/java7-fs-base/issues</url>
-  </issueManagement>
 </project>
