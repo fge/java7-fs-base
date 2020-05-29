@@ -79,6 +79,14 @@ public class FileSystemRepositoryBaseTest {
     }
 
     @Test
+    public void testParamsMapWithoutValue() throws Exception {
+        URI uri = URI.create("scheme:///?id=");
+
+        Map<String, String> params = repository.getParamsMap(uri);
+        assertThat(params.get("id")).isNull();
+    }
+
+    @Test
     public void testNoQueryParamsMap() throws Exception {
         URI uri = URI.create("scheme:///");
 

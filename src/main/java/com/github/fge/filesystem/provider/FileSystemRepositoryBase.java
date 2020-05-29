@@ -192,8 +192,8 @@ public abstract class FileSystemRepositoryBase
         if (uri.getQuery() != null) {
             String[] pairs = uri.getQuery().split("[\\?&]");
             for (String pair : pairs) {
-                String[] parts = pair.split("=");
-                result.put(parts[0], parts[1]);
+                String[] kv = pair.split("=");
+                result.put(kv[0], kv.length > 1 ? kv[1] : null);
             }
         }
         return result;
