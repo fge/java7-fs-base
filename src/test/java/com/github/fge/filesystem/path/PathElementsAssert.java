@@ -45,7 +45,6 @@ public class PathElementsAssert
      * root checks
      */
 
-    @SuppressWarnings("VariableNotUsedInsideIf")
     public final PathElementsAssert hasNullRoot()
     {
         if (actual.root != null)

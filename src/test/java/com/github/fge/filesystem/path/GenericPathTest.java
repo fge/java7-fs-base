@@ -18,29 +18,38 @@
 
 package com.github.fge.filesystem.path;
 
-import com.github.fge.filesystem.CustomSoftAssertions;
-import com.github.fge.filesystem.provider.FileSystemFactoryProvider;
-import com.github.fge.filesystem.driver.FileSystemDriver;
-import com.github.fge.filesystem.fs.GenericFileSystem;
-import com.github.fge.filesystem.provider.FileSystemRepository;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
-
 import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.spi.FileSystemProvider;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
-import static com.github.fge.filesystem.path.PathAssert.assertPath;
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+import com.github.fge.filesystem.CustomSoftAssertions;
+import com.github.fge.filesystem.driver.FileSystemDriver;
+import com.github.fge.filesystem.fs.GenericFileSystem;
+import com.github.fge.filesystem.provider.FileSystemFactoryProvider;
+import com.github.fge.filesystem.provider.FileSystemRepository;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import static com.github.fge.filesystem.path.PathAssert.assertPath;
+
+
 public final class GenericPathTest
 {
+    @RegisterExtension
+    final CustomSoftAssertions soft = new CustomSoftAssertions();
+
     private static final String[] NO_NAMES = new String[0];
 
     private final URI uri = URI.create("foo://bar");
@@ -51,7 +60,7 @@ public final class GenericPathTest
     private FileSystemDriver driver;
     private PathElementsFactory factory;
 
-    @BeforeMethod
+    @BeforeEach
     public void initMocks()
     {
         final FileSystemFactoryProvider factoryProvider
@@ -77,11 +86,11 @@ public final class GenericPathTest
 
         path = new GenericPath(fs, factory, elements1);
 
-        assertThat(path.isAbsolute()).isFalse();
+        assertFalse(path.isAbsolute());
 
         path = new GenericPath(fs, factory, elements2);
 
-        assertThat(path.isAbsolute()).isTrue();
+        assertTrue(path.isAbsolute());
     }
 
     @Test
@@ -138,7 +147,8 @@ public final class GenericPathTest
      * order for two Paths to be equals, this contract can not be obeyed; or I
      * am doing something VERY wrong.
      */
-    @Test(enabled = false)
+    @Test
+    @Disabled
     public void relativizeResolveRoundRobinWorks()
     {
         /*
@@ -184,8 +194,6 @@ public final class GenericPathTest
         // "rr" as in "resolved, relativized"
         GenericPath rr;
 
-        final CustomSoftAssertions soft = CustomSoftAssertions.create();
-
         /*
          * Try with the absolute version first...
          */
@@ -209,24 +217,15 @@ public final class GenericPathTest
             .as("rr and q filesystems should be the same (p not absolute)")
             .isSameAs(q.getFileSystem());
         soft.assertThat(rr.elements).hasSameContentsAs(q.elements);
-
-        soft.assertAll();
     }
 
-    @DataProvider
-    public Iterator<Object[]> toUriPathData()
-    {
-        final List<Object[]> list = new ArrayList<>();
-
-        list.add(new Object[] { "foo://bar", "/", "foo://bar" });
-        list.add(new Object[] { "foo://bar/x", "/", "foo://bar/x" });
-        list.add(new Object[] { "foo://bar/x", "/../a", "foo://bar/x/a" });
-        list.add(new Object[] { "foo://bar", "/a v", "foo://bar/a%20v" });
-
-        return list.iterator();
-    }
-
-    @Test(dataProvider = "toUriPathData")
+    @ParameterizedTest
+    @CsvSource({
+        "foo://bar,/,foo://bar",
+        "foo://bar/x,/,foo://bar/x",
+        "foo://bar/x,/../a,foo://bar/x/a",
+        "foo://bar,/a v,foo://bar/a%20v",
+    })
     public void toUriPathReturnsCorrectURI(final String s, final String path,
         final String expected)
     {
@@ -237,7 +236,6 @@ public final class GenericPathTest
         final PathElements elements = unixFactory.toPathElements(path);
         final Path p = new GenericPath(fs2, unixFactory, elements);
 
-        assertThat(p.toUri().toString()).as("generated URI is correct")
-            .isEqualTo(expected);
+        assertEquals(expected, p.toUri().toString(), "generated URI is correct");
     }
 }

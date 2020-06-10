@@ -24,7 +24,6 @@ import com.github.fge.filesystem.attributes.testclasses.ArgType1;
 import java.io.IOException;
 import java.nio.file.attribute.UserPrincipal;
 
-@SuppressWarnings("PublicConstructorInNonPublicClass")
 final class PackageLocalAcl
     extends AclFileAttributesProvider
 {

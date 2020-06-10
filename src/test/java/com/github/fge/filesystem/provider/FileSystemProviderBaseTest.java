@@ -18,21 +18,22 @@
 
 package com.github.fge.filesystem.provider;
 
-import com.github.fge.filesystem.driver.FileSystemDriver;
-import com.github.fge.filesystem.exceptions.IllegalOptionSetException;
-import com.github.fge.filesystem.exceptions.UnsupportedOptionException;
-import com.github.fge.filesystem.options.FileSystemOptionsFactory;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
 import java.io.IOException;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.spi.FileSystemProvider;
 
-import static com.github.fge.filesystem.CustomAssertions.shouldHaveThrown;
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import com.github.fge.filesystem.driver.FileSystemDriver;
+import com.github.fge.filesystem.exceptions.IllegalOptionSetException;
+import com.github.fge.filesystem.exceptions.UnsupportedOptionException;
+import com.github.fge.filesystem.options.FileSystemOptionsFactory;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.Mockito.mock;
@@ -49,7 +50,7 @@ public final class FileSystemProviderBaseTest
     private FileSystemProvider provider;
     private Path path;
 
-    @BeforeMethod
+    @BeforeEach
     public void initMocks()
     {
         final FileSystemRepository repository
@@ -80,11 +81,9 @@ public final class FileSystemProviderBaseTest
     public void writeOptionsAreRejectedOnNewInputStream()
         throws IOException
     {
-        try {
+        assertThrows(IllegalOptionSetException.class, () -> {
             provider.newInputStream(path, StandardOpenOption.WRITE);
-            shouldHaveThrown(IllegalOptionSetException.class);
-        } catch (IllegalOptionSetException ignored) {
-        }
+        });
 
         //noinspection unchecked
         verify(driver, never())
@@ -98,12 +97,10 @@ public final class FileSystemProviderBaseTest
         final OpenOption myopt = mock(OpenOption.class);
         when(myopt.toString()).thenReturn("foo");
 
-        try {
+        Exception e = assertThrows(UnsupportedOptionException.class, () -> {
             provider.newInputStream(path, myopt);
-            shouldHaveThrown(UnsupportedOptionException.class);
-        } catch (UnsupportedOptionException e) {
-            assertThat(e).hasMessage("foo");
-        }
+        });
+        assertEquals("foo", e.getMessage());
 
         //noinspection unchecked
         verify(driver, never())
@@ -114,11 +111,9 @@ public final class FileSystemProviderBaseTest
     public void readOptionsAreRejectedOnNewOutputStream()
         throws IOException
     {
-        try {
+        assertThrows(IllegalOptionSetException.class, () -> {
             provider.newOutputStream(path, StandardOpenOption.READ);
-            shouldHaveThrown(IllegalOptionSetException.class);
-        } catch (IllegalOptionSetException ignored) {
-        }
+        });
 
         //noinspection unchecked
         verify(driver, never())
@@ -132,12 +127,10 @@ public final class FileSystemProviderBaseTest
         final OpenOption myopt = mock(OpenOption.class);
         when(myopt.toString()).thenReturn("foo");
 
-        try {
+        Exception e = assertThrows(UnsupportedOptionException.class, () -> {
             provider.newOutputStream(path, myopt);
-            shouldHaveThrown(UnsupportedOptionException.class);
-        } catch (UnsupportedOptionException e) {
-            assertThat(e).hasMessage("foo");
-        }
+        });
+        assertEquals("foo", e.getMessage());
 
         //noinspection unchecked
         verify(driver, never())

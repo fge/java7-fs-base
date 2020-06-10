@@ -10,15 +10,16 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Map;
 
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.github.fge.filesystem.attributes.FileAttributesFactory;
 import com.github.fge.filesystem.attributes.provider.BasicFileAttributesProvider;
 import com.github.fge.filesystem.driver.FileSystemDriver;
 import com.github.fge.filesystem.options.FileSystemOptionsFactory;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 
 /**
@@ -58,7 +59,7 @@ public class FileSystemRepositoryBaseTest {
 
     private MyFileSystemRepository repository;
 
-    @BeforeMethod
+    @BeforeEach
     public void init() {
         FileSystemFactoryProvider factoryProvider = new FileSystemFactoryProvider() {{
             setAttributesFactory(new FileAttributesFactory() {{
@@ -75,7 +76,7 @@ public class FileSystemRepositoryBaseTest {
         URI uri = URI.create("scheme:///?id=test");
 
         Map<String, String> params = repository.getParamsMap(uri);
-        assertThat(params.get("id")).isEqualTo("test");
+        assertEquals("test", params.get("id"));
     }
 
     @Test
@@ -83,7 +84,7 @@ public class FileSystemRepositoryBaseTest {
         URI uri = URI.create("scheme:///?id=");
 
         Map<String, String> params = repository.getParamsMap(uri);
-        assertThat(params.get("id")).isNull();
+        assertNull(params.get("id"));
     }
 
     @Test
@@ -91,7 +92,7 @@ public class FileSystemRepositoryBaseTest {
         URI uri = URI.create("scheme:///");
 
         Map<String, String> params = repository.getParamsMap(uri);
-        assertThat(params.get("id")).isNull();
+        assertNull(params.get("id"));
     }
 
     @Test
@@ -99,8 +100,8 @@ public class FileSystemRepositoryBaseTest {
         URI uri = URI.create("scheme:///?id=test&second=2#sharp");
 
         Map<String, String> params = repository.getParamsMap(uri);
-        assertThat(params.get("id")).isEqualTo("test");
-        assertThat(params.get("second")).isEqualTo("2");
+        assertEquals("test", params.get("id"));
+        assertEquals("2", params.get("second"));
     }
 }
 

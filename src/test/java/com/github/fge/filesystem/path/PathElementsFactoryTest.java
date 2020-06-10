@@ -18,136 +18,112 @@
 
 package com.github.fge.filesystem.path;
 
+import java.util.stream.Stream;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+
 import com.github.fge.filesystem.CustomSoftAssertions;
-import org.assertj.core.api.SoftAssertions;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
-import static org.testng.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 public final class PathElementsFactoryTest
 {
     private final PathElementsFactory factory = new UnixPathElementsFactory();
 
-    @DataProvider
-    public Iterator<Object[]> rootAndNamesData()
+    @RegisterExtension
+    final CustomSoftAssertions soft = new CustomSoftAssertions();
+
+    static Stream<Arguments> rootAndNamesData()
     {
-        final List<Object[]> list = new ArrayList<>();
-
-        list.add(new Object[] { "", null, "" });
-        list.add(new Object[] { "/", "/", "" });
-        list.add(new Object[] { "//", "/", "" });
-        list.add(new Object[] { "foo/bar", null, "foo/bar" });
-        list.add(new Object[] { "foo/bar/", null, "foo/bar" });
-        list.add(new Object[] { "foo//bar", null, "foo//bar" });
-        list.add(new Object[] { "foo//bar///", null, "foo//bar" });
-        list.add(new Object[] { "/foo/bar", "/", "foo/bar" });
-        list.add(new Object[] { "/foo/bar/", "/", "foo/bar" });
-        list.add(new Object[] { "//foo/bar/", "/", "foo/bar" });
-        list.add(new Object[] { "//foo//bar", "/", "foo//bar" });
-        list.add(new Object[] { "//foo//bar///", "/", "foo//bar" });
-
-        return list.iterator();
+        return Stream.of(
+            arguments("", null, "" ),
+            arguments("/", "/", "" ),
+            arguments("//", "/", "" ),
+            arguments("foo/bar", null, "foo/bar" ),
+            arguments("foo/bar/", null, "foo/bar" ),
+            arguments("foo//bar", null, "foo//bar" ),
+            arguments("foo//bar///", null, "foo//bar" ),
+            arguments("/foo/bar", "/", "foo/bar" ),
+            arguments("/foo/bar/", "/", "foo/bar" ),
+            arguments("//foo/bar/", "/", "foo/bar" ),
+            arguments("//foo//bar", "/", "foo//bar" ),
+            arguments("//foo//bar///", "/", "foo//bar")
+        );
     }
 
-    @Test(dataProvider = "rootAndNamesData")
+    @ParameterizedTest
+    @MethodSource("rootAndNamesData")
     public void rooAndNamesSplitsCorrectly(final String path, final String root,
         final String names)
     {
         final String[] ret = factory.rootAndNames(path);
 
-        final SoftAssertions soft = new SoftAssertions();
-
         soft.assertThat(ret[0]).as("root is correctly calculated")
             .isEqualTo(root);
         soft.assertThat(ret[1]).as("names are correctly extracted")
             .isEqualTo(names);
-
-        soft.assertAll();
     }
 
-    @DataProvider
-    public Iterator<Object[]> splitNamesData()
+    static Stream<Arguments> splitNamesData()
     {
-        final List<Object[]> list = new ArrayList<>();
-
-        list.add(new Object[] { "", new String[0] });
-        list.add(new Object[] { "a", stringArray("a") });
-        list.add(new Object[] { "a/b/c", stringArray("a", "b", "c") });
-        list.add(new Object[] { "a//b/c", stringArray("a", "b", "c") });
-
-        return list.iterator();
+        return Stream.of(
+            arguments("", new String[0]),
+            arguments("a", stringArray("a")),
+            arguments("a/b/c", stringArray("a", "b", "c")),
+            arguments("a//b/c", stringArray("a", "b", "c"))
+        );
     }
 
-    @SuppressWarnings("MethodCanBeVariableArityMethod")
-    @Test(dataProvider = "splitNamesData")
+    @ParameterizedTest
+    @MethodSource("splitNamesData")
     public void splitNamesWorks(final String input, final String[] names)
     {
-        assertThat(factory.splitNames(input)).as("names are split correctly")
-            .isEqualTo(names);
+        assertArrayEquals(names, factory.splitNames(input), "names are split correctly");
     }
 
-    @DataProvider
-    public Iterator<Object[]> normalizeData()
+    static Stream<Arguments> normalizeData()
     {
-        final List<Object[]> list = new ArrayList<>();
-
         final String[] empty = new String[0];
 
-        list.add(new Object[] { null, empty, empty });
-        list.add(new Object[] { "/", empty, empty });
-        list.add(new Object[] { "/", stringArray("."), empty });
-        list.add(new Object[] { "/", stringArray(".", ".."),
-            stringArray("..") });
-        list.add(new Object[] { null, stringArray("a", ".", "b"),
-            stringArray("a", "b") });
-        list.add(new Object[] { null, stringArray("a", ".."), empty });
-        list.add(new Object[] { null, stringArray("a", "."),
-            stringArray("a") });
-        list.add(new Object[] { null, stringArray("a", "..", "b"),
-            stringArray("b") });
-        list.add(new Object[] { null, stringArray("a", "..", "b", ".", "c"),
-            stringArray("b", "c") });
-        list.add(new Object[] { null, stringArray("..", "a"),
-            stringArray("..", "a") });
-        list.add(new Object[] { null, stringArray("..", "..", "a"),
-            stringArray("..", "..", "a") });
-        list.add(new Object[] { null, stringArray("..", "a", ".."),
-            stringArray("..") });
-        list.add(new Object[] { "null", stringArray("..", "..", ".", ".."),
-            stringArray("..", "..", "..") });
-
-        return list.iterator();
+        return Stream.of(
+            arguments(null, empty, empty ),
+            arguments("/", empty, empty ),
+            arguments("/", stringArray("."), empty ),
+            arguments("/", stringArray(".", ".."), stringArray("..") ),
+            arguments(null, stringArray("a", ".", "b"), stringArray("a", "b") ),
+            arguments(null, stringArray("a", ".."), empty ),
+            arguments(null, stringArray("a", "."), stringArray("a") ),
+            arguments(null, stringArray("a", "..", "b"), stringArray("b") ),
+            arguments(null, stringArray("a", "..", "b", ".", "c"), stringArray("b", "c") ),
+            arguments(null, stringArray("..", "a"), stringArray("..", "a") ),
+            arguments(null, stringArray("..", "..", "a"), stringArray("..", "..", "a") ),
+            arguments(null, stringArray("..", "a", ".."), stringArray("..") ),
+            arguments("null", stringArray("..", "..", ".", ".."), stringArray("..", "..", ".."))
+        );
     }
 
-    @SuppressWarnings("MethodCanBeVariableArityMethod")
-    @Test(dataProvider = "normalizeData")
+    @ParameterizedTest
+    @MethodSource("normalizeData")
     public void normalizingWorks(final String root, final String[] orig,
         final String[] expectedNames)
     {
         final PathElements elements = new PathElements(root, orig);
         final PathElements normalized = factory.normalize(elements);
 
-        final CustomSoftAssertions soft = CustomSoftAssertions.create();
-
         soft.assertThat(normalized).hasRoot(root).hasNames(expectedNames);
-
-        soft.assertAll();
     }
 
     @Test
     public void resolveWorks()
     {
         PathElements first, second, resolved;
-
-        final CustomSoftAssertions soft = CustomSoftAssertions.create();
 
         first = new PathElements(null, stringArray("foo"));
         second = new PathElements("/", stringArray("bar"));
@@ -175,16 +151,12 @@ public final class PathElementsFactoryTest
 
         soft.assertThat(factory.resolve(first, second))
             .hasSameContentsAs(resolved);
-
-        soft.assertAll();
     }
 
     @Test
     public void resolveSiblingWorks()
     {
         PathElements first, second, resolved;
-
-        final CustomSoftAssertions soft = CustomSoftAssertions.create();
 
         first = new PathElements(null, stringArray("foo"));
         second = new PathElements(null, new String[0]);
@@ -214,8 +186,6 @@ public final class PathElementsFactoryTest
 
         soft.assertThat(resolved).hasSameRootAs(first)
             .hasNames("foo", "baz");
-
-        soft.assertAll();
     }
 
     @Test
@@ -225,62 +195,53 @@ public final class PathElementsFactoryTest
             = new PathElements("/", PathElements.NO_NAMES);
         final PathElements elements2 = PathElements.EMPTY;
 
-        try {
+        assertThrows(IllegalArgumentException.class, () -> {
             factory.relativize(elements1, elements2);
-            fail("No exception thrown!");
-        } catch (IllegalArgumentException ignored) {
-            assertTrue(true);
-        }
+        }, "No exception thrown!");
 
-        try {
+        assertThrows(IllegalArgumentException.class, () -> {
             factory.relativize(elements2, elements1);
-            fail("No exception thrown!");
-        } catch (IllegalArgumentException ignored) {
-            assertTrue(true);
-        }
+        }, "No exception thrown!");
     }
 
-    @DataProvider
-    public Iterator<Object[]> relativizeData()
+    static Stream<Arguments> relativizeData()
     {
-        final List<Object[]> list = new ArrayList<>();
-
-        list.add(new Object[] {
-            "/",
-            stringArray("a", "b"),
-            stringArray("a", "b"),
-            PathElements.NO_NAMES
-        });
-        list.add(new Object[] {
-            null,
-            stringArray("a", "b"),
-            stringArray("a", "c"),
-            stringArray("..", "c")
-        });
-        list.add(new Object[] {
-            "whatever",
-            stringArray("a", "b"),
-            stringArray("a", "b", "c", "d", "e"),
-            stringArray("c", "d", "e")
-        });
-        list.add(new Object[] {
-            "whatever",
-            stringArray("a", "b", "c", "d", "e"),
-            stringArray("a", "b", "f"),
-            stringArray("..", "..", "..", "f")
-        });
-        list.add(new Object[] {
-            "whatever",
-            stringArray("a", "b", "f"),
-            stringArray("a", "b", "c", "d", "e"),
-            stringArray("..", "c", "d", "e")
-        });
-
-        return list.iterator();
+        return Stream.of(
+            arguments(
+                "/",
+                stringArray("a", "b"),
+                stringArray("a", "b"),
+                PathElements.NO_NAMES
+            ),
+            arguments(
+                null,
+                stringArray("a", "b"),
+                stringArray("a", "c"),
+                stringArray("..", "c")
+            ),
+            arguments(
+                "whatever",
+                stringArray("a", "b"),
+                stringArray("a", "b", "c", "d", "e"),
+                stringArray("c", "d", "e")
+            ),
+            arguments(
+                "whatever",
+                stringArray("a", "b", "c", "d", "e"),
+                stringArray("a", "b", "f"),
+                stringArray("..", "..", "..", "f")
+            ),
+            arguments(
+                "whatever",
+                stringArray("a", "b", "f"),
+                stringArray("a", "b", "c", "d", "e"),
+                stringArray("..", "c", "d", "e")
+            )
+        );
     }
 
-    @SuppressWarnings("MethodCanBeVariableArityMethod")
-    @Test(dataProvider = "relativizeData")
+    @ParameterizedTest
+    @MethodSource("relativizeData")
     public void relativizeGivesExpectedResults(final String root,
         final String[] firstNames, final String[] secondNames,
         final String[] expectedNames)
@@ -289,11 +250,7 @@ public final class PathElementsFactoryTest
         final PathElements second = new PathElements(root, secondNames);
         final PathElements relativized = factory.relativize(first, second);
 
-        final CustomSoftAssertions soft = CustomSoftAssertions.create();
-
         soft.assertThat(relativized).hasNullRoot().hasNames(expectedNames);
-
-        soft.assertAll();
     }
 
     @Test
@@ -301,63 +258,55 @@ public final class PathElementsFactoryTest
     {
         final PathElements elements = new PathElements(null, stringArray("a"));
 
-        try {
+        Exception e = assertThrows(IllegalArgumentException.class, () -> {
             factory.toUriPath(null, elements);
-            failBecauseExceptionWasNotThrown(IllegalArgumentException.class);
-        } catch (IllegalArgumentException e) {
-            assertThat(e).isExactlyInstanceOf(IllegalArgumentException.class)
-                .hasMessage("elements not absolute");
-        }
+        });
+        assertEquals("elements not absolute", e.getMessage());
     }
 
-    @DataProvider
-    public Iterator<Object[]> toUriPathData()
+    static Stream<Arguments> toUriPathData()
     {
-        final List<Object[]> list = new ArrayList<>();
-
-        list.add(new Object[] { null, stringArray("a", "b"), "/a/b" });
-        list.add(new Object[] { "/", stringArray("a", "b"), "/a/b"});
-        list.add(new Object[] { "/foo", stringArray("a", "b"), "/foo/a/b"});
-        list.add(new Object[] { "/foo/", stringArray("a", "b"), "/foo/a/b"});
-        list.add(new Object[] { null, stringArray("..", "..", "a"), "/a"});
-        list.add(new Object[] { null, stringArray("a", ".", "b"), "/a/b"});
-
-        return list.iterator();
+        return Stream.of(
+            arguments(null, stringArray("a", "b"), "/a/b" ),
+            arguments("/", stringArray("a", "b"), "/a/b"),
+            arguments("/foo", stringArray("a", "b"), "/foo/a/b"),
+            arguments("/foo/", stringArray("a", "b"), "/foo/a/b"),
+            arguments(null, stringArray("..", "..", "a"), "/a"),
+            arguments(null, stringArray("a", ".", "b"), "/a/b")
+        );
     }
 
-    @Test(dataProvider = "toUriPathData")
+    @ParameterizedTest
+    @MethodSource("toUriPathData")
     public void toUriPathGivesCorrectResult(final String prefix,
         final String[] names, final String expected)
     {
         final PathElements elements = new PathElements("/", names);
         final String actual = factory.toUriPath(prefix, elements);
 
-        assertThat(actual).as("URI path is correctly generated")
-            .isEqualTo(expected);
+        assertEquals(expected, actual, "URI path is correctly generated");
     }
 
-    @DataProvider
-    public Iterator<Object[]> toStringData()
+    static Stream<Arguments> toStringData()
     {
-        final List<Object[]> list = new ArrayList<>();
-
-        list.add(new Object[] { null, PathElements.NO_NAMES, "" });
-        list.add(new Object[] { "/", PathElements.NO_NAMES, "/" });
-        list.add(new Object[] { null, stringArray("foo"), "foo" });
-        list.add(new Object[] { "/", stringArray("foo"), "/foo" });
-        list.add(new Object[] { null, stringArray("foo", "bar"), "foo/bar" });
-        list.add(new Object[] { "/", stringArray("foo", "bar"), "/foo/bar" });
-
-        return list.iterator();
+        return Stream.of(
+            arguments(null, PathElements.NO_NAMES, "" ),
+            arguments("/", PathElements.NO_NAMES, "/" ),
+            arguments(null, stringArray("foo"), "foo" ),
+            arguments("/", stringArray("foo"), "/foo" ),
+            arguments(null, stringArray("foo", "bar"), "foo/bar" ),
+            arguments("/", stringArray("foo", "bar"), "/foo/bar" )
+        );
     }
 
-    @Test(dataProvider = "toStringData")
+    @ParameterizedTest
+    @MethodSource("toStringData")
     public void toStringWorks(final String root, final String[] names,
         final String expected)
     {
         final PathElements elements = new PathElements(root, names);
 
-        assertThat(factory.toString(elements)).isEqualTo(expected);
+        assertEquals(expected, factory.toString(elements));
     }
 
     private static String[] stringArray(final String first,

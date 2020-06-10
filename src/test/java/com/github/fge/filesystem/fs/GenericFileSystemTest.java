@@ -18,19 +18,21 @@
 
 package com.github.fge.filesystem.fs;
 
-import com.github.fge.filesystem.provider.FileSystemFactoryProvider;
-import com.github.fge.filesystem.driver.FileSystemDriver;
-import com.github.fge.filesystem.provider.FileSystemRepository;
-import org.mockito.InOrder;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.spi.FileSystemProvider;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InOrder;
+
+import com.github.fge.filesystem.driver.FileSystemDriver;
+import com.github.fge.filesystem.provider.FileSystemFactoryProvider;
+import com.github.fge.filesystem.provider.FileSystemRepository;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
@@ -47,7 +49,7 @@ public final class GenericFileSystemTest
     private FileSystemProvider provider;
     private FileSystemFactoryProvider factoryProvider;
 
-    @BeforeMethod
+    @BeforeEach
     public void init()
     {
         factoryProvider = new FileSystemFactoryProvider();
@@ -61,7 +63,7 @@ public final class GenericFileSystemTest
     @Test
     public void newlyCreatedFileSystemIsOpen()
     {
-        assertThat(fs.isOpen()).isTrue();
+        assertTrue(fs.isOpen());
     }
 
     @Test
@@ -76,7 +78,7 @@ public final class GenericFileSystemTest
         inOrder.verify(driver).close();
         inOrder.verify(repository).unregister(same(uri));
 
-        assertThat(fs.isOpen()).isFalse();
+        assertFalse(fs.isOpen());
     }
 
     @Test
@@ -91,16 +93,13 @@ public final class GenericFileSystemTest
 
         final InOrder inOrder = inOrder(repository, driver);
 
-        try {
+        assertThrows(IOException.class, () -> {
             fs.close();
-            failBecauseExceptionWasNotThrown(IOException.class);
-        } catch (IOException e) {
-            assertThat(e).isSameAs(exception);
-        }
+        });
 
         inOrder.verify(driver).close();
         inOrder.verify(repository).unregister(uri);
 
-        assertThat(fs.isOpen()).isFalse();
+        assertFalse(fs.isOpen());
     }
 }

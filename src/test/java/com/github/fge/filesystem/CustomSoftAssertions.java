@@ -18,18 +18,14 @@
 
 package com.github.fge.filesystem;
 
+import org.assertj.core.api.JUnitJupiterSoftAssertions;
+
 import com.github.fge.filesystem.path.PathElements;
 import com.github.fge.filesystem.path.PathElementsAssert;
-import org.assertj.core.api.SoftAssertions;
 
 public final class CustomSoftAssertions
-    extends SoftAssertions
+    extends JUnitJupiterSoftAssertions
 {
-    public static CustomSoftAssertions create()
-    {
-        return new CustomSoftAssertions();
-    }
-
     public PathElementsAssert assertThat(final PathElements actual)
     {
         return proxy(PathElementsAssert.class, PathElements.class, actual);

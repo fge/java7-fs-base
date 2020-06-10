@@ -11,15 +11,16 @@ import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.nio.file.spi.FileSystemProvider;
 
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.github.fge.filesystem.driver.FileSystemDriver;
 import com.github.fge.filesystem.fs.GenericFileSystem;
 import com.github.fge.filesystem.provider.FileSystemFactoryProvider;
 import com.github.fge.filesystem.provider.FileSystemRepository;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -40,7 +41,7 @@ public class GlobPathMatcherTest {
     private FileSystemProvider provider;
     private FileSystemFactoryProvider factoryProvider;
 
-    @BeforeMethod
+    @BeforeEach
     public void init()
     {
         factoryProvider = new FileSystemFactoryProvider();
@@ -55,24 +56,24 @@ public class GlobPathMatcherTest {
     public void testGlobPathMatcher() {
         GlobPathMatcher gpm = new GlobPathMatcher("*.java");
 
-        assertThat(gpm.match("Foo.java")).isTrue();
-        assertThat(gpm.match("Bar.java")).isTrue();
-        assertThat(gpm.match("Buz.py")).isFalse();
+        assertTrue(gpm.match("Foo.java"));
+        assertTrue(gpm.match("Bar.java"));
+        assertFalse(gpm.match("Buz.py"));
     }
 
     @Test
     public void testPathMacherOfGlobFromFs() {
         PathMatcher pm = fs.getPathMatcher("*.java");
-        assertThat(pm.matches(Paths.get("Foo.java"))).isTrue();
-        assertThat(pm.matches(Paths.get("Bar.java"))).isTrue();
-        assertThat(pm.matches(Paths.get("Buz.py"))).isFalse();
+        assertTrue(pm.matches(Paths.get("Foo.java")));
+        assertTrue(pm.matches(Paths.get("Bar.java")));
+        assertFalse(pm.matches(Paths.get("Buz.py")));
     }
 
     @Test
     public void testPathMacherOfRegexFromFs() {
         PathMatcher pm = fs.getPathMatcher("regex:A.+\\.java");
-        assertThat(pm.matches(Paths.get("Abc.java"))).isTrue();
-        assertThat(pm.matches(Paths.get("Zbc.java"))).isFalse();
+        assertTrue(pm.matches(Paths.get("Abc.java")));
+        assertFalse(pm.matches(Paths.get("Zbc.java")));
     }
 }
 

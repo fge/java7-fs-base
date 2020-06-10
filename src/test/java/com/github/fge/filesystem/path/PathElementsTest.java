@@ -18,19 +18,24 @@
 
 package com.github.fge.filesystem.path;
 
-import com.github.fge.filesystem.CustomSoftAssertions;
-import org.assertj.core.api.SoftAssertions;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
+import java.util.stream.Stream;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import com.github.fge.filesystem.CustomSoftAssertions;
 
 import static com.github.fge.filesystem.path.PathElementsAssert.assertElements;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 public final class PathElementsTest
 {
+    @RegisterExtension
+    final CustomSoftAssertions soft = new CustomSoftAssertions();
+
     private static final String[] NO_NAMES = new String[0];
 
     @Test
@@ -40,21 +45,18 @@ public final class PathElementsTest
         assertElements(elements).hasNullRoot();
     }
 
-    @DataProvider
-    public Iterator<Object[]> variousNameArrays()
+    static Stream<Arguments> variousNameArrays()
     {
-        final List<Object[]> list = new ArrayList<>();
-
-        list.add(new Object[]{ NO_NAMES });
-        list.add(new Object[] { stringArray("foo") });
-        list.add(new Object[] { stringArray("foo", "bar") });
-        list.add(new Object[] { stringArray("foo", "bar", "baz") });
-
-        return list.iterator();
+        return Stream.of(
+            arguments(new Object[] { NO_NAMES }),
+            arguments(new Object[] { stringArray("foo") }),
+            arguments(new Object[] { stringArray("foo", "bar") }),
+            arguments(new Object[] { stringArray("foo", "bar", "baz") })
+        );
     }
 
-    @SuppressWarnings("MethodCanBeVariableArityMethod")
-    @Test(dataProvider = "variousNameArrays")
+    @ParameterizedTest
+    @MethodSource("variousNameArrays")
     public void pathElementsWithNoRootReturnsNullRootPath(final String[] names)
     {
         final PathElements elements = new PathElements(null, names);
@@ -62,19 +64,15 @@ public final class PathElementsTest
         assertElements(elements).hasNullRoot();
     }
 
-    @SuppressWarnings("MethodCanBeVariableArityMethod")
-    @Test(dataProvider = "variousNameArrays")
+    @ParameterizedTest
+    @MethodSource("variousNameArrays")
     public void pathElementsWithRootRetunsRootOnlyRootPath(final String[] names)
     {
         final String root = "foo";
         final PathElements elements = new PathElements(root, names);
         final PathElements rootElements = elements.rootPathElement();
 
-        final CustomSoftAssertions soft = CustomSoftAssertions.create();
-
         soft.assertThat(rootElements).hasRoot(root).hasNoNames();
-
-        soft.assertAll();
     }
 
     @Test
@@ -83,22 +81,16 @@ public final class PathElementsTest
         final PathElements elements1 = new PathElements(null, NO_NAMES);
         final PathElements elements2 = new PathElements("foo", NO_NAMES);
 
-        final SoftAssertions soft = new SoftAssertions();
-
         soft.assertThat(elements1.parent()).as(
             "a PathElements with no names must have a null parent").isNull();
         soft.assertThat(elements2.parent()).as(
             "a PathElements with no names must have a null parent").isNull();
-
-        soft.assertAll();
     }
 
     @Test
     public void singleNamePathElementParentIsCorrect()
     {
         PathElements elements, parent;
-
-        final CustomSoftAssertions soft = CustomSoftAssertions.create();
 
         elements = new PathElements(null, stringArray("foo"));
         parent = elements.parent();
@@ -115,8 +107,6 @@ public final class PathElementsTest
             .isNotNull();
 
         soft.assertThat(parent).hasSameRootAs(elements).hasNoNames();
-
-        soft.assertAll();
     }
 
     @Test
@@ -127,8 +117,6 @@ public final class PathElementsTest
 
         final PathElements elementsWithRoot = new PathElements("root", before);
         final PathElements elementsWithoutRoot = new PathElements(null, before);
-
-        final CustomSoftAssertions soft = CustomSoftAssertions.create();
 
         PathElements actual, expected;
 
@@ -141,8 +129,6 @@ public final class PathElementsTest
         expected = new PathElements(null, after);
 
         soft.assertThat(actual).hasSameContentsAs(expected);
-
-        soft.assertAll();
     }
 
     @Test
@@ -151,26 +137,19 @@ public final class PathElementsTest
         final PathElements elements1 = new PathElements(null, NO_NAMES);
         final PathElements elements2 = new PathElements("foo", NO_NAMES);
 
-        final SoftAssertions soft = new SoftAssertions();
-
         soft.assertThat(elements1.lastName()).overridingErrorMessage(
             "a PathElements with no names must not have a last name"
         ).isNull();
         soft.assertThat(elements2.parent()).overridingErrorMessage(
             "a PathElements with no names must not have a last name"
         ).isNull();
-
-        soft.assertAll();
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Test
     public void pathNameLastNameWorksAndHasNoRoot()
     {
         final String[] names1 = stringArray("foo", "bar", "baz");
         final String[] names2 = stringArray("foo", "bar");
-
-        final CustomSoftAssertions soft = CustomSoftAssertions.create();
 
         PathElements elements, actual;
 
@@ -183,8 +162,6 @@ public final class PathElementsTest
         actual = elements.lastName();
 
         soft.assertThat(actual).hasNullRoot().hasNames("bar");
-
-        soft.assertAll();
     }
 
     @Test
@@ -196,8 +173,6 @@ public final class PathElementsTest
         final PathElements p3 = new PathElements(null, names);
         final PathElements p4 = new PathElements("/", names);
         final Object o = new Object();
-
-        final SoftAssertions soft = new SoftAssertions();
 
         //noinspection EqualsWithItself
         soft.assertThat(p1.equals(p1)).isTrue();
@@ -212,8 +187,6 @@ public final class PathElementsTest
         soft.assertThat(p3.hashCode()).isEqualTo(p2.hashCode());
 
         soft.assertThat(p4.equals(p3)).isFalse();
-
-        soft.assertAll();
     }
 
     private static String[] stringArray(final String first,
