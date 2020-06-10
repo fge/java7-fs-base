@@ -21,6 +21,8 @@ package com.github.fge.filesystem.provider;
 import com.github.fge.filesystem.driver.FileSystemDriver;
 import com.github.fge.filesystem.fs.GenericFileSystem;
 
+import vavi.net.http.HttpUtil;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -173,7 +175,7 @@ public abstract class FileSystemRepositoryBase
         }
     }
 
-    // TODO: should be checked at the provider level, not here
+    /** if you want to check at the provider level, override */
     protected void checkURI(@Nullable final URI uri)
     {
         Objects.requireNonNull(uri);
@@ -188,14 +190,16 @@ public abstract class FileSystemRepositoryBase
 
     /** */
     protected Map<String, String> getParamsMap(URI uri) {
-        Map<String, String> result = new HashMap<>();
-        if (uri.getQuery() != null) {
-            String[] pairs = uri.getQuery().split("[\\?&]");
-            for (String pair : pairs) {
-                String[] kv = pair.split("=");
-                result.put(kv[0], kv.length > 1 ? kv[1] : null);
+        try {
+            Map<String, String[]> params = HttpUtil.splitQuery(uri);
+            Map<String, String> result = new HashMap<>();
+            for (String key : params.keySet()) {
+                String[] values = params.get(key);
+                result.put(key, values != null && values.length > 0 ? values[0] : null);
             }
+            return result;
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
         }
-        return result;
     }
 }
