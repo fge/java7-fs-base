@@ -1,0 +1,122 @@
+/*
+ * Copyright (c) 2020 by Naohide Sano, All rights reserved.
+ *
+ * Programmed by Naohide Sano
+ */
+
+package com.github.fge.filesystem.driver;
+
+import java.io.IOException;
+import java.nio.channels.SeekableByteChannel;
+import java.nio.file.AccessMode;
+import java.nio.file.FileStore;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.OpenOption;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileAttribute;
+import java.util.Set;
+
+import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
+
+import com.github.fge.filesystem.attributes.DummyFileAttributesProvider;
+import com.github.fge.filesystem.provider.FileSystemFactoryProvider;
+
+import vavi.nio.file.UploadMonitor;
+import vavi.nio.file.Util;
+import vavi.util.Debug;
+
+
+/**
+ * ExtendedFileSystemDriverBase.
+ *
+ * @author <a href="mailto:umjammer@gmail.com">Naohide Sano</a> (umjammer)
+ * @version 0.00 2020/06/10 umjammer initial version <br>
+ * @see UnixLikeFileSystemDriverBase
+ */
+@ParametersAreNonnullByDefault
+public abstract class ExtendedFileSystemDriverBase extends UnixLikeFileSystemDriverBase {
+
+    /** */
+    protected ExtendedFileSystemDriverBase(final FileStore fileStore, final FileSystemFactoryProvider factoryProvider) {
+        super(fileStore, factoryProvider);
+    }
+
+    /** */
+    private UploadMonitor<Path> uploadMonitor = new UploadMonitor<>();
+
+    /** */
+    private static final DummyFileAttributesProvider.DummyEntry dummy = new DummyFileAttributesProvider.DummyEntry();
+
+    @Nonnull
+    @Override
+    public SeekableByteChannel newByteChannel(final Path path,
+                                              final Set<? extends OpenOption> options,
+                                              final FileAttribute<?>... attrs) throws IOException {
+        if (options != null && Util.isWriting(options)) {
+            uploadMonitor.start(path);
+            return new Util.SeekableByteChannelForWriting(newOutputStream(path, options)) {
+                @Override
+                protected long getLeftOver() throws IOException {
+                    long leftover = 0;
+                    if (options.contains(StandardOpenOption.APPEND)) {
+                        BasicFileAttributes entry = readAttributes(path, BasicFileAttributes.class);
+                        if (entry != null && entry.size() >= 0) {
+                            leftover = entry.size();
+                        }
+                    }
+                    return leftover;
+                }
+
+                @Override
+                public void close() throws IOException {
+                    try {
+                        super.close();
+                    } finally {
+                        uploadMonitor.finish(path);
+                    }
+                }
+            };
+        } else {
+            BasicFileAttributes entry = readAttributes(path, BasicFileAttributes.class);
+            if (entry.isDirectory()) {
+                throw new NoSuchFileException(path.toString());
+            }
+            return new Util.SeekableByteChannelForReading(newInputStream(path, null)) {
+                @Override
+                protected long getSize() throws IOException {
+                    return entry.size();
+                }
+            };
+        }
+    }
+
+    /** */
+    protected abstract void checkAccessImpl(final Path path, final AccessMode... modes) throws IOException;
+
+    @Override
+    public void checkAccess(final Path path, final AccessMode... modes) throws IOException {
+        if (uploadMonitor.isUploading(path)) {
+Debug.println("uploading... : " + path);
+            return;
+        }
+
+        checkAccessImpl(path, modes);
+    }
+
+    /** */
+    protected abstract Object getPathMetadataImpl(final Path path) throws IOException;
+
+    @Nonnull
+    @Override
+    public Object getPathMetadata(final Path path) throws IOException {
+        if (uploadMonitor.isUploading(path)) {
+Debug.println("uploading... : " + path);
+            return dummy;
+        }
+
+        return getPathMetadataImpl(path);
+    }
+}

@@ -40,6 +40,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.DosFileAttributeView;
 import java.nio.file.attribute.DosFileAttributes;
 import java.nio.file.attribute.FileAttributeView;
+import java.nio.file.attribute.PosixFileAttributes;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -126,6 +127,17 @@ public class FileAttributesFactory
         return Collections.unmodifiableMap(descriptors);
     }
 
+    /** */
+    private static DummyFileAttributesProvider dummyProvider;
+
+    static {
+        try {
+            dummyProvider = new DummyFileAttributesProvider();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     /**
      * Instantiate a new provider for a given attribute view with the given
      * metadata
@@ -145,6 +157,11 @@ public class FileAttributesFactory
         final Object metadata)
         throws IOException
     {
+        // TODO ugly
+        if (DummyFileAttributesProvider.DummyEntry.class.isInstance(metadata)) {
+            return dummyProvider;
+        }
+
         final MethodHandle handle = providers.get(Objects.requireNonNull(name));
 
         if (handle == null)
@@ -298,6 +315,15 @@ public class FileAttributesFactory
         final Map<String, Class<?>> map, final Object metadata)
         throws IOException
     {
+        // TODO ugly
+        if (DummyFileAttributesProvider.DummyEntry.class.isInstance(metadata)) {
+            if (PosixFileAttributes.class.equals(targetClass)) {
+                throw new UnsupportedOperationException("request posix for dummy");
+            } else {
+                return (C) dummyProvider;
+            }
+        }
+
         final MethodHandle handle = getHandle(targetClass, map);
 
         if (handle == null)
