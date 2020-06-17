@@ -19,13 +19,10 @@ import com.github.fge.filesystem.attributes.provider.BasicFileAttributesProvider
  * @author <a href="mailto:umjammer@gmail.com">Naohide Sano</a> (umjammer)
  * @version 0.00 2020/06/10 umjammer initial version <br>
  */
-public final class DummyFileAttributesProvider extends BasicFileAttributesProvider {
+public final class DummyFileAttributes extends BasicFileAttributesProvider {
 
     /** */
-    public static class DummyEntry {}
-
-    /** */
-    public DummyFileAttributesProvider() throws IOException {
+    public DummyFileAttributes() throws IOException {
         super();
     }
 
@@ -39,8 +36,19 @@ public final class DummyFileAttributesProvider extends BasicFileAttributesProvid
         return false;
     }
 
+    private long size;
+
     @Override
     public long size() {
-        return 0;
+        return size;
+    }
+
+    public void setSize(long size) {
+        this.size = size;
+    }
+
+    @Override
+    public String toString() {
+        return "{dummy:{size: " + size + "}}";
     }
 }

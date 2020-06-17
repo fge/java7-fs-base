@@ -7,6 +7,7 @@
 package com.github.fge.filesystem.driver;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.AccessMode;
 import java.nio.file.FileStore;
@@ -21,7 +22,7 @@ import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 
-import com.github.fge.filesystem.attributes.DummyFileAttributesProvider;
+import com.github.fge.filesystem.attributes.DummyFileAttributes;
 import com.github.fge.filesystem.provider.FileSystemFactoryProvider;
 
 import vavi.nio.file.UploadMonitor;
@@ -45,10 +46,7 @@ public abstract class ExtendedFileSystemDriverBase extends UnixLikeFileSystemDri
     }
 
     /** */
-    private UploadMonitor<Path> uploadMonitor = new UploadMonitor<>();
-
-    /** */
-    private static final DummyFileAttributesProvider.DummyEntry dummy = new DummyFileAttributesProvider.DummyEntry();
+    private UploadMonitor<DummyFileAttributes> uploadMonitor = new UploadMonitor<>();
 
     @Nonnull
     @Override
@@ -56,7 +54,7 @@ public abstract class ExtendedFileSystemDriverBase extends UnixLikeFileSystemDri
                                               final Set<? extends OpenOption> options,
                                               final FileAttribute<?>... attrs) throws IOException {
         if (options != null && Util.isWriting(options)) {
-            uploadMonitor.start(path);
+            uploadMonitor.start(path, new DummyFileAttributes());
             return new Util.SeekableByteChannelForWriting(newOutputStream(path, options)) {
                 @Override
                 protected long getLeftOver() throws IOException {
@@ -68,6 +66,13 @@ public abstract class ExtendedFileSystemDriverBase extends UnixLikeFileSystemDri
                         }
                     }
                     return leftover;
+                }
+
+                @Override
+                public int write(ByteBuffer src) throws IOException {
+                    int n = super.write(src);
+                    uploadMonitor.entry(path).setSize(written);
+                    return n;
                 }
 
                 @Override
@@ -93,28 +98,28 @@ public abstract class ExtendedFileSystemDriverBase extends UnixLikeFileSystemDri
         }
     }
 
-    /** */
+    /* @see {@link #checkAccess(Path,AccessMode[]) */
     protected abstract void checkAccessImpl(final Path path, final AccessMode... modes) throws IOException;
 
     @Override
     public void checkAccess(final Path path, final AccessMode... modes) throws IOException {
         if (uploadMonitor.isUploading(path)) {
-Debug.println("uploading... : " + path);
+Debug.println("uploading... : " + path + ", " + uploadMonitor.entry(path));
             return;
         }
 
         checkAccessImpl(path, modes);
     }
 
-    /** */
+    /* @see {@link #getPathMetadata(Path) */
     protected abstract Object getPathMetadataImpl(final Path path) throws IOException;
 
     @Nonnull
     @Override
     public Object getPathMetadata(final Path path) throws IOException {
         if (uploadMonitor.isUploading(path)) {
-Debug.println("uploading... : " + path);
-            return dummy;
+Debug.println("uploading... : " + path + ", " + uploadMonitor.entry(path));
+            return uploadMonitor.entry(path);
         }
 
         return getPathMetadataImpl(path);

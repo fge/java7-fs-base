@@ -128,11 +128,11 @@ public class FileAttributesFactory
     }
 
     /** */
-    private static DummyFileAttributesProvider dummyProvider;
+    private static DummyFileAttributes dummyProvider;
 
     static {
         try {
-            dummyProvider = new DummyFileAttributesProvider();
+            dummyProvider = new DummyFileAttributes();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -158,7 +158,7 @@ public class FileAttributesFactory
         throws IOException
     {
         // TODO ugly
-        if (DummyFileAttributesProvider.DummyEntry.class.isInstance(metadata)) {
+        if (DummyFileAttributes.class.isInstance(metadata)) {
             return dummyProvider;
         }
 
@@ -316,7 +316,7 @@ public class FileAttributesFactory
         throws IOException
     {
         // TODO ugly
-        if (DummyFileAttributesProvider.DummyEntry.class.isInstance(metadata)) {
+        if (DummyFileAttributes.class.isInstance(metadata)) {
             if (PosixFileAttributes.class.equals(targetClass)) {
                 throw new UnsupportedOperationException("request posix for dummy");
             } else {
