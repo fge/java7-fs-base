@@ -69,6 +69,15 @@ public abstract class ExtendedFileSystemDriverBase extends UnixLikeFileSystemDri
                 }
 
                 @Override
+                public SeekableByteChannel position(long pos) throws IOException {
+// TODO ad-hoc
+if (pos < uploadMonitor.entry(path).size()) {
+ throw new IOException("{\"@vavi\":" + uploadMonitor.entry(path).size() + "}");
+}
+                    return super.position(pos);
+                }
+
+                @Override
                 public int write(ByteBuffer src) throws IOException {
                     int n = super.write(src);
                     uploadMonitor.entry(path).setSize(written);
