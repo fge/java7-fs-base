@@ -11,7 +11,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.AccessMode;
 import java.nio.file.FileStore;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -23,6 +22,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 import com.github.fge.filesystem.attributes.DummyFileAttributes;
+import com.github.fge.filesystem.exceptions.IsDirectoryException;
 import com.github.fge.filesystem.provider.FileSystemFactoryProvider;
 
 import vavi.nio.file.UploadMonitor;
@@ -87,7 +87,7 @@ public abstract class ExtendedFileSystemDriverBase extends UnixLikeFileSystemDri
         } else {
             BasicFileAttributes entry = readAttributes(path, BasicFileAttributes.class);
             if (entry.isDirectory()) {
-                throw new NoSuchFileException(path.toString());
+                throw new IsDirectoryException(path.toString());
             }
             return new Util.SeekableByteChannelForReading(newInputStream(path, null)) {
                 @Override
