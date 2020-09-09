@@ -127,17 +127,6 @@ public class FileAttributesFactory
         return Collections.unmodifiableMap(descriptors);
     }
 
-    /** */
-    private static DummyFileAttributes dummyProvider;
-
-    static {
-        try {
-            dummyProvider = new DummyFileAttributes();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     /**
      * Instantiate a new provider for a given attribute view with the given
      * metadata
@@ -159,7 +148,7 @@ public class FileAttributesFactory
     {
         // TODO ugly
         if (DummyFileAttributes.class.isInstance(metadata)) {
-            return dummyProvider;
+            return (FileAttributesProvider) metadata;
         }
 
         final MethodHandle handle = providers.get(Objects.requireNonNull(name));
@@ -320,7 +309,7 @@ public class FileAttributesFactory
             if (PosixFileAttributes.class.equals(targetClass)) {
                 throw new UnsupportedOperationException("request posix for dummy");
             } else {
-                return (C) dummyProvider;
+                return (C) metadata;
             }
         }
 

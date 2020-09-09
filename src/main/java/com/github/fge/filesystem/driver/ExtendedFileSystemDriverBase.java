@@ -22,6 +22,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 import com.github.fge.filesystem.attributes.DummyFileAttributes;
+import com.github.fge.filesystem.attributes.provider.DummyFileAttributesProvider;
 import com.github.fge.filesystem.exceptions.IsDirectoryException;
 import com.github.fge.filesystem.provider.FileSystemFactoryProvider;
 
@@ -54,7 +55,7 @@ public abstract class ExtendedFileSystemDriverBase extends UnixLikeFileSystemDri
                                               final Set<? extends OpenOption> options,
                                               final FileAttribute<?>... attrs) throws IOException {
         if (options != null && Util.isWriting(options)) {
-            uploadMonitor.start(path, new DummyFileAttributes());
+            uploadMonitor.start(path, new DummyFileAttributesProvider());
             return new Util.SeekableByteChannelForWriting(newOutputStream(path, options)) {
                 @Override
                 protected long getLeftOver() throws IOException {

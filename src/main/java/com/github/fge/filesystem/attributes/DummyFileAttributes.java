@@ -6,11 +6,6 @@
 
 package com.github.fge.filesystem.attributes;
 
-import java.io.IOException;
-
-import com.github.fge.filesystem.attributes.provider.BasicFileAttributesProvider;
-
-
 /**
  * DummyFileAttributesProvider.
  *
@@ -19,36 +14,9 @@ import com.github.fge.filesystem.attributes.provider.BasicFileAttributesProvider
  * @author <a href="mailto:umjammer@gmail.com">Naohide Sano</a> (umjammer)
  * @version 0.00 2020/06/10 umjammer initial version <br>
  */
-public final class DummyFileAttributes extends BasicFileAttributesProvider {
+public interface DummyFileAttributes {
 
-    /** */
-    public DummyFileAttributes() throws IOException {
-        super();
-    }
+    long size();
 
-    @Override
-    public boolean isRegularFile() {
-        return true;
-    }
-
-    @Override
-    public boolean isDirectory() {
-        return false;
-    }
-
-    private long size;
-
-    @Override
-    public long size() {
-        return size;
-    }
-
-    public void setSize(long size) {
-        this.size = size;
-    }
-
-    @Override
-    public String toString() {
-        return "{dummy:{size: " + size + "}}";
-    }
+    void setSize(long size);
 }
