@@ -19,6 +19,7 @@
 package com.github.fge.filesystem.path;
 
 import com.github.fge.filesystem.fs.GenericFileSystem;
+import com.github.fge.filesystem.watch.AbstractWatchService;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -346,7 +347,13 @@ public final class GenericPath
         final WatchEvent.Modifier... modifiers)
         throws IOException
     {
-        throw new UnsupportedOperationException("TODO");
+        if (!(watcher instanceof AbstractWatchService)) {
+            throw new IllegalArgumentException(
+                "watcher (" + watcher + ") is not associated with this file system");
+          }
+
+          AbstractWatchService service = (AbstractWatchService) watcher;
+          return service.register(this, Arrays.asList(events), modifiers);
     }
 
     @SuppressWarnings("OverloadedVarargsMethod")
@@ -355,7 +362,7 @@ public final class GenericPath
         final WatchEvent.Kind<?>... events)
         throws IOException
     {
-        throw new UnsupportedOperationException("TODO");
+        return register(watcher, events, new WatchEvent.Modifier[0]);
     }
 
     @SuppressWarnings("AnonymousInnerClassWithTooManyMethods")
