@@ -3,7 +3,7 @@
 
   <groupId>com.github.fge</groupId>
   <artifactId>java7-fs-base</artifactId>
-  <version>0.0.10v</version>
+  <version>0.0.11v</version>
 
   <name>java7-fs-base</name>
   <url>https://github.com/umjammer/java7-fs-base</url>
@@ -53,7 +53,7 @@
     <dependency>
       <groupId>com.github.umjammer</groupId>
       <artifactId>vavi-nio-file</artifactId>
-      <version>0.0.12</version>
+      <version>0.0.13</version>
     </dependency>
 
     <dependency>
